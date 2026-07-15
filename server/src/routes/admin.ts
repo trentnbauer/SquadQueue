@@ -1,0 +1,89 @@
+import type { FastifyInstance } from 'fastify';
+import { prisma } from '../db/client.js';
+import { env } from '../config/env.js';
+import { HttpError } from '../util/httpError.js';
+import { requireAdmin } from '../services/adminAccess.js';
+import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary } from '@squadqueue/shared';
+
+export default async function adminRoutes(app: FastifyInstance) {
+  app.get('/api/admin/overview', async (request) => {
+    const userId = await request.requireAuth();
+    await requireAdmin(userId);
+
+    const status: AdminIntegrationStatus = {
+      ggDealsApiKeyConfigured: !!env.GGDEALS_API_KEY,
+      igdbConfigured: !!env.IGDB_CLIENT_ID && !!env.IGDB_CLIENT_SECRET,
+      authMode: env.DEV_FAKE_AUTH ? 'dev-fake-auth' : 'oidc',
+      oidcIssuerUrl: env.DEV_FAKE_AUTH ? null : (env.OIDC_ISSUER_URL ?? null),
+    };
+    return { status };
+  });
+
+  app.get('/api/admin/users', async (request) => {
+    const userId = await request.requireAuth();
+    await requireAdmin(userId);
+
+    const users = await prisma.user.findMany({ orderBy: { createdAt: 'asc' } });
+    const summaries: AdminUserSummary[] = users.map((u) => ({
+      id: u.id,
+      displayName: u.displayName,
+      email: u.email,
+      avatarColor: u.avatarColor,
+      avatarUrl: u.avatarUrl,
+      isAdmin: u.isAdmin,
+      createdAt: u.createdAt.toISOString(),
+    }));
+    return { users: summaries };
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/admin/users/:id', async (request, reply) => {
+    const actorId = await request.requireAuth();
+    await requireAdmin(actorId);
+    const { id: targetId } = request.params;
+
+    if (targetId === actorId) {
+      throw new HttpError(400, 'You cannot delete your own account');
+    }
+
+    const createdRoomCount = await prisma.room.count({ where: { createdBy: targetId } });
+    if (createdRoomCount > 0) {
+      throw new HttpError(
+        400,
+        `This user created ${createdRoomCount} room(s) — delete those rooms first before deleting the user.`,
+      );
+    }
+
+    await prisma.user.delete({ where: { id: targetId } });
+    reply.status(204);
+    return null;
+  });
+
+  app.get('/api/admin/rooms', async (request) => {
+    const userId = await request.requireAuth();
+    await requireAdmin(userId);
+
+    const rooms = await prisma.room.findMany({
+      include: { creator: true, _count: { select: { members: true, games: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+    const summaries: AdminRoomSummary[] = rooms.map((r) => ({
+      id: r.id,
+      name: r.name,
+      createdBy: r.createdBy,
+      creatorDisplayName: r.creator.displayName,
+      memberCount: r._count.members,
+      gameCount: r._count.games,
+      createdAt: r.createdAt.toISOString(),
+    }));
+    return { rooms: summaries };
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/admin/rooms/:id', async (request, reply) => {
+    const userId = await request.requireAuth();
+    await requireAdmin(userId);
+
+    await prisma.room.delete({ where: { id: request.params.id } });
+    reply.status(204);
+    return null;
+  });
+}

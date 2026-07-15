@@ -23,6 +23,9 @@ const envSchema = z.object({
 
   IGDB_CLIENT_ID: z.string().min(1),
   IGDB_CLIENT_SECRET: z.string().min(1),
+
+  // Comma-separated emails granted administrator access on login.
+  ADMIN_EMAILS: z.string().optional().default(''),
 });
 
 export type Env = z.infer<typeof envSchema>;

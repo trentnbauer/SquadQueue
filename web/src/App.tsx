@@ -4,6 +4,7 @@ import { authApi } from './api/auth';
 import { Header } from './components/Header';
 import { ShelfView } from './views/ShelfView';
 import { RoomView } from './views/RoomView';
+import { SettingsView } from './views/SettingsView';
 
 export default function App() {
   const { user, loading } = useAuth();
@@ -23,7 +24,7 @@ export default function App() {
         }}
       >
         <div style={{ fontFamily: 'var(--sq-header-font)', fontWeight: 700, fontSize: 28 }}>
-          QUEUE<span style={{ color: 'var(--sq-accent)' }}>//</span>NIGHT
+          SQUAD<span style={{ color: 'var(--sq-accent)' }}>//</span>QUEUE
         </div>
         <p style={{ color: 'var(--sq-muted)', margin: 0 }}>Games the squad wants to play together</p>
         <a
@@ -50,6 +51,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<ShelfView />} />
         <Route path="/room/:roomId" element={<RoomView />} />
+        <Route path="/settings" element={<SettingsView />} />
       </Routes>
     </div>
   );

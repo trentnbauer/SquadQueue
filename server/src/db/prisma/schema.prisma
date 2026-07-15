@@ -30,6 +30,7 @@ model User {
   displayName  String   @map("display_name")
   avatarColor  String   @default("#8f8aa8") @map("avatar_color")
   avatarUrl    String?  @map("avatar_url")
+  isAdmin      Boolean  @default(false) @map("is_admin")
   createdAt    DateTime @default(now()) @map("created_at")
 
   roomsCreated Room[]        @relation("RoomCreatedBy")
@@ -83,7 +84,7 @@ model Game {
   updatedAt      DateTime   @updatedAt @map("updated_at")
 
   room  Room?  @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  adder User   @relation(fields: [addedBy], references: [id])
+  adder User   @relation(fields: [addedBy], references: [id], onDelete: Cascade)
   votes Vote[]
 
   @@index([roomId])
@@ -99,7 +100,7 @@ model Vote {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([gameId, userId])
   @@map("votes")

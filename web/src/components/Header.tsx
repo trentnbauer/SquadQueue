@@ -145,6 +145,14 @@ export function Header() {
             Signed in as {user.displayName} ▾
           </summary>
           <div className={styles.menuPanel}>
+            {user.isAdmin && (
+              <>
+                <a href="/settings" className={styles.menuItem}>
+                  Administrator settings
+                </a>
+                <div className={styles.divider} />
+              </>
+            )}
             <a href={authApi.logoutUrl} className={styles.menuItem}>
               Sign out
             </a>

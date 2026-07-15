@@ -6,6 +6,7 @@ import staticPlugin from './plugins/static.js';
 import authRoutes from './routes/auth.js';
 import roomRoutes from './routes/rooms.js';
 import gameRoutes from './routes/games.js';
+import adminRoutes from './routes/admin.js';
 import { env } from './config/env.js';
 
 export async function buildApp() {
@@ -18,6 +19,7 @@ export async function buildApp() {
   await app.register(authRoutes);
   await app.register(roomRoutes);
   await app.register(gameRoutes);
+  await app.register(adminRoutes);
 
   if (process.env.NODE_ENV === 'production') {
     await app.register(staticPlugin);

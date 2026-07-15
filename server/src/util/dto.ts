@@ -5,6 +5,13 @@ export function toUserDto(user: {
   displayName: string;
   avatarColor: string;
   avatarUrl: string | null;
+  isAdmin: boolean;
 }): User {
-  return { id: user.id, displayName: user.displayName, avatarColor: user.avatarColor, avatarUrl: user.avatarUrl };
+  return {
+    id: user.id,
+    displayName: user.displayName,
+    avatarColor: user.avatarColor,
+    avatarUrl: user.avatarUrl,
+    isAdmin: user.isAdmin,
+  };
 }

@@ -23,16 +23,28 @@ declare module 'fastify' {
   }
 }
 
+// DEV_FAKE_AUTH already bypasses all real access control, so the dev user is always admin too.
+// Otherwise admin status is granted by email allowlist (ADMIN_EMAILS), re-checked on every login
+// so it can be added/removed by editing .env without touching the database.
+function computeIsAdmin(email: string): boolean {
+  if (env.DEV_FAKE_AUTH) return true;
+  const admins = env.ADMIN_EMAILS.split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return admins.includes(email.toLowerCase());
+}
+
 async function getOrCreateUser(profile: {
   oidcSub: string;
   email: string;
   displayName: string;
   avatarUrl: string | null;
 }) {
+  const isAdmin = computeIsAdmin(profile.email);
   return prisma.user.upsert({
     where: { oidcSub: profile.oidcSub },
-    update: { email: profile.email, displayName: profile.displayName, avatarUrl: profile.avatarUrl },
-    create: { ...profile, avatarColor: randomAvatarColor() },
+    update: { email: profile.email, displayName: profile.displayName, avatarUrl: profile.avatarUrl, isAdmin },
+    create: { ...profile, avatarColor: randomAvatarColor(), isAdmin },
   });
 }
 

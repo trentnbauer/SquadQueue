@@ -17,6 +17,7 @@ export interface User {
   displayName: string;
   avatarColor: string;
   avatarUrl: string | null;
+  isAdmin: boolean;
 }
 
 export interface Room {
@@ -106,4 +107,32 @@ export interface VoteRequest {
 
 export interface UpdateGameStatusRequest {
   status: GameStatus;
+}
+
+/** Admin-only views — never sent to non-admin users. */
+export interface AdminIntegrationStatus {
+  ggDealsApiKeyConfigured: boolean;
+  igdbConfigured: boolean;
+  authMode: 'dev-fake-auth' | 'oidc';
+  oidcIssuerUrl: string | null;
+}
+
+export interface AdminUserSummary {
+  id: string;
+  displayName: string;
+  email: string;
+  avatarColor: string;
+  avatarUrl: string | null;
+  isAdmin: boolean;
+  createdAt: string;
+}
+
+export interface AdminRoomSummary {
+  id: string;
+  name: string;
+  createdBy: string;
+  creatorDisplayName: string;
+  memberCount: number;
+  gameCount: number;
+  createdAt: string;
 }
