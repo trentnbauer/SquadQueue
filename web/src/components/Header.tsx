@@ -109,15 +109,19 @@ export function Header() {
 
   async function handleCopyInviteCode() {
     if (!activeRoom?.inviteCode) return;
-    await navigator.clipboard.writeText(activeRoom.inviteCode);
+    await navigator.clipboard.writeText(`${window.location.origin}/join/${activeRoom.inviteCode}`);
     setInviteCopied(true);
     setTimeout(() => setInviteCopied(false), 1500);
   }
 
   async function handleJoinRoom(e: React.FormEvent) {
     e.preventDefault();
-    if (!inviteCode.trim()) return;
-    const { room } = await joinRoom.mutateAsync({ inviteCode: inviteCode.trim() });
+    const trimmed = inviteCode.trim();
+    if (!trimmed) return;
+    // Accept either a bare code or a pasted full invite link (e.g. https://.../join/ABC123).
+    const pastedLinkMatch = trimmed.match(/\/join\/([^/?#]+)/);
+    const code = pastedLinkMatch ? decodeURIComponent(pastedLinkMatch[1]) : trimmed;
+    const { room } = await joinRoom.mutateAsync({ inviteCode: code });
     setInviteCode('');
     closeAddRoomMenu();
     navigate(`/room/${room.id}`);
@@ -205,7 +209,7 @@ export function Header() {
               <form className={styles.miniForm} onSubmit={handleJoinRoom}>
                 <input
                   autoFocus
-                  placeholder="Invite code"
+                  placeholder="Invite code or link"
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value)}
                 />
@@ -220,8 +224,8 @@ export function Header() {
             type="button"
             className={styles.inviteBadge}
             onClick={handleCopyInviteCode}
-            title="Click to copy invite code"
-            aria-label="Copy room invite code"
+            title="Click to copy a shareable invite link"
+            aria-label="Copy room invite link"
           >
             {inviteCopied ? 'Copied!' : `Invite: ${activeRoom.inviteCode}`}
           </button>

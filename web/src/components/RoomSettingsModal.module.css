@@ -241,4 +241,14 @@
   color: var(--sq-text);
   font-size: 13px;
   letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.inviteCodeHint {
+  color: var(--sq-muted);
+  font-size: 11px;
+  margin: 4px 0 0;
 }

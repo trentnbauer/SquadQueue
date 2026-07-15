@@ -1,7 +1,9 @@
-import { Routes, Route } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from './context/AuthContext';
 import { authApi } from './api/auth';
+import { useRooms } from './hooks/useRooms';
+import { ActionErrorBanner } from './components/ActionErrorBanner';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { OnboardingModal } from './components/OnboardingModal';
@@ -9,8 +11,14 @@ import { ChangelogModal } from './components/ChangelogModal';
 import { ShelfView } from './views/ShelfView';
 import { RoomView } from './views/RoomView';
 import { SettingsView } from './views/SettingsView';
+import { JoinRoomView } from './views/JoinRoomView';
 
 const ONBOARDED_KEY = 'sq-onboarded';
+// Invite links (`/join/:inviteCode`) need to survive a full-page OAuth sign-in/callback
+// round trip, which drops the URL back at APP_BASE_URL with no way to carry a query param
+// through the redirect. Stashing the code in sessionStorage lets us pick it back up and
+// finish the join automatically once the user lands back in the app authenticated.
+const PENDING_INVITE_KEY = 'sq-pending-invite';
 
 const PROVIDER_LABEL: Record<string, string> = {
   oidc: 'Sign in',
@@ -39,8 +47,13 @@ function LoginButton({ provider }: { provider: string }) {
 
 export default function App() {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { joinRoom } = useRooms();
   const [providers, setProviders] = useState<string[] | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [pendingJoinError, setPendingJoinError] = useState<string | null>(null);
+  const completingPendingJoin = useRef(false);
 
   useEffect(() => {
     if (!user) authApi.providers().then(({ providers }) => setProviders(providers));
@@ -49,6 +62,34 @@ export default function App() {
   useEffect(() => {
     if (user && !localStorage.getItem(ONBOARDED_KEY)) setShowOnboarding(true);
   }, [user]);
+
+  // Capture an invite code from a shared `/join/:inviteCode` link before the sign-in gate
+  // below can swallow it. If the user isn't signed in yet, this is the only chance we get to
+  // remember which room they meant to join.
+  useEffect(() => {
+    if (user) return;
+    const match = location.pathname.match(/^\/join\/([^/]+)$/);
+    if (match) sessionStorage.setItem(PENDING_INVITE_KEY, decodeURIComponent(match[1]));
+  }, [location.pathname, user]);
+
+  // Once signed in, finish any join that was stashed above (this is what runs right after the
+  // OAuth callback redirects back to APP_BASE_URL). Visiting /join/:inviteCode directly while
+  // already signed in is instead handled by JoinRoomView, so skip that case here.
+  useEffect(() => {
+    if (!user || completingPendingJoin.current) return;
+    const pendingCode = sessionStorage.getItem(PENDING_INVITE_KEY);
+    if (!pendingCode || location.pathname.startsWith('/join/')) return;
+
+    completingPendingJoin.current = true;
+    sessionStorage.removeItem(PENDING_INVITE_KEY);
+    joinRoom
+      .mutateAsync({ inviteCode: pendingCode })
+      .then(({ room }) => navigate(`/room/${room.id}`, { replace: true }))
+      .catch((err) => {
+        setPendingJoinError(err instanceof Error ? err.message : 'This invite link is invalid or has expired.');
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, location.pathname]);
 
   function handleOnboardingDone() {
     localStorage.setItem(ONBOARDED_KEY, 'true');
@@ -85,10 +126,12 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--sq-bg)' }}>
       <Header />
+      <ActionErrorBanner message={pendingJoinError} onDismiss={() => setPendingJoinError(null)} />
       <Routes>
         <Route path="/" element={<ShelfView />} />
         <Route path="/room/:roomId" element={<RoomView />} />
         <Route path="/settings" element={<SettingsView />} />
+        <Route path="/join/:inviteCode" element={<JoinRoomView />} />
       </Routes>
       <Footer />
       {showOnboarding && <OnboardingModal onDone={handleOnboardingDone} />}
