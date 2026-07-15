@@ -64,6 +64,11 @@
   gap: 8px;
 }
 
+.searchResultsList {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
 .candidateOption {
   display: flex;
   align-items: center;

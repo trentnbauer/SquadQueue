@@ -134,7 +134,7 @@ export async function searchGames(query: string, roomPlatform?: RoomPlatform): P
   const escaped = trimmed.replace(/"/g, '\\"');
   const games = await igdbRequest<IgdbGame[]>(
     'games',
-    `search "${escaped}"; fields name,cover.image_id,platforms.name,first_release_date; limit 8;`,
+    `search "${escaped}"; fields name,cover.image_id,platforms.name,first_release_date; limit 20;`,
   );
 
   return games

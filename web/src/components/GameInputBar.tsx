@@ -91,7 +91,7 @@ export function GameInputBar({ roomId, onAdded }: GameInputBarProps) {
 
       {!candidate && results.length > 0 && (
         <div className={styles.previewPanel}>
-          <div className={styles.candidateList}>
+          <div className={`${styles.candidateList} ${styles.searchResultsList}`}>
             {results.map((r) => (
               <button
                 key={r.igdbId}
