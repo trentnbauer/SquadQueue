@@ -39,6 +39,7 @@ export function GameCard({ game, currentUserId, memberCount, onStatusChange, onV
         style={game.coverImageUrl ? { backgroundImage: `url(${game.coverImageUrl})` } : undefined}
       >
         {!game.coverImageUrl && <span className={styles.coverLabel}>COVER ART</span>}
+        {game.status === 'done' && <div className={styles.doneStrike} />}
         <div className={styles.statusOverlay}>
           <StatusBadge status={game.status} onClick={onStatusChange} />
         </div>
