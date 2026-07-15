@@ -1,5 +1,5 @@
 import type { Prisma } from '@prisma/client';
-import type { Game, GamePrice, VoteValue } from '@squadqueue/shared';
+import type { Game, GamePrice, PriceRegion, VoteValue } from '@squadqueue/shared';
 import { getSteamPrice } from './priceService.js';
 import { toUserDto } from '../util/dto.js';
 
@@ -13,15 +13,15 @@ const gameWithRelations = {
 export type GameWithRelations = Prisma.GameGetPayload<typeof gameWithRelations>;
 export const gameInclude = gameWithRelations.include;
 
-async function resolvePrice(game: GameWithRelations): Promise<GamePrice> {
+async function resolvePrice(game: GameWithRelations, region?: PriceRegion): Promise<GamePrice> {
   if (game.steamAppid) {
-    return getSteamPrice(game.steamAppid);
+    return getSteamPrice(game.steamAppid, { region });
   }
   return { amount: null, currency: null, source: 'unavailable' };
 }
 
-export async function serializeGame(game: GameWithRelations, currentUserId: string): Promise<Game> {
-  const price = await resolvePrice(game);
+export async function serializeGame(game: GameWithRelations, currentUserId: string, region?: PriceRegion): Promise<Game> {
+  const price = await resolvePrice(game, region);
   const myVote = game.votes.find((v) => v.userId === currentUserId);
   const voteScore = game.votes.reduce((sum, v) => sum + v.value, 0);
 
@@ -45,6 +45,6 @@ export async function serializeGame(game: GameWithRelations, currentUserId: stri
   };
 }
 
-export async function serializeGames(games: GameWithRelations[], currentUserId: string): Promise<Game[]> {
-  return Promise.all(games.map((g) => serializeGame(g, currentUserId)));
+export async function serializeGames(games: GameWithRelations[], currentUserId: string, region?: PriceRegion): Promise<Game[]> {
+  return Promise.all(games.map((g) => serializeGame(g, currentUserId, region)));
 }

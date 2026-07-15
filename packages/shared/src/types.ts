@@ -12,6 +12,19 @@ export const ROOM_PLATFORM_LABELS: Record<RoomPlatform, string> = {
   switch2: 'Switch 2',
 };
 
+// Confirmed against gg.deals' real Prices API response before picking these - not every country
+// code works (e.g. "uk" 404s, the ISO code "gb" is what it actually wants).
+export type PriceRegion = 'us' | 'gb' | 'eu' | 'au' | 'ca' | 'br';
+
+export const PRICE_REGION_LABELS: Record<PriceRegion, string> = {
+  us: 'US ($)',
+  gb: 'UK (£)',
+  eu: 'EU (€)',
+  au: 'Australia ($)',
+  ca: 'Canada ($)',
+  br: 'Brazil (R$)',
+};
+
 export type VoteValue = 1 | 2 | 3 | 4 | 5;
 
 export const VOTE_SCALE: Record<VoteValue, string> = {

@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ROOM_PLATFORM_LABELS, type RoomPlatform, type RoomRole } from '@squadqueue/shared';
+import { PRICE_REGION_LABELS, ROOM_PLATFORM_LABELS, type PriceRegion, type RoomPlatform, type RoomRole } from '@squadqueue/shared';
 import { useAuth } from '../context/AuthContext';
 import { useView } from '../context/ViewContext';
 import { useRooms } from '../hooks/useRooms';
+import { useCurrencyRegion } from '../context/CurrencyRegionContext';
 import { roomsApi } from '../api/rooms';
 import { authApi } from '../api/auth';
 import { AvatarBadge } from './AvatarBadge';
@@ -12,6 +13,7 @@ import { ACCENT_PRESETS } from '../theme/defaultTheme';
 import styles from './Header.module.css';
 
 const ROOM_PLATFORM_OPTIONS = Object.keys(ROOM_PLATFORM_LABELS) as RoomPlatform[];
+const PRICE_REGION_OPTIONS = Object.keys(PRICE_REGION_LABELS) as PriceRegion[];
 
 const ROLE_LABEL: Record<RoomRole, string> = {
   room_master: 'Room Master',
@@ -23,6 +25,7 @@ export function Header() {
   const { user } = useAuth();
   const { activeRoom } = useView();
   const { rooms, createRoom, joinRoom } = useRooms();
+  const { region, setRegion } = useCurrencyRegion();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -225,6 +228,22 @@ export function Header() {
             Signed in as {user.displayName} ▾
           </summary>
           <div className={styles.menuPanel}>
+            <div className={styles.menuItem} style={{ color: 'var(--sq-muted)', fontSize: 11 }}>
+              Price currency
+            </div>
+            <select
+              className={styles.currencySelect}
+              value={region ?? ''}
+              onChange={(e) => setRegion((e.target.value || undefined) as PriceRegion | undefined)}
+            >
+              <option value="">Server default</option>
+              {PRICE_REGION_OPTIONS.map((r) => (
+                <option key={r} value={r}>
+                  {PRICE_REGION_LABELS[r]}
+                </option>
+              ))}
+            </select>
+            <div className={styles.divider} />
             {user.isAdmin && (
               <>
                 <a href="/settings" className={styles.menuItem}>

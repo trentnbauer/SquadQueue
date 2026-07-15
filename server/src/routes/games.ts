@@ -11,9 +11,15 @@ import {
 } from '../services/gameAccess.js';
 import { gameInclude, serializeGame, serializeGames } from '../services/gameSerializer.js';
 import { searchIntake, previewIntake, resolveGameForCreation, refreshGamePricing } from '../services/gameIntake.js';
-import type { CreateGameRequest, UpdateGameStatusRequest, VoteRequest } from '@squadqueue/shared';
+import type { CreateGameRequest, PriceRegion, UpdateGameStatusRequest, VoteRequest } from '@squadqueue/shared';
+import { PRICE_REGION_LABELS } from '@squadqueue/shared';
 
 const GAME_STATUSES = ['backlog', 'playing', 'done'] as const;
+const PRICE_REGIONS = Object.keys(PRICE_REGION_LABELS) as PriceRegion[];
+
+function parseRegion(region?: string): PriceRegion | undefined {
+  return PRICE_REGIONS.includes(region as PriceRegion) ? (region as PriceRegion) : undefined;
+}
 
 export default async function gameRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { q?: string; roomId?: string } }>('/api/games/search', async (request) => {
@@ -38,17 +44,17 @@ export default async function gameRoutes(app: FastifyInstance) {
     return { preview };
   });
 
-  app.get('/api/games', async (request) => {
+  app.get<{ Querystring: { region?: string } }>('/api/games', async (request) => {
     const userId = await request.requireAuth();
     const games = await prisma.game.findMany({
       where: { roomId: null, addedBy: userId },
       include: gameInclude,
       orderBy: { createdAt: 'desc' },
     });
-    return { games: await serializeGames(games, userId) };
+    return { games: await serializeGames(games, userId, parseRegion(request.query.region)) };
   });
 
-  app.get<{ Params: { roomId: string } }>('/api/rooms/:roomId/games', async (request) => {
+  app.get<{ Params: { roomId: string }; Querystring: { region?: string } }>('/api/rooms/:roomId/games', async (request) => {
     const userId = await request.requireAuth();
     const { roomId } = request.params;
     await requireMembership(roomId, userId);
@@ -58,7 +64,7 @@ export default async function gameRoutes(app: FastifyInstance) {
       include: gameInclude,
       orderBy: { createdAt: 'desc' },
     });
-    return { games: await serializeGames(games, userId) };
+    return { games: await serializeGames(games, userId, parseRegion(request.query.region)) };
   });
 
   app.post<{ Body: CreateGameRequest }>('/api/games', async (request, reply) => {

@@ -196,6 +196,16 @@
   font-size: 13px;
 }
 
+.currencySelect {
+  margin: 0 10px 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--sq-surface2);
+  border: 1px solid var(--sq-border);
+  color: var(--sq-text);
+  font-size: 13px;
+}
+
 .miniForm button {
   padding: 8px 10px;
   border-radius: 6px;

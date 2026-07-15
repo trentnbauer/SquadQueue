@@ -4,13 +4,15 @@ import type {
   Game,
   GameIntakeCandidate,
   GameSearchResult,
+  PriceRegion,
   UpdateGameStatusRequest,
   VoteRequest,
 } from '@squadqueue/shared';
 
 export const gamesApi = {
-  shelf: () => apiGet<{ games: Game[] }>('/api/games'),
-  room: (roomId: string) => apiGet<{ games: Game[] }>(`/api/rooms/${roomId}/games`),
+  shelf: (region?: PriceRegion) => apiGet<{ games: Game[] }>(`/api/games${region ? `?region=${region}` : ''}`),
+  room: (roomId: string, region?: PriceRegion) =>
+    apiGet<{ games: Game[] }>(`/api/rooms/${roomId}/games${region ? `?region=${region}` : ''}`),
   search: (q: string, roomId?: string | null) =>
     apiGet<{ results: GameSearchResult[] }>(
       `/api/games/search?q=${encodeURIComponent(q)}${roomId ? `&roomId=${roomId}` : ''}`,

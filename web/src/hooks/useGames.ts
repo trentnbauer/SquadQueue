@@ -1,15 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gamesApi } from '../api/games';
+import { useCurrencyRegion } from '../context/CurrencyRegionContext';
 import type { GameStatus, VoteValue } from '@squadqueue/shared';
 
 /** Handles listing + status/vote/remove mutations for either the personal shelf (roomId null) or a room. */
 export function useGames(roomId: string | null) {
-  const queryKey = roomId ? ['games', 'room', roomId] : ['games', 'shelf'];
+  const { region } = useCurrencyRegion();
+  const queryKey = roomId ? ['games', 'room', roomId, region] : ['games', 'shelf', region];
   const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey,
-    queryFn: () => (roomId ? gamesApi.room(roomId) : gamesApi.shelf()),
+    queryFn: () => (roomId ? gamesApi.room(roomId, region) : gamesApi.shelf(region)),
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
