@@ -54,6 +54,15 @@ function loadEnv(): Env {
     process.exit(1);
   }
 
+  if (parsed.data.DEV_FAKE_AUTH && process.env.NODE_ENV === 'production') {
+    console.error(
+      'DEV_FAKE_AUTH=true is set with NODE_ENV=production. This authenticates every request as a ' +
+        'hardcoded dev user with no real access control - refusing to start. Unset DEV_FAKE_AUTH ' +
+        'or configure a real sign-in provider.',
+    );
+    process.exit(1);
+  }
+
   if (!parsed.data.DEV_FAKE_AUTH) {
     const data = parsed.data;
     const oidcReady = !!(data.OIDC_ISSUER_URL && data.OIDC_CLIENT_ID && data.OIDC_CLIENT_SECRET && data.OIDC_REDIRECT_URI);
