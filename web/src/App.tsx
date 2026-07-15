@@ -5,6 +5,7 @@ import { authApi } from './api/auth';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { OnboardingModal } from './components/OnboardingModal';
+import { ChangelogModal } from './components/ChangelogModal';
 import { ShelfView } from './views/ShelfView';
 import { RoomView } from './views/RoomView';
 import { SettingsView } from './views/SettingsView';
@@ -91,6 +92,7 @@ export default function App() {
       </Routes>
       <Footer />
       {showOnboarding && <OnboardingModal onDone={handleOnboardingDone} />}
+      <ChangelogModal />
     </div>
   );
 }
