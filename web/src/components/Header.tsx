@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { ROOM_PLATFORM_LABELS, type RoomPlatform } from '@squadqueue/shared';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ROOM_PLATFORM_LABELS, type RoomPlatform, type RoomRole } from '@squadqueue/shared';
 import { useAuth } from '../context/AuthContext';
 import { useView } from '../context/ViewContext';
 import { useRooms } from '../hooks/useRooms';
@@ -13,13 +13,21 @@ import styles from './Header.module.css';
 
 const ROOM_PLATFORM_OPTIONS = Object.keys(ROOM_PLATFORM_LABELS) as RoomPlatform[];
 
+const ROLE_LABEL: Record<RoomRole, string> = {
+  room_master: 'Room Master',
+  moderator: 'Moderator',
+  member: 'Member',
+};
+
 export function Header() {
   const { user } = useAuth();
   const { activeRoom } = useView();
   const { rooms, createRoom, joinRoom } = useRooms();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const roomMenuRef = useRef<HTMLDetailsElement>(null);
+  const membersMenuRef = useRef<HTMLDetailsElement>(null);
   const profileMenuRef = useRef<HTMLDetailsElement>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
@@ -27,12 +35,41 @@ export function Header() {
   const [newRoomPlatform, setNewRoomPlatform] = useState<RoomPlatform>('pc');
   const [inviteCode, setInviteCode] = useState('');
 
+  const membersQueryKey = ['room-members', activeRoom?.id];
   const { data: membersData } = useQuery({
-    queryKey: ['room-members', activeRoom?.id],
+    queryKey: membersQueryKey,
     queryFn: () => roomsApi.members(activeRoom!.id),
     enabled: !!activeRoom,
   });
   const members = membersData?.members ?? [];
+  const myRole = activeRoom?.myRole;
+
+  function canPromote(memberRole: RoomRole): boolean {
+    return myRole === 'room_master' && memberRole === 'member';
+  }
+
+  function canRemove(memberUserId: string, memberRole: RoomRole): boolean {
+    if (memberRole === 'room_master') return false; // never removable, including by themselves
+    if (memberUserId === user?.id) return true; // leave
+    return myRole === 'room_master' || myRole === 'moderator';
+  }
+
+  async function handlePromote(targetUserId: string) {
+    if (!activeRoom) return;
+    await roomsApi.promote(activeRoom.id, targetUserId);
+    queryClient.invalidateQueries({ queryKey: membersQueryKey });
+  }
+
+  async function handleRemove(targetUserId: string, isSelf: boolean) {
+    if (!activeRoom) return;
+    if (!confirm(isSelf ? 'Leave this room?' : 'Remove this member from the room?')) return;
+    await roomsApi.removeMember(activeRoom.id, targetUserId);
+    queryClient.invalidateQueries({ queryKey: membersQueryKey });
+    if (isSelf) {
+      membersMenuRef.current?.removeAttribute('open');
+      navigate('/');
+    }
+  }
 
   async function handleCreateRoom(e: React.FormEvent) {
     e.preventDefault();
@@ -138,17 +175,48 @@ export function Header() {
 
       <div className={styles.right}>
         {activeRoom && members.length > 0 && (
-          <div className={styles.avatarStack}>
-            {members.map((m) => (
-              <AvatarBadge
-                key={m.user.id}
-                name={m.user.displayName}
-                color={m.user.avatarColor}
-                avatarUrl={m.user.avatarUrl}
-                size={32}
-              />
-            ))}
-          </div>
+          <details className={styles.menu} ref={membersMenuRef}>
+            <summary className={styles.avatarStackButton}>
+              <div className={styles.avatarStack}>
+                {members.map((m) => (
+                  <AvatarBadge
+                    key={m.user.id}
+                    name={m.user.displayName}
+                    color={m.user.avatarColor}
+                    avatarUrl={m.user.avatarUrl}
+                    size={32}
+                  />
+                ))}
+              </div>
+            </summary>
+            <div className={styles.menuPanel}>
+              {members.map((m) => {
+                const isSelf = m.user.id === user.id;
+                return (
+                  <div key={m.user.id} className={styles.memberRow}>
+                    <AvatarBadge name={m.user.displayName} color={m.user.avatarColor} avatarUrl={m.user.avatarUrl} size={22} />
+                    <div className={styles.memberInfo}>
+                      <span className={styles.memberName}>
+                        {m.user.displayName}
+                        {isSelf ? ' (you)' : ''}
+                      </span>
+                      <span className={styles.memberRole}>{ROLE_LABEL[m.role]}</span>
+                    </div>
+                    {canPromote(m.role) && (
+                      <button className={styles.memberAction} onClick={() => handlePromote(m.user.id)}>
+                        Promote
+                      </button>
+                    )}
+                    {canRemove(m.user.id, m.role) && (
+                      <button className={styles.memberAction} onClick={() => handleRemove(m.user.id, isSelf)}>
+                        {isSelf ? 'Leave' : 'Remove'}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </details>
         )}
 
         <details className={styles.menu} ref={profileMenuRef}>

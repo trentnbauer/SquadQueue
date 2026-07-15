@@ -49,6 +49,58 @@
   border-radius: 50%;
 }
 
+.avatarStackButton {
+  display: block;
+  cursor: pointer;
+  list-style: none;
+}
+
+.avatarStackButton::-webkit-details-marker {
+  display: none;
+}
+
+.memberRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.memberInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.memberName {
+  font-size: 13px;
+  color: var(--sq-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memberRole {
+  font-size: 10.5px;
+  color: var(--sq-muted);
+}
+
+.memberAction {
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--sq-neutral-pill-bg);
+  color: var(--sq-text);
+  border: none;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.memberAction:hover {
+  background: var(--sq-accent-pill-bg);
+  color: var(--sq-accent);
+}
+
 .menu {
   position: relative;
 }
