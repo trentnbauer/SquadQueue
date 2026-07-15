@@ -1,0 +1,93 @@
+import { redis } from './redisClient.js';
+import { env } from '../config/env.js';
+import type { GamePrice } from '@squadqueue/shared';
+
+const PRICE_CACHE_TTL_SECONDS = 60 * 60 * 6; // 6h — prices/sales move faster than metadata
+const PRICE_CACHE_PREFIX = 'gg:price:v2:steam:'; // v2: cached shape is now {price, ggDealsUrl}, not a bare GamePrice
+
+interface GGDealsPricesResponse {
+  success: boolean;
+  data: Record<
+    string,
+    {
+      title: string;
+      url: string;
+      prices: {
+        currentRetail?: string;
+        currentKeyshops?: string;
+        historicalRetail?: string;
+        historicalKeyshops?: string;
+        currency: string;
+      };
+    }
+  >;
+}
+
+function lowestOf(...values: Array<string | undefined>): string | null {
+  const numeric = values
+    .filter((v): v is string => typeof v === 'string' && v.length > 0)
+    .map((v) => ({ raw: v, n: Number(v) }))
+    .filter((v) => !Number.isNaN(v.n));
+  if (numeric.length === 0) return null;
+  return numeric.reduce((min, cur) => (cur.n < min.n ? cur : min)).raw;
+}
+
+interface PriceEntry {
+  price: GamePrice;
+  ggDealsUrl: string | null;
+}
+
+async function fetchLiveEntry(steamAppId: number, region: string): Promise<PriceEntry> {
+  const url = new URL('https://api.gg.deals/v1/prices/by-steam-app-id/');
+  url.searchParams.set('ids', String(steamAppId));
+  url.searchParams.set('key', env.GGDEALS_API_KEY);
+  url.searchParams.set('region', region);
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    // Price API hiccup shouldn't break the whole card — degrade to "unavailable" and let a later refresh retry.
+    return { price: { amount: null, currency: null, source: 'unavailable' }, ggDealsUrl: null };
+  }
+
+  const body = (await response.json()) as GGDealsPricesResponse;
+  const entry = body.data?.[String(steamAppId)];
+  if (!entry) return { price: { amount: null, currency: null, source: 'unavailable' }, ggDealsUrl: null };
+
+  const amount = lowestOf(entry.prices.currentRetail, entry.prices.currentKeyshops);
+  if (amount === null) return { price: { amount: null, currency: null, source: 'unavailable' }, ggDealsUrl: entry.url ?? null };
+
+  return { price: { amount, currency: entry.prices.currency, source: 'live' }, ggDealsUrl: entry.url ?? null };
+}
+
+async function getEntry(
+  steamAppId: number,
+  opts: { region?: string; forceRefresh?: boolean } = {},
+): Promise<PriceEntry> {
+  const region = opts.region ?? env.GGDEALS_DEFAULT_REGION;
+  const cacheKey = `${PRICE_CACHE_PREFIX}${steamAppId}:${region}`;
+
+  if (!opts.forceRefresh) {
+    const cached = await redis.get(cacheKey);
+    if (cached) return JSON.parse(cached) as PriceEntry;
+  }
+
+  const entry = await fetchLiveEntry(steamAppId, region);
+  await redis.set(cacheKey, JSON.stringify(entry), 'EX', PRICE_CACHE_TTL_SECONDS);
+  return entry;
+}
+
+export async function getSteamPrice(
+  steamAppId: number,
+  opts: { region?: string; forceRefresh?: boolean } = {},
+): Promise<GamePrice> {
+  const entry = await getEntry(steamAppId, opts);
+  return entry.price;
+}
+
+/** Used only during intake — also returns the canonical gg.deals URL for the game. */
+export async function getSteamPriceAndUrl(
+  steamAppId: number,
+  opts: { region?: string; forceRefresh?: boolean } = {},
+): Promise<PriceEntry> {
+  return getEntry(steamAppId, opts);
+}

@@ -1,0 +1,38 @@
+{
+  "name": "@squadqueue/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/bootstrap.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/bootstrap.js",
+    "db:generate": "dotenv -e ../.env -- prisma generate --schema src/db/prisma/schema.prisma",
+    "db:push": "dotenv -e ../.env -- prisma db push --schema src/db/prisma/schema.prisma",
+    "db:migrate": "dotenv -e ../.env -- prisma migrate dev --schema src/db/prisma/schema.prisma",
+    "db:deploy": "dotenv -e ../.env -- prisma migrate deploy --schema src/db/prisma/schema.prisma",
+    "db:studio": "dotenv -e ../.env -- prisma studio --schema src/db/prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^10.0.1",
+    "@fastify/session": "^11.0.1",
+    "@fastify/static": "^8.0.3",
+    "@prisma/client": "^6.1.0",
+    "@squadqueue/shared": "*",
+    "dotenv": "^16.6.1",
+    "fastify": "^5.2.0",
+    "fastify-plugin": "^5.0.1",
+    "ioredis": "^5.4.2",
+    "openid-client": "^6.1.7",
+    "pino-pretty": "^13.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "dotenv-cli": "^11.0.0",
+    "prisma": "^6.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

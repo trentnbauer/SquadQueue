@@ -1,0 +1,103 @@
+.card {
+  background: var(--sq-surface);
+  border: 1px solid var(--sq-border);
+  border-radius: var(--sq-card-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cover {
+  position: relative;
+  height: 140px;
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--sq-stripe) 0px,
+    var(--sq-stripe) 2px,
+    transparent 2px,
+    transparent 14px
+  );
+  background-color: var(--sq-surface2);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coverLabel {
+  font: 600 10.5px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.06em;
+  color: var(--sq-muted);
+}
+
+.statusOverlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.body {
+  padding: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  flex: 1;
+}
+
+.titleBlock {
+  min-height: 62px;
+}
+
+.title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: 700 16px var(--sq-header-font);
+  color: var(--sq-text);
+}
+
+.genre {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: 500 11.5px system-ui, sans-serif;
+  color: var(--sq-muted);
+  margin-top: 2px;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 700 13.5px system-ui, sans-serif;
+  color: var(--sq-text);
+}
+
+.addedBy {
+  font: 400 11px system-ui, sans-serif;
+  color: var(--sq-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--sq-border);
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: var(--sq-muted);
+  font-size: 11px;
+  align-self: flex-start;
+  padding: 0;
+}
+
+.removeButton:hover {
+  color: var(--sq-text);
+}

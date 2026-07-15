@@ -1,0 +1,57 @@
+:root {
+  --sq-bg: #0f0e16;
+  --sq-surface: #1a1926;
+  --sq-surface2: #161522;
+  --sq-border: rgba(255, 255, 255, 0.09);
+  --sq-stripe: rgba(255, 255, 255, 0.05);
+  --sq-text: #f1eefc;
+  --sq-muted: #8f8aa8;
+  --sq-neutral-pill-bg: rgba(255, 255, 255, 0.07);
+
+  --sq-accent: #8b5cf6;
+  --sq-accent-pill-bg: color-mix(in oklch, var(--sq-accent) 24%, var(--sq-surface));
+
+  --sq-accent2: #2dd4bf;
+  --sq-accent2-pill-bg: color-mix(in oklch, var(--sq-accent2) 24%, var(--sq-surface));
+
+  --sq-header-font: 'Space Grotesk', system-ui, sans-serif;
+  --sq-body-font: system-ui, sans-serif;
+
+  --sq-radius: 10px;
+  --sq-card-radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--sq-bg);
+  color: var(--sq-text);
+  font-family: var(--sq-body-font);
+}
+
+a {
+  color: var(--sq-accent);
+}
+
+a:hover {
+  filter: brightness(1.1);
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input {
+  font-family: inherit;
+}

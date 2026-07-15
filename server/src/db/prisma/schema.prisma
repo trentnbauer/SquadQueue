@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GameStatus {
+  backlog
+  playing
+  done
+
+  @@map("game_status")
+}
+
+enum RoomRole {
+  room_master
+  moderator
+  member
+
+  @@map("room_role")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  oidcSub      String   @unique @map("oidc_sub")
+  email        String
+  displayName  String   @map("display_name")
+  avatarColor  String   @default("#8f8aa8") @map("avatar_color")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  roomsCreated Room[]        @relation("RoomCreatedBy")
+  memberships  RoomMember[]
+  gamesAdded   Game[]
+  votes        Vote[]
+
+  @@map("users")
+}
+
+model Room {
+  id          String   @id @default(uuid())
+  name        String
+  inviteCode  String   @unique @map("invite_code")
+  accentColor String   @default("#8b5cf6") @map("accent_color")
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  creator     User         @relation("RoomCreatedBy", fields: [createdBy], references: [id])
+  members     RoomMember[]
+  games       Game[]
+
+  @@map("rooms")
+}
+
+model RoomMember {
+  roomId   String   @map("room_id")
+  userId   String   @map("user_id")
+  role     RoomRole @default(member)
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+  @@map("room_members")
+}
+
+model Game {
+  id             String     @id @default(uuid())
+  roomId         String?    @map("room_id")
+  addedBy        String     @map("added_by")
+  title          String
+  platform       String
+  genre          String?
+  ggDealsUrl     String?    @map("gg_deals_url")
+  steamAppid     Int?       @map("steam_appid")
+  coverImageUrl  String?    @map("cover_image_url")
+  status         GameStatus @default(backlog)
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  room  Room?  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  adder User   @relation(fields: [addedBy], references: [id])
+  votes Vote[]
+
+  @@index([roomId])
+  @@index([addedBy], map: "idx_games_personal")
+  @@map("games")
+}
+
+model Vote {
+  gameId    String   @map("game_id")
+  userId    String   @map("user_id")
+  value     Int // 1-5, validated at the API layer (Prisma has no portable CHECK constraint support)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([gameId, userId])
+  @@map("votes")
+}

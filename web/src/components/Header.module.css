@@ -1,0 +1,132 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 40px;
+  background: var(--sq-surface2);
+  border-bottom: 1px solid var(--sq-border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brandName {
+  font: 700 22px var(--sq-header-font);
+  color: var(--sq-text);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.tagline {
+  font: 400 12.5px system-ui, sans-serif;
+  color: var(--sq-muted);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatarStack {
+  display: flex;
+}
+
+.avatarStack > * {
+  margin-left: -9px;
+  border: 2px solid var(--sq-surface2);
+  border-radius: 50%;
+}
+
+.menu {
+  position: relative;
+}
+
+.menuButton {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: var(--sq-neutral-pill-bg);
+  color: var(--sq-text);
+  font: 600 12.5px system-ui, sans-serif;
+  border: none;
+  list-style: none;
+}
+
+.menuButton::-webkit-details-marker {
+  display: none;
+}
+
+.menuPanel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 220px;
+  background: var(--sq-surface);
+  border: 1px solid var(--sq-border);
+  border-radius: var(--sq-radius);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 10;
+}
+
+.menuItem {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--sq-text);
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+}
+
+.menuItem:hover {
+  background: var(--sq-neutral-pill-bg);
+}
+
+.menuItemActive {
+  color: var(--sq-accent);
+}
+
+.miniForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.miniForm input {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--sq-surface2);
+  border: 1px solid var(--sq-border);
+  color: var(--sq-text);
+  font-size: 13px;
+}
+
+.miniForm button {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--sq-accent);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--sq-border);
+  margin: 4px 0;
+}
