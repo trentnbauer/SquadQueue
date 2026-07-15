@@ -35,6 +35,9 @@ interface GameGridProps {
   games: Game[];
   currentUserId: string;
   isLoading?: boolean;
+  isError?: boolean;
+  loadError?: string | null;
+  onRetry?: () => void;
   /** Room member count, used to warn when a game's max co-op players is under this. Undefined on the Personal Shelf. */
   memberCount?: number;
   onStatusChange: (gameId: string, status: GameStatus) => void;
@@ -47,6 +50,9 @@ export function GameGrid({
   games,
   currentUserId,
   isLoading,
+  isError,
+  loadError,
+  onRetry,
   memberCount,
   onStatusChange,
   onVote,
@@ -72,6 +78,19 @@ export function GameGrid({
         {[0, 1, 2].map((i) => (
           <div key={i} className={styles.skeletonCard} />
         ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className={styles.error}>
+        <p>{loadError ?? 'Could not load games.'}</p>
+        {onRetry && (
+          <button type="button" className={styles.retryButton} onClick={onRetry}>
+            Retry
+          </button>
+        )}
       </div>
     );
   }
