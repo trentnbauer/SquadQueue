@@ -45,6 +45,18 @@ function playNextIds(games: Game[]): Set<string> {
   return new Set(eligible.slice(0, 3).map((g) => g.id));
 }
 
+/** Currently Playing first, then Play Next-tagged backlog, then the rest of the backlog, then
+ * Completed last. Layered on top of the frozen order via a stable sort (bucket only, no
+ * re-scoring), so games keep their relative position within a bucket — this reacts live to status
+ * changes (a deliberate, rare, self-performed action) while #17's frozen order still governs
+ * anything score-driven within a bucket. */
+function statusBucket(game: Game, playNext: Set<string>): number {
+  if (game.status === 'playing') return 0;
+  if (game.status === 'backlog' && playNext.has(game.id)) return 1;
+  if (game.status === 'backlog') return 2;
+  return 3; // done
+}
+
 interface GameGridProps {
   games: Game[];
   currentUserId: string;
@@ -58,14 +70,15 @@ interface GameGridProps {
 export function GameGrid({ games, currentUserId, memberCount, onStatusChange, onVote, onRemove }: GameGridProps) {
   const sorted = useStableOrder(games);
   const playNext = playNextIds(games);
+  const prioritized = [...sorted].sort((a, b) => statusBucket(a, playNext) - statusBucket(b, playNext));
 
-  if (sorted.length === 0) {
+  if (prioritized.length === 0) {
     return <div className={styles.empty}>Nothing here yet.</div>;
   }
 
   return (
     <div className={styles.cards}>
-      {sorted.map((game) => (
+      {prioritized.map((game) => (
         <GameCard
           key={game.id}
           game={game}

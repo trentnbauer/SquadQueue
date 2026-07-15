@@ -42,9 +42,6 @@ export function GameCard({ game, currentUserId, memberCount, isPlayNext, onStatu
         {!game.coverImageUrl && <span className={styles.coverLabel}>COVER ART</span>}
         {game.status === 'done' && <div className={styles.doneStrike} />}
         {isPlayNext && <div className={styles.playNextBanner}>▶ Play Next</div>}
-        <div className={styles.statusOverlay}>
-          <StatusBadge status={game.status} onClick={onStatusChange} />
-        </div>
       </div>
 
       <div className={styles.body}>
@@ -56,6 +53,9 @@ export function GameCard({ game, currentUserId, memberCount, isPlayNext, onStatu
           ) : (
             <span className={styles.title}>{game.title}</span>
           )}
+          <div className={styles.statusRow}>
+            <StatusBadge status={game.status} onClick={onStatusChange} />
+          </div>
           <div className={styles.genre} title={game.genre ?? undefined}>
             {game.genre ?? '—'}
           </div>

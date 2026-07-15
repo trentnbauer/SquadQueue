@@ -31,10 +31,8 @@
   color: var(--sq-muted);
 }
 
-.statusOverlay {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+.statusRow {
+  margin-top: 6px;
 }
 
 .doneStrike {
@@ -72,7 +70,7 @@
 }
 
 .titleBlock {
-  min-height: 62px;
+  min-height: 88px;
 }
 
 .title {
