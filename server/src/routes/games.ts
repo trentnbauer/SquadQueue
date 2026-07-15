@@ -16,6 +16,10 @@ import { PRICE_REGION_LABELS } from '@squadqueue/shared';
 
 const GAME_STATUSES = ['backlog', 'playing', 'done'] as const;
 const PRICE_REGIONS = Object.keys(PRICE_REGION_LABELS) as PriceRegion[];
+// Shelves/rooms are meant to hold an actively-curated backlog, not a lifetime game archive - this
+// caps a single query so one runaway list can't pull unbounded rows (and unbounded price lookups)
+// on every page load. Well above any real shelf/room size today.
+const MAX_GAMES_PER_LIST = 500;
 
 function parseRegion(region?: string): PriceRegion | undefined {
   return PRICE_REGIONS.includes(region as PriceRegion) ? (region as PriceRegion) : undefined;
@@ -50,6 +54,7 @@ export default async function gameRoutes(app: FastifyInstance) {
       where: { roomId: null, addedBy: userId },
       include: gameInclude,
       orderBy: { createdAt: 'desc' },
+      take: MAX_GAMES_PER_LIST,
     });
     return { games: await serializeGames(games, userId, parseRegion(request.query.region)) };
   });
@@ -63,6 +68,7 @@ export default async function gameRoutes(app: FastifyInstance) {
       where: { roomId },
       include: gameInclude,
       orderBy: { createdAt: 'desc' },
+      take: MAX_GAMES_PER_LIST,
     });
     return { games: await serializeGames(games, userId, parseRegion(request.query.region)) };
   });
