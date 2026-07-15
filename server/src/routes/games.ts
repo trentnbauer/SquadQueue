@@ -8,6 +8,7 @@ import {
   requireGameDeleteAccess,
   requireNotDuplicate,
   existingIgdbIds,
+  invalidateExistingIgdbIds,
 } from '../services/gameAccess.js';
 import { gameInclude, serializeGame, serializeGames } from '../services/gameSerializer.js';
 import { searchIntake, previewIntake, resolveGameForCreation, refreshGamePricing } from '../services/gameIntake.js';
@@ -101,6 +102,7 @@ export default async function gameRoutes(app: FastifyInstance) {
       },
     });
     const game = await loadGameOr404(created.id);
+    await invalidateExistingIgdbIds(roomId ?? null, userId);
 
     reply.status(201);
     return { game: await serializeGame(game, userId) };
@@ -125,6 +127,7 @@ export default async function gameRoutes(app: FastifyInstance) {
     await requireGameDeleteAccess(game, userId);
 
     await prisma.game.delete({ where: { id: game.id } });
+    await invalidateExistingIgdbIds(game.roomId, game.addedBy);
     reply.status(204);
     return null;
   });

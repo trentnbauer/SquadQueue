@@ -3,6 +3,7 @@ import { HttpError } from '../util/httpError.js';
 import { requireMembership } from './roomAccess.js';
 import type { GameWithRelations } from './gameSerializer.js';
 import { gameInclude } from './gameSerializer.js';
+import { redis } from './redisClient.js';
 
 export async function loadGameOr404(gameId: string): Promise<GameWithRelations> {
   const game = await prisma.game.findUnique({ where: { id: gameId }, include: gameInclude });
@@ -50,10 +51,32 @@ export async function requireNotDuplicate(roomId: string | null, userId: string,
   }
 }
 
+const EXISTING_IGDB_IDS_CACHE_TTL_SECONDS = 30;
+
+function existingIgdbIdsCacheKey(roomId: string | null, userId: string): string {
+  return roomId ? `existing-igdb-ids:room:${roomId}` : `existing-igdb-ids:shelf:${userId}`;
+}
+
+/** Backs the search dropdown's "already added" filter. Cached briefly since a user typically
+ * fires several search requests in a row while picking a game, each needing this same set;
+ * a short TTL keeps it cheap without risking real staleness (adding a real duplicate is still
+ * blocked server-side by requireNotDuplicate regardless of what this set says). */
 export async function existingIgdbIds(roomId: string | null, userId: string): Promise<Set<number>> {
+  const cacheKey = existingIgdbIdsCacheKey(roomId, userId);
+  const cached = await redis.get(cacheKey);
+  if (cached) return new Set(JSON.parse(cached) as number[]);
+
   const games = await prisma.game.findMany({
     where: duplicateScopeWhere(roomId, userId),
     select: { igdbId: true },
   });
-  return new Set(games.map((g) => g.igdbId));
+  const ids = games.map((g) => g.igdbId);
+  await redis.set(cacheKey, JSON.stringify(ids), 'EX', EXISTING_IGDB_IDS_CACHE_TTL_SECONDS);
+  return new Set(ids);
+}
+
+/** Call after adding or removing a game so the next search reflects it immediately instead of
+ * waiting out the cache TTL. */
+export async function invalidateExistingIgdbIds(roomId: string | null, userId: string): Promise<void> {
+  await redis.del(existingIgdbIdsCacheKey(roomId, userId));
 }
