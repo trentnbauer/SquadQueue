@@ -53,7 +53,7 @@ export default async function gameRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { region?: string } }>('/api/games', async (request) => {
     const userId = await request.requireAuth();
     const games = await prisma.game.findMany({
-      where: { roomId: null, addedBy: userId },
+      where: { roomId: null, addedBy: userId, archivedAt: null },
       include: gameInclude,
       orderBy: { createdAt: 'desc' },
       take: MAX_GAMES_PER_LIST,
@@ -67,7 +67,7 @@ export default async function gameRoutes(app: FastifyInstance) {
     await requireMembership(roomId, userId);
 
     const games = await prisma.game.findMany({
-      where: { roomId },
+      where: { roomId, archivedAt: null },
       include: gameInclude,
       orderBy: { createdAt: 'desc' },
       take: MAX_GAMES_PER_LIST,

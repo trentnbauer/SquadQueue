@@ -1,4 +1,4 @@
-import { apiGet, apiDelete } from './client';
+import { apiGet, apiPost, apiDelete } from './client';
 import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary } from '@squadqueue/shared';
 
 export const adminApi = {
@@ -7,4 +7,5 @@ export const adminApi = {
   deleteUser: (id: string) => apiDelete(`/api/admin/users/${id}`),
   rooms: () => apiGet<{ rooms: AdminRoomSummary[] }>('/api/admin/rooms'),
   deleteRoom: (id: string) => apiDelete(`/api/admin/rooms/${id}`),
+  archiveDoneGames: () => apiPost<{ archivedCount: number }>('/api/admin/games/archive-done'),
 };

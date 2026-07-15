@@ -108,4 +108,22 @@ export default async function adminRoutes(app: FastifyInstance) {
     reply.status(204);
     return null;
   });
+
+  const ARCHIVE_DONE_AFTER_DAYS = 90;
+
+  app.post('/api/admin/games/archive-done', async (request) => {
+    const actorId = await request.requireAuth();
+    await requireAdmin(actorId);
+
+    const cutoff = new Date(Date.now() - ARCHIVE_DONE_AFTER_DAYS * 24 * 60 * 60 * 1000);
+    const { count } = await prisma.game.updateMany({
+      where: { status: 'done', archivedAt: null, updatedAt: { lt: cutoff } },
+      data: { archivedAt: new Date() },
+    });
+    app.log.warn(
+      { adminAction: 'games.archiveDone', actorId, count, cutoff: cutoff.toISOString() },
+      `Admin ${actorId} archived ${count} Done game(s) untouched since before ${cutoff.toISOString()}`,
+    );
+    return { archivedCount: count };
+  });
 }

@@ -12,6 +12,8 @@ export function SettingsView() {
   const queryClient = useQueryClient();
   const confirm = useConfirm();
   const [actionError, setActionError] = useState<string | null>(null);
+  const [archiveResult, setArchiveResult] = useState<string | null>(null);
+  const [archiving, setArchiving] = useState(false);
 
   const overview = useQuery({ queryKey: ['admin', 'overview'], queryFn: adminApi.overview, enabled: !!user?.isAdmin });
   const users = useQuery({ queryKey: ['admin', 'users'], queryFn: adminApi.users, enabled: !!user?.isAdmin });
@@ -55,6 +57,28 @@ export function SettingsView() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'rooms'] });
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Could not delete room');
+    }
+  }
+
+  async function handleArchiveDoneGames() {
+    const ok = await confirm({
+      title: 'Archive old Done games?',
+      message:
+        "Games marked Done and untouched for 90+ days will be hidden from their room/shelf. This doesn't delete anything - it's reversible in the database if ever needed.",
+      confirmLabel: 'Archive',
+    });
+    if (!ok) return;
+    setArchiving(true);
+    setArchiveResult(null);
+    try {
+      const { archivedCount } = await adminApi.archiveDoneGames();
+      setArchiveResult(
+        archivedCount === 0 ? 'No games qualified - nothing to archive.' : `Archived ${archivedCount} game(s).`,
+      );
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Could not archive old games');
+    } finally {
+      setArchiving(false);
     }
   }
 
@@ -142,6 +166,16 @@ export function SettingsView() {
               </button>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Maintenance</div>
+        <div className={styles.maintenanceRow}>
+          <button className={styles.archiveButton} onClick={handleArchiveDoneGames} disabled={archiving}>
+            {archiving ? 'Archiving…' : 'Archive Done games untouched for 90+ days'}
+          </button>
+          {archiveResult && <span className={styles.archiveResult}>{archiveResult}</span>}
         </div>
       </div>
     </div>
