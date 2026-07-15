@@ -63,7 +63,7 @@ export function Header() {
       <div className={styles.left}>
         <div className={styles.brand}>
           <a href="/" className={styles.brandName}>
-            SQUAD<span style={{ color: 'var(--sq-accent)' }}>//</span>QUEUE
+            SquadQueue
           </a>
           <div className={styles.tagline}>Games the squad wants to play together</div>
         </div>

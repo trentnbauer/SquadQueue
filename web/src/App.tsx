@@ -54,9 +54,7 @@ export default function App() {
           gap: 16,
         }}
       >
-        <div style={{ fontFamily: 'var(--sq-header-font)', fontWeight: 700, fontSize: 28 }}>
-          SQUAD<span style={{ color: 'var(--sq-accent)' }}>//</span>QUEUE
-        </div>
+        <div style={{ fontFamily: 'var(--sq-header-font)', fontWeight: 700, fontSize: 28 }}>SquadQueue</div>
         <p style={{ color: 'var(--sq-muted)', margin: 0 }}>Games the squad wants to play together</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
           {providers === null ? null : providers.length > 0 ? (
