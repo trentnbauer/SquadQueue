@@ -175,3 +175,15 @@ export interface AdminRoomSummary {
   gameCount: number;
   createdAt: string;
 }
+
+/** A durable record of a destructive admin action - see AdminAuditLog in schema.prisma.
+ * actorLabel/targetLabel are snapshots taken at write time, so they stay meaningful even after
+ * the account/room/etc they refer to is gone. */
+export interface AdminAuditLogEntry {
+  id: string;
+  actorLabel: string;
+  action: string;
+  targetLabel: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
