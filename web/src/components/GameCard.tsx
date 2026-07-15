@@ -76,7 +76,13 @@ export function GameCard({
         </div>
 
         <div className={styles.priceRow}>
-          <span>{formatPrice(game)}</span>
+          {game.ggDealsUrl ? (
+            <a href={game.ggDealsUrl} target="_blank" rel="noreferrer" className={styles.buyButton}>
+              {formatPrice(game)}
+            </a>
+          ) : (
+            <span className={styles.priceStatic}>{formatPrice(game)}</span>
+          )}
           <span className={styles.addedBy}>
             <AvatarBadge name={game.addedBy.displayName} color={game.addedBy.avatarColor} size={16} />
             added by {game.addedBy.displayName}

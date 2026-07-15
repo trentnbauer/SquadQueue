@@ -109,6 +109,23 @@
   color: var(--sq-text);
 }
 
+.buyButton {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--sq-accent);
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.buyButton:hover {
+  filter: brightness(1.1);
+}
+
+.priceStatic {
+  color: var(--sq-muted);
+}
+
 .addedBy {
   font: 400 11px system-ui, sans-serif;
   color: var(--sq-muted);
