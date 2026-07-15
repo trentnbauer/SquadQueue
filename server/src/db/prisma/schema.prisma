@@ -116,7 +116,10 @@ model Game {
 model Vote {
   gameId    String   @map("game_id")
   userId    String   @map("user_id")
-  value     Int // 1-5, validated at the API layer (Prisma has no portable CHECK constraint support)
+  // 1-5, validated at the API layer AND by a DB-level CHECK constraint (votes_value_range) -
+  // Prisma's schema DSL has no CHECK support, so that constraint is applied at boot instead,
+  // see db/ensureConstraints.ts.
+  value     Int
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
