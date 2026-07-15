@@ -43,10 +43,11 @@ model User {
   isAdmin      Boolean  @default(false) @map("is_admin")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  roomsCreated Room[]        @relation("RoomCreatedBy")
-  memberships  RoomMember[]
-  gamesAdded   Game[]
-  votes        Vote[]
+  roomsCreated    Room[]          @relation("RoomCreatedBy")
+  memberships     RoomMember[]
+  gamesAdded      Game[]
+  votes           Vote[]
+  auditLogEntries AdminAuditLog[]
 
   @@map("users")
 }
@@ -128,4 +129,24 @@ model Vote {
 
   @@id([gameId, userId])
   @@map("votes")
+}
+
+/// Durable record of destructive admin actions (user/room delete, bulk-archive) - a structured
+/// log line alone doesn't survive log rotation or a container restart, so this is the actual
+/// source of truth for "who did what, when." actorId is nullable with onDelete: SetNull rather
+/// than Cascade so a log entry outlives the admin account that made it - actorLabel/targetLabel
+/// are snapshots taken at write time so the entry stays meaningful even after that.
+model AdminAuditLog {
+  id          String   @id @default(uuid())
+  actorId     String?  @map("actor_id")
+  actorLabel  String   @map("actor_label")
+  action      String
+  targetLabel String?  @map("target_label")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("admin_audit_log")
 }

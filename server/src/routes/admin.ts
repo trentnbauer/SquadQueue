@@ -3,7 +3,8 @@ import { prisma } from '../db/client.js';
 import { env } from '../config/env.js';
 import { HttpError } from '../util/httpError.js';
 import { requireAdmin } from '../services/adminAccess.js';
-import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary } from '@squadqueue/shared';
+import { logAdminAction } from '../services/adminAuditLog.js';
+import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary, AdminAuditLogEntry } from '@squadqueue/shared';
 
 export default async function adminRoutes(app: FastifyInstance) {
   app.get('/api/admin/overview', async (request) => {
@@ -38,7 +39,7 @@ export default async function adminRoutes(app: FastifyInstance) {
 
   app.delete<{ Params: { id: string } }>('/api/admin/users/:id', async (request, reply) => {
     const actorId = await request.requireAuth();
-    await requireAdmin(actorId);
+    const actor = await requireAdmin(actorId);
     const { id: targetId } = request.params;
 
     if (targetId === actorId) {
@@ -59,6 +60,13 @@ export default async function adminRoutes(app: FastifyInstance) {
       { adminAction: 'user.delete', actorId, targetId, targetEmail: target?.email },
       `Admin ${actorId} deleted user ${targetId} (${target?.email ?? 'unknown'})`,
     );
+    await logAdminAction({
+      actorId,
+      actorLabel: actor.email,
+      action: 'user.delete',
+      targetLabel: target?.email ?? targetId,
+      metadata: { targetId },
+    });
     reply.status(204);
     return null;
   });
@@ -86,7 +94,7 @@ export default async function adminRoutes(app: FastifyInstance) {
 
   app.delete<{ Params: { id: string } }>('/api/admin/rooms/:id', async (request, reply) => {
     const actorId = await request.requireAuth();
-    await requireAdmin(actorId);
+    const actor = await requireAdmin(actorId);
     const { id: targetId } = request.params;
 
     const target = await prisma.room.findUnique({
@@ -105,6 +113,13 @@ export default async function adminRoutes(app: FastifyInstance) {
       },
       `Admin ${actorId} deleted room ${targetId} (${target?.name ?? 'unknown'}), cascading ${target?._count.members ?? 0} member(s) and ${target?._count.games ?? 0} game(s)`,
     );
+    await logAdminAction({
+      actorId,
+      actorLabel: actor.email,
+      action: 'room.delete',
+      targetLabel: target?.name ?? targetId,
+      metadata: { targetId, memberCount: target?._count.members ?? null, gameCount: target?._count.games ?? null },
+    });
     reply.status(204);
     return null;
   });
@@ -113,7 +128,7 @@ export default async function adminRoutes(app: FastifyInstance) {
 
   app.post('/api/admin/games/archive-done', async (request) => {
     const actorId = await request.requireAuth();
-    await requireAdmin(actorId);
+    const actor = await requireAdmin(actorId);
 
     const cutoff = new Date(Date.now() - ARCHIVE_DONE_AFTER_DAYS * 24 * 60 * 60 * 1000);
     const { count } = await prisma.game.updateMany({
@@ -124,6 +139,33 @@ export default async function adminRoutes(app: FastifyInstance) {
       { adminAction: 'games.archiveDone', actorId, count, cutoff: cutoff.toISOString() },
       `Admin ${actorId} archived ${count} Done game(s) untouched since before ${cutoff.toISOString()}`,
     );
+    await logAdminAction({
+      actorId,
+      actorLabel: actor.email,
+      action: 'games.archiveDone',
+      targetLabel: `${count} game(s)`,
+      metadata: { count, cutoff: cutoff.toISOString() },
+    });
     return { archivedCount: count };
+  });
+
+  app.get<{ Querystring: { limit?: string } }>('/api/admin/audit-log', async (request) => {
+    const userId = await request.requireAuth();
+    await requireAdmin(userId);
+
+    const limit = Math.min(Math.max(Number(request.query.limit) || 100, 1), 500);
+    const entries = await prisma.adminAuditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+    const dtos: AdminAuditLogEntry[] = entries.map((e) => ({
+      id: e.id,
+      actorLabel: e.actorLabel,
+      action: e.action,
+      targetLabel: e.targetLabel,
+      metadata: (e.metadata as Record<string, unknown> | null) ?? null,
+      createdAt: e.createdAt.toISOString(),
+    }));
+    return { entries: dtos };
   });
 }
