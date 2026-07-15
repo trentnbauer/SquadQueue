@@ -4,11 +4,25 @@ import { useView } from '../context/ViewContext';
 import { useGames } from '../hooks/useGames';
 import { GameInputBar } from '../components/GameInputBar';
 import { GameGrid } from '../components/GameGrid';
+import { ActionErrorBanner } from '../components/ActionErrorBanner';
 
 export function ShelfView() {
   const { user } = useAuth();
   const { switchView } = useView();
-  const { games, isLoading, invalidate, updateStatus, vote, remove, refreshPrice } = useGames(null);
+  const {
+    games,
+    isLoading,
+    isError,
+    loadError,
+    refetch,
+    invalidate,
+    actionError,
+    clearActionError,
+    updateStatus,
+    vote,
+    remove,
+    refreshPrice,
+  } = useGames(null);
 
   useEffect(() => {
     switchView({ type: 'personal' });
@@ -19,10 +33,14 @@ export function ShelfView() {
   return (
     <div>
       <GameInputBar roomId={null} onAdded={invalidate} />
+      <ActionErrorBanner message={actionError} onDismiss={clearActionError} />
       <GameGrid
         games={games}
         currentUserId={user.id}
         isLoading={isLoading}
+        isError={isError}
+        loadError={loadError}
+        onRetry={refetch}
         onStatusChange={updateStatus}
         onVote={vote}
         onRemove={remove}

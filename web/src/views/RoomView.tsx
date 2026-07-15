@@ -7,12 +7,26 @@ import { useGames } from '../hooks/useGames';
 import { roomsApi } from '../api/rooms';
 import { GameInputBar } from '../components/GameInputBar';
 import { GameGrid } from '../components/GameGrid';
+import { ActionErrorBanner } from '../components/ActionErrorBanner';
 
 export function RoomView() {
   const { roomId } = useParams<{ roomId: string }>();
   const { user } = useAuth();
   const { switchView } = useView();
-  const { games, isLoading, invalidate, updateStatus, vote, remove, refreshPrice } = useGames(roomId ?? null);
+  const {
+    games,
+    isLoading,
+    isError,
+    loadError,
+    refetch,
+    invalidate,
+    actionError,
+    clearActionError,
+    updateStatus,
+    vote,
+    remove,
+    refreshPrice,
+  } = useGames(roomId ?? null);
 
   const { data: membersData } = useQuery({
     queryKey: ['room-members', roomId],
@@ -30,10 +44,14 @@ export function RoomView() {
   return (
     <div>
       <GameInputBar roomId={roomId} onAdded={invalidate} />
+      <ActionErrorBanner message={actionError} onDismiss={clearActionError} />
       <GameGrid
         games={games}
         currentUserId={user.id}
         isLoading={isLoading}
+        isError={isError}
+        loadError={loadError}
+        onRetry={refetch}
         memberCount={memberCount}
         onStatusChange={updateStatus}
         onVote={vote}

@@ -11,6 +11,29 @@
   padding: 12px 40px;
 }
 
+.error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ff8a80;
+  font-size: 13px;
+  padding: 12px 40px;
+}
+
+.retryButton {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.retryButton:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
 .skeletonCard {
   background: var(--sq-surface);
   border: 1px solid var(--sq-border);
