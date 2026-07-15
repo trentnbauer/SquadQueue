@@ -96,9 +96,19 @@ interface GameGridProps {
   onStatusChange: (gameId: string, status: GameStatus) => void;
   onVote: (gameId: string, value: VoteValue) => void;
   onRemove: (gameId: string) => void;
+  onRefreshPrice: (gameId: string) => void;
 }
 
-export function GameGrid({ games, currentUserId, isLoading, memberCount, onStatusChange, onVote, onRemove }: GameGridProps) {
+export function GameGrid({
+  games,
+  currentUserId,
+  isLoading,
+  memberCount,
+  onStatusChange,
+  onVote,
+  onRemove,
+  onRefreshPrice,
+}: GameGridProps) {
   const sorted = useStableOrder(games);
   const candidates = playNextGames(games);
   const playNext = new Set(candidates.map((g) => g.id));
@@ -132,6 +142,7 @@ export function GameGrid({ games, currentUserId, isLoading, memberCount, onStatu
           onStatusChange={(next) => onStatusChange(game.id, next)}
           onVote={(value) => onVote(game.id, value)}
           onRemove={() => onRemove(game.id)}
+          onRefreshPrice={() => onRefreshPrice(game.id)}
         />
       ))}
     </div>

@@ -126,6 +126,32 @@
   color: var(--sq-muted);
 }
 
+.priceGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.refreshPriceButton {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--sq-neutral-pill-bg);
+  color: var(--sq-muted);
+  border: none;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+}
+
+.refreshPriceButton:hover {
+  background: var(--sq-accent-pill-bg);
+  color: var(--sq-accent);
+}
+
 .addedBy {
   font: 400 11px system-ui, sans-serif;
   color: var(--sq-muted);

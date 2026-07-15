@@ -14,6 +14,7 @@ interface GameCardProps {
   onStatusChange: (status: GameStatus) => void;
   onVote: (value: VoteValue) => void;
   onRemove: () => void;
+  onRefreshPrice: () => void;
 }
 
 function formatPrice(game: Game): string {
@@ -37,6 +38,7 @@ export function GameCard({
   onStatusChange,
   onVote,
   onRemove,
+  onRefreshPrice,
 }: GameCardProps) {
   const coopWarning =
     game.maxCoopPlayers != null && memberCount != null && memberCount > game.maxCoopPlayers
@@ -76,13 +78,26 @@ export function GameCard({
         </div>
 
         <div className={styles.priceRow}>
-          {game.ggDealsUrl ? (
-            <a href={game.ggDealsUrl} target="_blank" rel="noreferrer" className={styles.buyButton}>
-              {formatPrice(game)}
-            </a>
-          ) : (
-            <span className={styles.priceStatic}>{formatPrice(game)}</span>
-          )}
+          <div className={styles.priceGroup}>
+            {game.ggDealsUrl ? (
+              <a href={game.ggDealsUrl} target="_blank" rel="noreferrer" className={styles.buyButton}>
+                {formatPrice(game)}
+              </a>
+            ) : (
+              <span className={styles.priceStatic}>{formatPrice(game)}</span>
+            )}
+            {game.price.source === 'live' && (
+              <button
+                type="button"
+                className={styles.refreshPriceButton}
+                onClick={onRefreshPrice}
+                title="Check for a fresh price"
+                aria-label="Refresh price"
+              >
+                ↻
+              </button>
+            )}
+          </div>
           <span className={styles.addedBy}>
             <AvatarBadge name={game.addedBy.displayName} color={game.addedBy.avatarColor} size={16} />
             added by {game.addedBy.displayName}

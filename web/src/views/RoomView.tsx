@@ -12,7 +12,7 @@ export function RoomView() {
   const { roomId } = useParams<{ roomId: string }>();
   const { user } = useAuth();
   const { switchView } = useView();
-  const { games, isLoading, invalidate, updateStatus, vote, remove } = useGames(roomId ?? null);
+  const { games, isLoading, invalidate, updateStatus, vote, remove, refreshPrice } = useGames(roomId ?? null);
 
   const { data: membersData } = useQuery({
     queryKey: ['room-members', roomId],
@@ -38,6 +38,7 @@ export function RoomView() {
         onStatusChange={updateStatus}
         onVote={vote}
         onRemove={remove}
+        onRefreshPrice={refreshPrice}
       />
     </div>
   );

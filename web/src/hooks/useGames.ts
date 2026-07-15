@@ -32,6 +32,11 @@ export function useGames(roomId: string | null) {
     onSuccess: invalidate,
   });
 
+  const refreshPrice = useMutation({
+    mutationFn: (gameId: string) => gamesApi.refreshPrice(gameId),
+    onSuccess: invalidate,
+  });
+
   return {
     games: query.data?.games ?? [],
     isLoading: query.isLoading,
@@ -39,5 +44,6 @@ export function useGames(roomId: string | null) {
     updateStatus: (gameId: string, status: GameStatus) => updateStatus.mutate({ gameId, status }),
     vote: (gameId: string, value: VoteValue) => vote.mutate({ gameId, value }),
     remove: (gameId: string) => remove.mutate(gameId),
+    refreshPrice: (gameId: string) => refreshPrice.mutate(gameId),
   };
 }
