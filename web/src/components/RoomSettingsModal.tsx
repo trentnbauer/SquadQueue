@@ -40,9 +40,11 @@ export function RoomSettingsModal({ room, members, onClose }: RoomSettingsModalP
   const [error, setError] = useState<string | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
 
+  const inviteUrl = room.inviteCode ? `${window.location.origin}/join/${room.inviteCode}` : null;
+
   async function handleCopyInviteCode() {
-    if (!room.inviteCode) return;
-    await navigator.clipboard.writeText(room.inviteCode);
+    if (!inviteUrl) return;
+    await navigator.clipboard.writeText(inviteUrl);
     setInviteCopied(true);
     setTimeout(() => setInviteCopied(false), 1500);
   }
@@ -180,15 +182,18 @@ export function RoomSettingsModal({ room, members, onClose }: RoomSettingsModalP
           )}
         </div>
 
-        {room.inviteCode && (
+        {inviteUrl && (
           <div className={styles.section}>
-            <div className={styles.sectionTitle}>Invite code</div>
+            <div className={styles.sectionTitle}>Invite link</div>
             <div className={styles.inviteCodeRow}>
-              <strong className={styles.inviteCode}>{room.inviteCode}</strong>
+              <strong className={styles.inviteCode} title={inviteUrl}>
+                {inviteUrl}
+              </strong>
               <button type="button" className={styles.memberAction} onClick={handleCopyInviteCode}>
                 {inviteCopied ? 'Copied!' : 'Copy'}
               </button>
             </div>
+            <p className={styles.inviteCodeHint}>Anyone with this link can sign in and join {room.name}. Code: {room.inviteCode}</p>
           </div>
         )}
 
