@@ -10,6 +10,7 @@ const DEV_USER = {
   email: 'dev@localhost',
   displayName: 'Dev User',
   avatarColor: '#8b5cf6',
+  avatarUrl: null,
 };
 
 declare module 'fastify' {
@@ -22,10 +23,15 @@ declare module 'fastify' {
   }
 }
 
-async function getOrCreateUser(profile: { oidcSub: string; email: string; displayName: string }) {
+async function getOrCreateUser(profile: {
+  oidcSub: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
+}) {
   return prisma.user.upsert({
     where: { oidcSub: profile.oidcSub },
-    update: { email: profile.email, displayName: profile.displayName },
+    update: { email: profile.email, displayName: profile.displayName, avatarUrl: profile.avatarUrl },
     create: { ...profile, avatarColor: randomAvatarColor() },
   });
 }

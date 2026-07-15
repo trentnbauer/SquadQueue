@@ -9,6 +9,12 @@
   gap: 12px;
 }
 
+.left {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
 .brand {
   display: flex;
   flex-direction: column;
@@ -77,6 +83,11 @@
   flex-direction: column;
   gap: 4px;
   z-index: 10;
+}
+
+.menuPanelLeft {
+  right: auto;
+  left: 0;
 }
 
 .menuItem {

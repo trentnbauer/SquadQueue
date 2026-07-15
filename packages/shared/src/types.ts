@@ -16,6 +16,7 @@ export interface User {
   id: string;
   displayName: string;
   avatarColor: string;
+  avatarUrl: string | null;
 }
 
 export interface Room {

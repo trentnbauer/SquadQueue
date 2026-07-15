@@ -55,25 +55,17 @@ export function Header() {
 
   return (
     <header className={styles.header}>
-      <div className={styles.brand}>
-        <a href="/" className={styles.brandName}>
-          QUEUE<span style={{ color: 'var(--sq-accent)' }}>//</span>NIGHT
-        </a>
-        <div className={styles.tagline}>Games the squad wants to play together</div>
-      </div>
-
-      <div className={styles.right}>
-        {activeRoom && members.length > 0 && (
-          <div className={styles.avatarStack}>
-            {members.map((m) => (
-              <AvatarBadge key={m.user.id} name={m.user.displayName} color={m.user.avatarColor} size={32} />
-            ))}
-          </div>
-        )}
+      <div className={styles.left}>
+        <div className={styles.brand}>
+          <a href="/" className={styles.brandName}>
+            SQUAD<span style={{ color: 'var(--sq-accent)' }}>//</span>QUEUE
+          </a>
+          <div className={styles.tagline}>Games the squad wants to play together</div>
+        </div>
 
         <details className={styles.menu} ref={roomMenuRef}>
           <summary className={styles.menuButton}>{activeRoom ? activeRoom.name : 'Personal Shelf'} ▾</summary>
-          <div className={styles.menuPanel}>
+          <div className={`${styles.menuPanel} ${styles.menuPanelLeft}`}>
             <a href="/" className={`${styles.menuItem} ${!activeRoom ? styles.menuItemActive : ''}`}>
               Personal Shelf
             </a>
@@ -130,10 +122,26 @@ export function Header() {
             )}
           </div>
         </details>
+      </div>
+
+      <div className={styles.right}>
+        {activeRoom && members.length > 0 && (
+          <div className={styles.avatarStack}>
+            {members.map((m) => (
+              <AvatarBadge
+                key={m.user.id}
+                name={m.user.displayName}
+                color={m.user.avatarColor}
+                avatarUrl={m.user.avatarUrl}
+                size={32}
+              />
+            ))}
+          </div>
+        )}
 
         <details className={styles.menu} ref={profileMenuRef}>
           <summary className={styles.menuButton}>
-            <AvatarBadge name={user.displayName} color={user.avatarColor} size={22} />
+            <AvatarBadge name={user.displayName} color={user.avatarColor} avatarUrl={user.avatarUrl} size={22} />
             Signed in as {user.displayName} ▾
           </summary>
           <div className={styles.menuPanel}>

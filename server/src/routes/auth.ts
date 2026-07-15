@@ -49,13 +49,15 @@ export default async function authRoutes(app: FastifyInstance) {
 
     let email = typeof claims.email === 'string' ? claims.email : null;
     let name = typeof claims.name === 'string' ? claims.name : null;
-    if (!email || !name) {
+    let picture = typeof claims.picture === 'string' ? claims.picture : null;
+    if (!email || !name || !picture) {
       const userInfo = await client.fetchUserInfo(app.oidcConfig!, tokens.access_token, claims.sub);
       email = email ?? (typeof userInfo.email === 'string' ? userInfo.email : `${claims.sub}@unknown`);
       name = name ?? (typeof userInfo.name === 'string' ? userInfo.name : claims.sub);
+      picture = picture ?? (typeof userInfo.picture === 'string' ? userInfo.picture : null);
     }
 
-    const user = await getOrCreateUser({ oidcSub: claims.sub, email, displayName: name });
+    const user = await getOrCreateUser({ oidcSub: claims.sub, email, displayName: name, avatarUrl: picture });
 
     request.session.userId = user.id;
     delete request.session.oidcCodeVerifier;

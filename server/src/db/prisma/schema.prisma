@@ -29,6 +29,7 @@ model User {
   email        String
   displayName  String   @map("display_name")
   avatarColor  String   @default("#8f8aa8") @map("avatar_color")
+  avatarUrl    String?  @map("avatar_url")
   createdAt    DateTime @default(now()) @map("created_at")
 
   roomsCreated Room[]        @relation("RoomCreatedBy")

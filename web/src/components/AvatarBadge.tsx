@@ -1,18 +1,35 @@
 interface AvatarBadgeProps {
   name: string;
   color: string;
+  avatarUrl?: string | null;
   size?: number;
   title?: string;
 }
 
-export function AvatarBadge({ name, color, size = 28, title }: AvatarBadgeProps) {
+export function AvatarBadge({ name, color, avatarUrl, size = 28, title }: AvatarBadgeProps) {
+  const baseStyle: React.CSSProperties = {
+    width: size,
+    height: size,
+    borderRadius: '50%',
+    flex: 'none',
+  };
+
+  if (avatarUrl) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={name}
+        title={title ?? name}
+        style={{ ...baseStyle, objectFit: 'cover' }}
+      />
+    );
+  }
+
   return (
     <div
       title={title ?? name}
       style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
+        ...baseStyle,
         background: color,
         display: 'flex',
         alignItems: 'center',
@@ -20,7 +37,6 @@ export function AvatarBadge({ name, color, size = 28, title }: AvatarBadgeProps)
         color: '#fff',
         fontWeight: 700,
         fontSize: size * 0.42,
-        flex: 'none',
       }}
     >
       {name.charAt(0).toUpperCase()}
