@@ -6,6 +6,13 @@
   max-width: 900px;
 }
 
+@media (max-width: 640px) {
+  .page {
+    padding: 20px 18px;
+    gap: 24px;
+  }
+}
+
 .title {
   font: 700 22px var(--sq-header-font);
   color: var(--sq-text);

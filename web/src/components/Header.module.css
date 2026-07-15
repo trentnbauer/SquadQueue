@@ -9,6 +9,12 @@
   gap: 12px;
 }
 
+@media (max-width: 640px) {
+  .header {
+    padding: 16px 18px;
+  }
+}
+
 .left {
   display: flex;
   align-items: center;
@@ -127,6 +133,7 @@
   right: 0;
   top: calc(100% + 8px);
   min-width: 220px;
+  max-width: calc(100vw - 32px);
   background: var(--sq-surface);
   border: 1px solid var(--sq-border);
   border-radius: var(--sq-radius);
@@ -140,6 +147,16 @@
 .menuPanelLeft {
   right: auto;
   left: 0;
+}
+
+@media (max-width: 640px) {
+  /* Room menu sits mid-header, not at the left edge, so left-anchoring it (like desktop, opening
+   * toward the brand) runs the panel off the right edge of a phone screen. Anchor from the right
+   * instead, same as every other header dropdown, since there's no room to preserve the distinction. */
+  .menuPanelLeft {
+    right: 0;
+    left: auto;
+  }
 }
 
 .menuItem {
