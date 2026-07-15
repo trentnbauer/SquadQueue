@@ -67,6 +67,7 @@ export interface Game {
   title: string;
   platform: string;
   genre: string | null;
+  maxCoopPlayers: number | null;
   ggDealsUrl: string | null;
   coverImageUrl: string | null;
   status: GameStatus;

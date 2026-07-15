@@ -4,7 +4,7 @@ import { HttpError } from '../util/httpError.js';
 import type { GameSearchResult, RoomPlatform } from '@squadqueue/shared';
 
 const TOKEN_CACHE_KEY = 'igdb:token:v1';
-const DETAIL_CACHE_PREFIX = 'igdb:detail:v3:'; // v3: added platformFamilies
+const DETAIL_CACHE_PREFIX = 'igdb:detail:v4:'; // v4: added maxCoopPlayers
 const DETAIL_CACHE_TTL_SECONDS = 60 * 60 * 24; // 24h — title/cover/platform/steamAppId rarely change
 
 interface TwitchTokenResponse {
@@ -157,6 +157,7 @@ export interface IgdbGameDetail {
   genre: string | null;
   coverImageUrl: string | null;
   steamAppId: number | null;
+  maxCoopPlayers: number | null;
 }
 
 // external_game_source 1 == Steam (from the external_game_sources endpoint) — the `games`
@@ -167,6 +168,19 @@ interface IgdbExternalGame {
   uid: string;
 }
 
+interface IgdbMultiplayerMode {
+  onlinecoopmax?: number;
+  offlinecoopmax?: number;
+}
+
+// A game can have several multiplayer_modes rows (one per platform/mode) — take the highest
+// co-op figure across all of them as "the most this game supports," rather than tying it to any
+// one platform's row (IGDB's per-row platform tagging is inconsistent enough not to rely on).
+function maxCoopFrom(modes: IgdbMultiplayerMode[]): number | null {
+  const values = modes.flatMap((m) => [m.onlinecoopmax, m.offlinecoopmax]).filter((n): n is number => !!n && n > 0);
+  return values.length > 0 ? Math.max(...values) : null;
+}
+
 export async function getGameDetail(igdbId: number): Promise<IgdbGameDetail> {
   if (!Number.isInteger(igdbId) || igdbId <= 0) {
     throw new HttpError(400, 'Invalid IGDB game id');
@@ -175,7 +189,7 @@ export async function getGameDetail(igdbId: number): Promise<IgdbGameDetail> {
   const cached = await redis.get(cacheKey);
   if (cached) return JSON.parse(cached) as IgdbGameDetail;
 
-  const [games, externalGames] = await Promise.all([
+  const [games, externalGames, multiplayerModes] = await Promise.all([
     igdbRequest<IgdbGame[]>(
       'games',
       `fields name,cover.image_id,platforms.name,genres.name; where id = ${igdbId};`,
@@ -183,6 +197,10 @@ export async function getGameDetail(igdbId: number): Promise<IgdbGameDetail> {
     igdbRequest<IgdbExternalGame[]>(
       'external_games',
       `fields uid; where game = ${igdbId} & external_game_source = ${STEAM_EXTERNAL_SOURCE_ID};`,
+    ),
+    igdbRequest<IgdbMultiplayerMode[]>(
+      'multiplayer_modes',
+      `fields onlinecoopmax,offlinecoopmax; where game = ${igdbId};`,
     ),
   ]);
 
@@ -200,6 +218,7 @@ export async function getGameDetail(igdbId: number): Promise<IgdbGameDetail> {
     genre: genreLabel(game.genres),
     coverImageUrl: coverUrl(game.cover),
     steamAppId: steamUid && /^\d+$/.test(steamUid) ? Number(steamUid) : null,
+    maxCoopPlayers: maxCoopFrom(multiplayerModes),
   };
 
   await redis.set(cacheKey, JSON.stringify(detail), 'EX', DETAIL_CACHE_TTL_SECONDS);

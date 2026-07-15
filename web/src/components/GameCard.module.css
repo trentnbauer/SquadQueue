@@ -84,6 +84,14 @@
   gap: 5px;
 }
 
+.coopWarning {
+  font: 600 11px system-ui, sans-serif;
+  color: #ffb84a;
+  background: rgba(255, 184, 74, 0.12);
+  border-radius: var(--sq-radius);
+  padding: 7px 10px;
+}
+
 .divider {
   height: 1px;
   background: var(--sq-border);

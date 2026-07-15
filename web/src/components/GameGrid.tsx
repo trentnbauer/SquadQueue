@@ -14,12 +14,14 @@ function sortByScore(games: Game[]): Game[] {
 interface GameGridProps {
   games: Game[];
   currentUserId: string;
+  /** Room member count, used to warn when a game's max co-op players is under this. Undefined on the Personal Shelf. */
+  memberCount?: number;
   onStatusChange: (gameId: string, status: GameStatus) => void;
   onVote: (gameId: string, value: VoteValue) => void;
   onRemove: (gameId: string) => void;
 }
 
-export function GameGrid({ games, currentUserId, onStatusChange, onVote, onRemove }: GameGridProps) {
+export function GameGrid({ games, currentUserId, memberCount, onStatusChange, onVote, onRemove }: GameGridProps) {
   const sorted = sortByScore(games);
 
   if (sorted.length === 0) {
@@ -33,6 +35,7 @@ export function GameGrid({ games, currentUserId, onStatusChange, onVote, onRemov
           key={game.id}
           game={game}
           currentUserId={currentUserId}
+          memberCount={memberCount}
           onStatusChange={(next) => onStatusChange(game.id, next)}
           onVote={(value) => onVote(game.id, value)}
           onRemove={() => onRemove(game.id)}

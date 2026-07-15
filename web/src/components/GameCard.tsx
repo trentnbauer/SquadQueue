@@ -8,6 +8,7 @@ import styles from './GameCard.module.css';
 interface GameCardProps {
   game: Game;
   currentUserId: string;
+  memberCount?: number;
   onStatusChange: (status: GameStatus) => void;
   onVote: (value: VoteValue) => void;
   onRemove: () => void;
@@ -25,7 +26,12 @@ function formatPrice(game: Game): string {
   }
 }
 
-export function GameCard({ game, currentUserId, onStatusChange, onVote, onRemove }: GameCardProps) {
+export function GameCard({ game, currentUserId, memberCount, onStatusChange, onVote, onRemove }: GameCardProps) {
+  const coopWarning =
+    game.maxCoopPlayers != null && memberCount != null && memberCount > game.maxCoopPlayers
+      ? `Only supports ${game.maxCoopPlayers}-player co-op — this room has ${memberCount} members`
+      : null;
+
   return (
     <div className={styles.card}>
       <div
@@ -59,6 +65,8 @@ export function GameCard({ game, currentUserId, onStatusChange, onVote, onRemove
             added by {game.addedBy.displayName}
           </span>
         </div>
+
+        {coopWarning && <div className={styles.coopWarning}>⚠ {coopWarning}</div>}
 
         <div className={styles.divider} />
 

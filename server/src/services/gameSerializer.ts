@@ -32,6 +32,7 @@ export async function serializeGame(game: GameWithRelations, currentUserId: stri
     title: game.title,
     platform: game.platform,
     genre: game.genre,
+    maxCoopPlayers: game.maxCoopPlayers,
     ggDealsUrl: game.ggDealsUrl,
     coverImageUrl: game.coverImageUrl,
     status: game.status,

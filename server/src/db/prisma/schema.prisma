@@ -87,6 +87,7 @@ model Game {
   title          String
   platform       String
   genre          String?
+  maxCoopPlayers Int?       @map("max_coop_players")
   ggDealsUrl     String?    @map("gg_deals_url")
   steamAppid     Int?       @map("steam_appid")
   coverImageUrl  String?    @map("cover_image_url")

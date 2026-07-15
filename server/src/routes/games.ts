@@ -73,6 +73,7 @@ export default async function gameRoutes(app: FastifyInstance) {
         title: resolved.title,
         platform: resolved.platform,
         genre: resolved.genre,
+        maxCoopPlayers: resolved.maxCoopPlayers,
         ggDealsUrl: resolved.ggDealsUrl,
         steamAppid: resolved.steamAppId,
         coverImageUrl: resolved.coverImageUrl,

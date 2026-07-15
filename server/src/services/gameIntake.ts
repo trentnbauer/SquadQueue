@@ -61,6 +61,7 @@ export async function resolveGameForCreation(
   ggDealsUrl: string | null;
   coverImageUrl: string | null;
   steamAppId: number | null;
+  maxCoopPlayers: number | null;
 }> {
   const detail = await getGameDetail(igdbId);
   assertPlatformMatch(detail, roomPlatform);
@@ -73,6 +74,7 @@ export async function resolveGameForCreation(
     ggDealsUrl,
     coverImageUrl: detail.coverImageUrl,
     steamAppId: detail.steamAppId,
+    maxCoopPlayers: detail.maxCoopPlayers,
   };
 }
 
