@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { platformFamilies, type IgdbPlatform } from './igdbClient.js';
+import { platformFamilies, escapeApicalypseString, type IgdbPlatform } from './igdbClient.js';
 
 function names(...n: string[]): IgdbPlatform[] {
   return n.map((name) => ({ name }));
@@ -35,5 +35,29 @@ describe('platformFamilies', () => {
     expect(platformFamilies(undefined)).toEqual([]);
     expect(platformFamilies([])).toEqual([]);
     expect(platformFamilies([{ name: undefined }])).toEqual([]);
+  });
+});
+
+describe('escapeApicalypseString', () => {
+  it('escapes a bare double quote', () => {
+    expect(escapeApicalypseString('a"b')).toBe('a\\"b');
+  });
+
+  it('escapes backslashes before quotes so an attacker cannot smuggle an unescaped quote', () => {
+    // If quotes were escaped without first escaping backslashes, this input's trailing `\"`
+    // would become `\\"` in the output - read as an escaped backslash followed by an *unescaped*
+    // quote, closing the string early and letting the rest of the input inject raw query syntax.
+    const malicious = 'foo\\"; fields *; where 1=1;"';
+    const escaped = escapeApicalypseString(malicious);
+    expect(escaped).toBe('foo\\\\\\"; fields *; where 1=1;\\"');
+
+    const query = `search "${escaped}";`;
+    // The escaped payload must not contain an unescaped quote - i.e. every `"` in the query is
+    // immediately preceded by an odd number of backslashes.
+    expect(query.match(/(?<!\\)(\\\\)*"/g)).toEqual(['"', '"']);
+  });
+
+  it('leaves ordinary text untouched', () => {
+    expect(escapeApicalypseString('Mario Kart World')).toBe('Mario Kart World');
   });
 });

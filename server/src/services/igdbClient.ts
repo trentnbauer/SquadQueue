@@ -175,6 +175,13 @@ async function igdbRequest<T>(endpoint: string, body: string): Promise<T> {
   return (await response.json()) as T;
 }
 
+// Backslashes must be escaped before quotes, or an attacker-supplied backslash right before a
+// quote combines with the one we insert (e.g. `\"` -> `\\"`) into an escaped-backslash-then-
+// unescaped-quote sequence, closing the string early and injecting raw Apicalypse syntax.
+export function escapeApicalypseString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 export async function searchGames(query: string, platforms?: RoomPlatform[]): Promise<GameSearchResult[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
@@ -183,7 +190,7 @@ export async function searchGames(query: string, platforms?: RoomPlatform[]): Pr
   // ticked any owned systems) - treat it the same as undefined rather than matching nothing.
   const activePlatforms = platforms && platforms.length > 0 ? platforms : undefined;
 
-  const escaped = trimmed.replace(/"/g, '\\"');
+  const escaped = escapeApicalypseString(trimmed);
   // Scoping the platform filter into the query itself (rather than fetching the top 20 results
   // overall and discarding non-matching ones afterward) matters: IGDB ranks "top 20 for this query
   // on this platform" when the where clause is present, instead of "top 20 for this query" full
