@@ -5,6 +5,7 @@ import { authApi } from './api/auth';
 import { useRooms } from './hooks/useRooms';
 import { ActionErrorBanner } from './components/ActionErrorBanner';
 import { Header } from './components/Header';
+import { Sidebar } from './components/Sidebar';
 import { Footer } from './components/Footer';
 import { OnboardingModal } from './components/OnboardingModal';
 import { ChangelogModal } from './components/ChangelogModal';
@@ -124,16 +125,19 @@ export default function App() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--sq-bg)' }}>
-      <Header />
-      <ActionErrorBanner message={pendingJoinError} onDismiss={() => setPendingJoinError(null)} />
-      <Routes>
-        <Route path="/" element={<ShelfView />} />
-        <Route path="/room/:roomId" element={<RoomView />} />
-        <Route path="/settings" element={<SettingsView />} />
-        <Route path="/join/:inviteCode" element={<JoinRoomView />} />
-      </Routes>
-      <Footer />
+    <div style={{ minHeight: '100vh', background: 'var(--sq-bg)', display: 'flex' }}>
+      <Sidebar />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <Header />
+        <ActionErrorBanner message={pendingJoinError} onDismiss={() => setPendingJoinError(null)} />
+        <Routes>
+          <Route path="/" element={<ShelfView />} />
+          <Route path="/room/:roomId" element={<RoomView />} />
+          <Route path="/settings" element={<SettingsView />} />
+          <Route path="/join/:inviteCode" element={<JoinRoomView />} />
+        </Routes>
+        <Footer />
+      </div>
       {showOnboarding && <OnboardingModal onDone={handleOnboardingDone} />}
       <ChangelogModal />
     </div>

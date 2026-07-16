@@ -1,22 +1,15 @@
 import { useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { PRICE_REGION_LABELS, ROOM_PLATFORM_LABELS, type PriceRegion, type RoomPlatform, type RoomRole } from '@squadqueue/shared';
+import type { RoomRole } from '@squadqueue/shared';
 import { useAuth } from '../context/AuthContext';
 import { useView } from '../context/ViewContext';
 import { useConfirm } from '../context/ConfirmContext';
-import { useRooms } from '../hooks/useRooms';
 import { useGames } from '../hooks/useGames';
-import { useCurrencyRegion } from '../context/CurrencyRegionContext';
 import { roomsApi } from '../api/rooms';
-import { authApi } from '../api/auth';
 import { AvatarBadge } from './AvatarBadge';
 import { RoomSettingsModal } from './RoomSettingsModal';
-import { ACCENT_PRESETS } from '../theme/defaultTheme';
 import styles from './Header.module.css';
-
-const ROOM_PLATFORM_OPTIONS = Object.keys(ROOM_PLATFORM_LABELS) as RoomPlatform[];
-const PRICE_REGION_OPTIONS = Object.keys(PRICE_REGION_LABELS) as PriceRegion[];
 
 const ROLE_LABEL: Record<RoomRole, string> = {
   room_master: 'Room Master',
@@ -27,21 +20,11 @@ const ROLE_LABEL: Record<RoomRole, string> = {
 export function Header() {
   const { user } = useAuth();
   const { activeRoom } = useView();
-  const { rooms, createRoom, joinRoom } = useRooms();
-  const { region, setRegion } = useCurrencyRegion();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
 
-  const roomMenuRef = useRef<HTMLDetailsElement>(null);
-  const addRoomMenuRef = useRef<HTMLDetailsElement>(null);
   const membersMenuRef = useRef<HTMLDetailsElement>(null);
-  const profileMenuRef = useRef<HTMLDetailsElement>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showJoinForm, setShowJoinForm] = useState(false);
-  const [newRoomName, setNewRoomName] = useState('');
-  const [newRoomPlatform, setNewRoomPlatform] = useState<RoomPlatform>('pc');
-  const [inviteCode, setInviteCode] = useState('');
   const [showRoomSettings, setShowRoomSettings] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
 
@@ -70,7 +53,7 @@ export function Header() {
 
   async function handlePromote(targetUserId: string) {
     if (!activeRoom) return;
-    await roomsApi.promote(activeRoom.id, targetUserId);
+    await roomsApi.setRole(activeRoom.id, targetUserId, 'moderator');
     queryClient.invalidateQueries({ queryKey: membersQueryKey });
   }
 
@@ -90,23 +73,6 @@ export function Header() {
     }
   }
 
-  function closeAddRoomMenu() {
-    addRoomMenuRef.current?.removeAttribute('open');
-    setShowCreateForm(false);
-    setShowJoinForm(false);
-  }
-
-  async function handleCreateRoom(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newRoomName.trim()) return;
-    const accentColor = ACCENT_PRESETS[Math.floor(Math.random() * ACCENT_PRESETS.length)].value;
-    const { room } = await createRoom.mutateAsync({ name: newRoomName.trim(), platform: newRoomPlatform, accentColor });
-    setNewRoomName('');
-    setNewRoomPlatform('pc');
-    closeAddRoomMenu();
-    navigate(`/room/${room.id}`);
-  }
-
   async function handleCopyInviteCode() {
     if (!activeRoom?.inviteCode) return;
     await navigator.clipboard.writeText(`${window.location.origin}/join/${activeRoom.inviteCode}`);
@@ -114,110 +80,12 @@ export function Header() {
     setTimeout(() => setInviteCopied(false), 1500);
   }
 
-  async function handleJoinRoom(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = inviteCode.trim();
-    if (!trimmed) return;
-    // Accept either a bare code or a pasted full invite link (e.g. https://.../join/ABC123).
-    const pastedLinkMatch = trimmed.match(/\/join\/([^/?#]+)/);
-    const code = pastedLinkMatch ? decodeURIComponent(pastedLinkMatch[1]) : trimmed;
-    const { room } = await joinRoom.mutateAsync({ inviteCode: code });
-    setInviteCode('');
-    closeAddRoomMenu();
-    navigate(`/room/${room.id}`);
-  }
-
   if (!user) return null;
 
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <div className={styles.brand}>
-          <Link to="/" className={styles.brandName}>
-            SquadQueue
-          </Link>
-          <div className={styles.tagline}>Games the squad wants to play together</div>
-        </div>
-
-        {/* Pure navigation: switch between the Personal Shelf and any room you belong to.
-            Creating/joining a room and managing an active room live in their own separate,
-            clearly-labeled controls below, not nested inside this menu. */}
-        <details className={styles.menu} ref={roomMenuRef}>
-          <summary className={styles.roomSelectorButton}>
-            <span className={styles.roomSelectorIcon} aria-hidden="true">
-              {activeRoom ? '🎮' : '🗂'}
-            </span>
-            <span className={styles.roomSelectorName}>{activeRoom ? activeRoom.name : 'Personal Shelf'}</span>
-            <span className={styles.roomSelectorChevron} aria-hidden="true">▾</span>
-          </summary>
-          <div className={`${styles.menuPanel} ${styles.menuPanelLeft}`}>
-            <div className={styles.menuSectionLabel}>Switch to</div>
-            <Link
-              to="/"
-              className={`${styles.menuItem} ${!activeRoom ? styles.menuItemActive : ''}`}
-              onClick={() => roomMenuRef.current?.removeAttribute('open')}
-            >
-              🗂 Personal Shelf
-            </Link>
-            {rooms.map((room) => (
-              <Link
-                key={room.id}
-                to={`/room/${room.id}`}
-                className={`${styles.menuItem} ${activeRoom?.id === room.id ? styles.menuItemActive : ''}`}
-                onClick={() => roomMenuRef.current?.removeAttribute('open')}
-              >
-                🎮 {room.name} <span style={{ color: 'var(--sq-muted)', fontWeight: 400 }}>· {ROOM_PLATFORM_LABELS[room.platform]}</span>
-              </Link>
-            ))}
-          </div>
-        </details>
-
-        <details className={styles.menu} ref={addRoomMenuRef}>
-          <summary className={styles.addRoomButton} title="Create or join a room">
-            + Room
-          </summary>
-          <div className={styles.menuPanel}>
-            {!showCreateForm && !showJoinForm && (
-              <>
-                <button className={styles.menuItem} onClick={() => setShowCreateForm(true)}>
-                  Create a new room
-                </button>
-                <button className={styles.menuItem} onClick={() => setShowJoinForm(true)}>
-                  Join with invite code
-                </button>
-              </>
-            )}
-            {showCreateForm && (
-              <form className={styles.miniForm} onSubmit={handleCreateRoom}>
-                <input
-                  autoFocus
-                  placeholder="Room name"
-                  value={newRoomName}
-                  onChange={(e) => setNewRoomName(e.target.value)}
-                />
-                <select value={newRoomPlatform} onChange={(e) => setNewRoomPlatform(e.target.value as RoomPlatform)}>
-                  {ROOM_PLATFORM_OPTIONS.map((p) => (
-                    <option key={p} value={p}>
-                      {ROOM_PLATFORM_LABELS[p]}
-                    </option>
-                  ))}
-                </select>
-                <button type="submit">Create room</button>
-              </form>
-            )}
-            {showJoinForm && (
-              <form className={styles.miniForm} onSubmit={handleJoinRoom}>
-                <input
-                  autoFocus
-                  placeholder="Invite code or link"
-                  value={inviteCode}
-                  onChange={(e) => setInviteCode(e.target.value)}
-                />
-                <button type="submit">Join room</button>
-              </form>
-            )}
-          </div>
-        </details>
+        <div className={styles.title}>{activeRoom ? activeRoom.name : 'Personal Shelf'}</div>
 
         {activeRoom?.inviteCode && (
           <button
@@ -298,42 +166,6 @@ export function Header() {
             </div>
           </details>
         )}
-
-        <details className={styles.menu} ref={profileMenuRef}>
-          <summary className={styles.menuButton}>
-            <AvatarBadge name={user.displayName} color={user.avatarColor} avatarUrl={user.avatarUrl} size={22} />
-            Signed in as {user.displayName} ▾
-          </summary>
-          <div className={styles.menuPanel}>
-            <div className={styles.menuItem} style={{ color: 'var(--sq-muted)', fontSize: 11 }}>
-              Price currency
-            </div>
-            <select
-              className={styles.currencySelect}
-              value={region ?? ''}
-              onChange={(e) => setRegion((e.target.value || undefined) as PriceRegion | undefined)}
-            >
-              <option value="">Server default</option>
-              {PRICE_REGION_OPTIONS.map((r) => (
-                <option key={r} value={r}>
-                  {PRICE_REGION_LABELS[r]}
-                </option>
-              ))}
-            </select>
-            <div className={styles.divider} />
-            {user.isAdmin && (
-              <>
-                <Link to="/settings" className={styles.menuItem}>
-                  Administrator settings
-                </Link>
-                <div className={styles.divider} />
-              </>
-            )}
-            <a href={authApi.logoutUrl} className={styles.menuItem}>
-              Sign out
-            </a>
-          </div>
-        </details>
       </div>
     </header>
   );

@@ -18,25 +18,13 @@
 .left {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 16px;
 }
 
-.brand {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.brandName {
-  font: 700 22px var(--sq-header-font);
+.title {
+  font: 700 19px var(--sq-header-font);
   color: var(--sq-text);
   letter-spacing: 0.01em;
-  text-decoration: none;
-}
-
-.tagline {
-  font: 400 12.5px system-ui, sans-serif;
-  color: var(--sq-muted);
 }
 
 .right {
@@ -111,88 +99,6 @@
   position: relative;
 }
 
-.menuButton {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 14px 6px 6px;
-  border-radius: 999px;
-  background: var(--sq-neutral-pill-bg);
-  color: var(--sq-text);
-  font: 600 12.5px system-ui, sans-serif;
-  border: none;
-  list-style: none;
-}
-
-.menuButton::-webkit-details-marker {
-  display: none;
-}
-
-/* Room / view selector — a proper dropdown-style control rather than a small rounded pill:
- * rectangular with subtle corners, a bordered surface, a distinct icon chip, and a chevron
- * that separates clearly from the room name. */
-.roomSelectorButton {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 12px 7px 7px;
-  min-width: 176px;
-  border-radius: var(--sq-radius);
-  background: var(--sq-surface);
-  border: 1px solid var(--sq-border);
-  color: var(--sq-text);
-  font: 600 13px system-ui, sans-serif;
-  list-style: none;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.roomSelectorButton:hover {
-  border-color: var(--sq-accent);
-  background: var(--sq-surface2);
-}
-
-.roomSelectorButton::-webkit-details-marker {
-  display: none;
-}
-
-.roomSelectorIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-  border-radius: 7px;
-  background: var(--sq-accent-pill-bg);
-  font-size: 14px;
-}
-
-.roomSelectorName {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.roomSelectorChevron {
-  flex-shrink: 0;
-  color: var(--sq-muted);
-  font-size: 11px;
-  transition: transform 0.15s ease;
-}
-
-.menu[open] > .roomSelectorButton .roomSelectorChevron {
-  transform: rotate(180deg);
-}
-
-@media (max-width: 640px) {
-  .roomSelectorButton {
-    min-width: 0;
-  }
-}
-
 .inviteBadge {
   display: flex;
   align-items: center;
@@ -245,110 +151,3 @@
   z-index: 10;
 }
 
-.menuPanelLeft {
-  right: auto;
-  left: 0;
-}
-
-@media (max-width: 640px) {
-  /* Room menu sits mid-header, not at the left edge, so left-anchoring it (like desktop, opening
-   * toward the brand) runs the panel off the right edge of a phone screen. Anchor from the right
-   * instead, same as every other header dropdown, since there's no room to preserve the distinction. */
-  .menuPanelLeft {
-    right: 0;
-    left: auto;
-  }
-}
-
-.menuItem {
-  display: block;
-  padding: 8px 10px;
-  border-radius: 6px;
-  color: var(--sq-text);
-  text-decoration: none;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 13px;
-}
-
-.menuItem:hover {
-  background: var(--sq-neutral-pill-bg);
-}
-
-.menuSectionLabel {
-  padding: 4px 10px 2px;
-  font: 700 10px system-ui, sans-serif;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--sq-muted);
-}
-
-.addRoomButton {
-  display: flex;
-  align-items: center;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--sq-muted);
-  border: 1px dashed var(--sq-border);
-  font: 600 12.5px system-ui, sans-serif;
-  list-style: none;
-  cursor: pointer;
-}
-
-.addRoomButton:hover {
-  color: var(--sq-text);
-  border-color: var(--sq-text);
-}
-
-.addRoomButton::-webkit-details-marker {
-  display: none;
-}
-
-.menuItemActive {
-  color: var(--sq-accent);
-}
-
-.miniForm {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 8px 10px;
-}
-
-.miniForm input,
-.miniForm select {
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: var(--sq-surface2);
-  border: 1px solid var(--sq-border);
-  color: var(--sq-text);
-  font-size: 13px;
-}
-
-.currencySelect {
-  margin: 0 10px 4px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: var(--sq-surface2);
-  border: 1px solid var(--sq-border);
-  color: var(--sq-text);
-  font-size: 13px;
-}
-
-.miniForm button {
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: var(--sq-accent);
-  color: #fff;
-  border: none;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.divider {
-  height: 1px;
-  background: var(--sq-border);
-  margin: 4px 0;
-}
