@@ -25,6 +25,22 @@ export const ROOM_PLATFORM_LABELS: Record<RoomPlatform, string> = {
   switch2: 'Switch 2',
 };
 
+/** The exact IGDB platform name(s) each RoomPlatform family corresponds to - shared so both the
+ * server (scoping an IGDB search query to a room/owned-systems platform) and the web client
+ * (matching a game's free-text `platform` label against a user's owned systems) use the same
+ * mapping instead of two copies drifting apart. */
+export const IGDB_PLATFORM_NAMES: Record<RoomPlatform, string[]> = {
+  switch: ['Nintendo Switch'],
+  switch2: ['Nintendo Switch 2'],
+  xbox_360: ['Xbox 360'],
+  xbox_one: ['Xbox One'],
+  xbox_series: ['Xbox Series X|S'],
+  ps3: ['PlayStation 3'],
+  ps4: ['PlayStation 4'],
+  ps5: ['PlayStation 5'],
+  pc: ['PC (Microsoft Windows)', 'Mac', 'Linux'],
+};
+
 // Confirmed against gg.deals' real Prices API response before picking these - not every country
 // code works (e.g. "uk" 404s, the ISO code "gb" is what it actually wants).
 export type PriceRegion = 'us' | 'gb' | 'eu' | 'au' | 'ca' | 'br';

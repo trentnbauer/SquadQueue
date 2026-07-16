@@ -2,7 +2,7 @@ import { redis } from './redisClient.js';
 import { env } from '../config/env.js';
 import { HttpError } from '../util/httpError.js';
 import { getConfigValue } from './configResolver.js';
-import type { GameSearchResult, RoomPlatform } from '@squadqueue/shared';
+import { IGDB_PLATFORM_NAMES, type GameSearchResult, type RoomPlatform } from '@squadqueue/shared';
 
 /** IGDB client id/secret, resolved env-first with a DB fallback (see configResolver.ts) - either
  * or both may be unset (env.ts no longer requires them at boot), in which case IGDB requests fail
@@ -115,21 +115,6 @@ export function platformFamilies(platforms?: IgdbPlatform[]): RoomPlatform[] {
 function releaseYear(unixSeconds?: number): number | null {
   return unixSeconds ? new Date(unixSeconds * 1000).getUTCFullYear() : null;
 }
-
-// Reverse of platformFamilies() - the exact IGDB platform names that belong to each family, used
-// to scope a search query to a room's platform. Exact names (not substrings) so "Nintendo Switch"
-// and "Nintendo Switch 2" don't collide with each other the way a wildcard match would.
-const IGDB_PLATFORM_NAMES: Record<RoomPlatform, string[]> = {
-  switch: ['Nintendo Switch'],
-  switch2: ['Nintendo Switch 2'],
-  xbox_360: ['Xbox 360'],
-  xbox_one: ['Xbox One'],
-  xbox_series: ['Xbox Series X|S'],
-  ps3: ['PlayStation 3'],
-  ps4: ['PlayStation 4'],
-  ps5: ['PlayStation 5'],
-  pc: ['PC (Microsoft Windows)', 'Mac', 'Linux'],
-};
 
 function platformWhereClause(platforms: RoomPlatform[]): string {
   const names = platforms

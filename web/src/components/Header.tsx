@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { RoomRole } from '@squadqueue/shared';
+import { IGDB_PLATFORM_NAMES, type RoomRole } from '@squadqueue/shared';
 import { useAuth } from '../context/AuthContext';
 import { useView } from '../context/ViewContext';
 import { useConfirm } from '../context/ConfirmContext';
@@ -59,7 +59,7 @@ function PillFilter({ label, allLabel, options, value, onChange }: PillFilterPro
 }
 
 export function Header() {
-  const { user } = useAuth();
+  const { user, ownedPlatforms } = useAuth();
   const { activeRoom } = useView();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -85,11 +85,19 @@ export function Header() {
   const { games, invalidate: invalidateGames } = useGames(activeRoom?.id ?? null);
 
   // A Room already has one fixed platform, so every game in it matches - the platform filter is
-  // only meaningful on the Personal Shelf, where games can span multiple systems.
-  const platformOptions = useMemo(
-    () => (activeRoom ? [] : distinctValues(games, (g) => g.platform)),
-    [games, activeRoom],
+  // only meaningful on the Personal Shelf, where games can span multiple systems. There, once the
+  // user has ticked which systems they own, only show filter pills for those - a filter option for
+  // a system they don't own (surfaced by e.g. a cross-platform title's IGDB platform list) isn't a
+  // useful choice.
+  const ownedPlatformLabels = useMemo(
+    () => (ownedPlatforms.length > 0 ? new Set(ownedPlatforms.flatMap((p) => IGDB_PLATFORM_NAMES[p])) : null),
+    [ownedPlatforms],
   );
+  const platformOptions = useMemo(() => {
+    if (activeRoom) return [];
+    const all = distinctValues(games, (g) => g.platform);
+    return ownedPlatformLabels ? all.filter((label) => ownedPlatformLabels.has(label)) : all;
+  }, [games, activeRoom, ownedPlatformLabels]);
   const genreOptions = useMemo(() => distinctValues(games, (g) => g.genre), [games]);
 
   function canPromote(memberRole: RoomRole): boolean {
