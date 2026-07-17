@@ -29,11 +29,12 @@ services:
       retries: 10
 
   server:
-    build:
-      # This file lives at the repo root, so "." is the repo root itself - the default project
-      # directory Compose uses when none is given, no --project-directory override needed.
-      context: .
-      dockerfile: docker/Dockerfile.server
+    # Pulls the pre-built image from the "Build and Publish Docker Image" GitHub Actions workflow
+    # (.github/workflows/build-docker-image.yml) instead of building locally - that workflow
+    # already builds and pushes linux/amd64+linux/arm64 on every change to main, so there's no
+    # need to rebuild here. Override IMAGE_TAG to pin a specific commit (tagged `sha-<short>`)
+    # instead of always tracking `latest`.
+    image: ghcr.io/trentnbauer/squadqueue:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       postgres:

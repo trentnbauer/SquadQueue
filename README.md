@@ -61,10 +61,10 @@ Each method's `*_REDIRECT_URI` must exactly match what you register with that pr
 ## Production deployment (Docker)
 
 ```sh
-docker compose --env-file .env -f docker-compose.prod.yml up -d --build
+docker compose --env-file .env -f docker-compose.prod.yml up -d
 ```
 
-This builds and runs a single `server` container (serving both the API and the built frontend) alongside Postgres and Redis, all wired from the same `.env`. On first boot the container runs `prisma db push` automatically to create the schema.
+This pulls the pre-built `server` image (serving both the API and the built frontend) from `ghcr.io/trentnbauer/squadqueue` - published automatically by the "Build and Publish Docker Image" GitHub Actions workflow on every change to `main` - and runs it alongside Postgres and Redis, all wired from the same `.env`. On first boot the container runs `prisma db push` automatically to create the schema. To pin a specific build instead of always tracking the latest, set `IMAGE_TAG=sha-<short-commit>` in `.env`.
 
 ### Running behind a reverse proxy
 
