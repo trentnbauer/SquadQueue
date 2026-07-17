@@ -30,9 +30,8 @@ services:
 
   server:
     build:
-      # Relative paths in this file resolve against --project-directory (repo root, per the
-      # documented invocation), not this file's own directory - so this is "." (repo root), not
-      # ".." (which would resolve to one level *above* repo root once --project-directory is set).
+      # This file lives at the repo root, so "." is the repo root itself - the default project
+      # directory Compose uses when none is given, no --project-directory override needed.
       context: .
       dockerfile: docker/Dockerfile.server
     restart: unless-stopped
