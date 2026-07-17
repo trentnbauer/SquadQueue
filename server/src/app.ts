@@ -26,7 +26,11 @@ export async function buildApp() {
         // as inline styles regardless of source - 'unsafe-inline' is required for the app to render.
         // fonts.googleapis.com serves the @font-face CSS for the header font (web/index.html).
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        imgSrc: ["'self'", 'data:', 'https://images.igdb.com'],
+        // Profile pictures come from whichever sign-in provider is configured (Discord's CDN,
+        // Google's, Steam's, or an arbitrary self-hosted OIDC provider's) - there's no fixed set of
+        // hosts to allowlist, so any HTTPS image source is allowed rather than an allowlist that
+        // silently breaks avatars every time a provider serves images from a new domain.
+        imgSrc: ["'self'", 'data:', 'https:'],
         connectSrc: ["'self'"],
       },
     },
