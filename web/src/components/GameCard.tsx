@@ -192,7 +192,7 @@ export function GameCard({
             it, "should I buy it" and "what's a good deal" are no longer the relevant questions. */}
         {game.status !== 'playing' && (
           <>
-            <div className={styles.priceRow}>
+            <div className={styles.priceRow} onClick={(e) => e.stopPropagation()}>
               {game.ggDealsUrl ? (
                 <a
                   href={game.ggDealsUrl}
