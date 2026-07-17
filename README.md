@@ -30,7 +30,7 @@ cp .env.example .env
 npm install
 
 # start Postgres + Redis in Docker
-docker compose --env-file .env --project-directory . -f docker/docker-compose.yml up -d
+docker compose --env-file .env up -d
 
 # create the database schema
 npm run db:push
@@ -61,7 +61,7 @@ Each method's `*_REDIRECT_URI` must exactly match what you register with that pr
 ## Production deployment (Docker)
 
 ```sh
-docker compose --env-file .env --project-directory . -f docker/docker-compose.prod.yml up -d --build
+docker compose --env-file .env -f docker-compose.prod.yml up -d --build
 ```
 
 This builds and runs a single `server` container (serving both the API and the built frontend) alongside Postgres and Redis, all wired from the same `.env`. On first boot the container runs `prisma db push` automatically to create the schema.
