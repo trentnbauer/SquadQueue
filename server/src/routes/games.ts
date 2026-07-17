@@ -318,17 +318,23 @@ export default async function gameRoutes(app: FastifyInstance) {
     },
   );
 
-  app.patch<{ Params: { id: string }; Body: SetGameOwnershipRequest }>('/api/games/:id/ownership', async (request) => {
-    const userId = await request.requireAuth();
-    const game = await loadGameOr404(request.params.id);
-    await requireGameReadAccess(game, userId);
+  app.patch<{ Params: { id: string }; Body: SetGameOwnershipRequest }>(
+    '/api/games/:id/ownership',
+    // Same class of route as target-price - a direct user action toggling one game's state, not
+    // something a normal session comes close to hitting.
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (request) => {
+      const userId = await request.requireAuth();
+      const game = await loadGameOr404(request.params.id);
+      await requireGameReadAccess(game, userId);
 
-    const { owned } = request.body;
-    await setOwnership(userId, game.igdbId, owned);
+      const { owned } = request.body;
+      await setOwnership(userId, game.igdbId, owned);
 
-    const updated = await loadGameOr404(game.id);
-    return { game: await serializeGame(updated, userId) };
-  });
+      const updated = await loadGameOr404(game.id);
+      return { game: await serializeGame(updated, userId) };
+    },
+  );
 
   app.put<{ Params: { id: string }; Body: VoteRequest }>('/api/games/:id/vote', async (request) => {
     const userId = await request.requireAuth();
