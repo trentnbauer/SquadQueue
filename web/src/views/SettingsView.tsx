@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ROOM_PLATFORM_LABELS } from '@squadqueue/shared';
-import type { AdminIntegrationStatus, ConfigSource, IntegrationConfigKey } from '@squadqueue/shared';
+import { ROOM_PLATFORM_LABELS } from '@queueup/shared';
+import type { AdminIntegrationStatus, ConfigSource, IntegrationConfigKey } from '@queueup/shared';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { adminApi } from '../api/admin';

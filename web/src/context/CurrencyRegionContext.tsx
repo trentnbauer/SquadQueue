@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { PRICE_REGION_LABELS, type PriceRegion } from '@squadqueue/shared';
+import { PRICE_REGION_LABELS, type PriceRegion } from '@queueup/shared';
 
 const STORAGE_KEY = 'sq-price-region';
 

@@ -1,29 +1,29 @@
 :root {
-  --sq-bg: #0f0e16;
-  --sq-surface: #1a1926;
-  --sq-surface2: #161522;
-  --sq-border: rgba(255, 255, 255, 0.09);
-  --sq-stripe: rgba(255, 255, 255, 0.05);
-  --sq-text: #f1eefc;
-  --sq-muted: #8f8aa8;
-  --sq-neutral-pill-bg: rgba(255, 255, 255, 0.07);
+  --qu-bg: #0f0e16;
+  --qu-surface: #1a1926;
+  --qu-surface2: #161522;
+  --qu-border: rgba(255, 255, 255, 0.09);
+  --qu-stripe: rgba(255, 255, 255, 0.05);
+  --qu-text: #f1eefc;
+  --qu-muted: #8f8aa8;
+  --qu-neutral-pill-bg: rgba(255, 255, 255, 0.07);
 
-  --sq-accent: #8b5cf6;
-  /* Text color for content rendered directly on top of --sq-accent (buttons, banners) - kept as
+  --qu-accent: #8b5cf6;
+  /* Text color for content rendered directly on top of --qu-accent (buttons, banners) - kept as
    * its own variable rather than a hardcoded white, since a room's accent color is user-editable
    * and some presets (e.g. Lime) are too bright for white text to read clearly. Recomputed
-   * whenever --sq-accent changes (see ThemeContext). */
-  --sq-accent-text: #fff;
-  --sq-accent-pill-bg: color-mix(in oklch, var(--sq-accent) 24%, var(--sq-surface));
+   * whenever --qu-accent changes (see ThemeContext). */
+  --qu-accent-text: #fff;
+  --qu-accent-pill-bg: color-mix(in oklch, var(--qu-accent) 24%, var(--qu-surface));
 
-  --sq-accent2: #2dd4bf;
-  --sq-accent2-pill-bg: color-mix(in oklch, var(--sq-accent2) 24%, var(--sq-surface));
+  --qu-accent2: #2dd4bf;
+  --qu-accent2-pill-bg: color-mix(in oklch, var(--qu-accent2) 24%, var(--qu-surface));
 
-  --sq-header-font: 'Space Grotesk', system-ui, sans-serif;
-  --sq-body-font: system-ui, sans-serif;
+  --qu-header-font: 'Space Grotesk', system-ui, sans-serif;
+  --qu-body-font: system-ui, sans-serif;
 
-  --sq-radius: 10px;
-  --sq-card-radius: 14px;
+  --qu-radius: 10px;
+  --qu-card-radius: 14px;
 }
 
 /* Light mode override - applied via a `data-theme="light"` attribute on <html>, set synchronously
@@ -31,14 +31,14 @@
  * Accent colors, fonts, and radii are left alone: accent is computed per-room already (see
  * ThemeContext) and stays vivid enough against either background. */
 :root[data-theme='light'] {
-  --sq-bg: #f5f4fa;
-  --sq-surface: #ffffff;
-  --sq-surface2: #eeecf6;
-  --sq-border: rgba(15, 14, 22, 0.1);
-  --sq-stripe: rgba(15, 14, 22, 0.04);
-  --sq-text: #1b1a24;
-  --sq-muted: #6b6680;
-  --sq-neutral-pill-bg: rgba(15, 14, 22, 0.06);
+  --qu-bg: #f5f4fa;
+  --qu-surface: #ffffff;
+  --qu-surface2: #eeecf6;
+  --qu-border: rgba(15, 14, 22, 0.1);
+  --qu-stripe: rgba(15, 14, 22, 0.04);
+  --qu-text: #1b1a24;
+  --qu-muted: #6b6680;
+  --qu-neutral-pill-bg: rgba(15, 14, 22, 0.06);
 }
 
 * {
@@ -53,13 +53,13 @@ body,
 
 body {
   margin: 0;
-  background: var(--sq-bg);
-  color: var(--sq-text);
-  font-family: var(--sq-body-font);
+  background: var(--qu-bg);
+  color: var(--qu-text);
+  font-family: var(--qu-body-font);
 }
 
 a {
-  color: var(--sq-accent);
+  color: var(--qu-accent);
 }
 
 a:hover {

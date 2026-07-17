@@ -10,9 +10,9 @@
 }
 
 .dialog {
-  background: var(--sq-surface);
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-radius);
+  background: var(--qu-surface);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-radius);
   padding: 24px;
   max-width: 640px;
   width: 100%;
@@ -29,14 +29,14 @@
 }
 
 .title {
-  font: 700 16px var(--sq-header-font);
-  color: var(--sq-text);
+  font: 700 16px var(--qu-header-font);
+  color: var(--qu-text);
 }
 
 .closeButton {
   border: none;
   background: transparent;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
@@ -44,7 +44,7 @@
 }
 
 .closeButton:hover {
-  color: var(--sq-text);
+  color: var(--qu-text);
 }
 
 .reelViewport {
@@ -52,9 +52,9 @@
   height: 132px;
   margin: 0 auto;
   overflow: hidden;
-  border-radius: var(--sq-radius);
-  background: var(--sq-surface2);
-  border: 1px solid var(--sq-border);
+  border-radius: var(--qu-radius);
+  background: var(--qu-surface2);
+  border: 1px solid var(--qu-border);
 }
 
 .centerMarker {
@@ -64,8 +64,8 @@
   left: 50%;
   width: 108px;
   transform: translateX(-50%);
-  border-left: 2px solid var(--sq-accent);
-  border-right: 2px solid var(--sq-accent);
+  border-left: 2px solid var(--qu-accent);
+  border-right: 2px solid var(--qu-accent);
   box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.35);
   z-index: 2;
   pointer-events: none;
@@ -86,8 +86,8 @@
   width: 108px;
   height: 108px;
   border-radius: 10px;
-  background-color: var(--sq-surface2);
-  background-image: repeating-linear-gradient(135deg, var(--sq-stripe) 0px, var(--sq-stripe) 2px, transparent 2px, transparent 14px);
+  background-color: var(--qu-surface2);
+  background-image: repeating-linear-gradient(135deg, var(--qu-stripe) 0px, var(--qu-stripe) 2px, transparent 2px, transparent 14px);
   background-size: cover;
   background-position: center;
   position: relative;
@@ -113,7 +113,7 @@
   min-height: 96px;
   margin-top: 20px;
   padding-top: 18px;
-  border-top: 1px solid var(--sq-border);
+  border-top: 1px solid var(--qu-border);
   text-align: center;
 }
 
@@ -121,12 +121,12 @@
   font: 600 10.5px system-ui, sans-serif;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
 }
 
 .revealTitle {
-  font: 800 20px var(--sq-header-font);
-  color: var(--sq-accent);
+  font: 800 20px var(--qu-header-font);
+  color: var(--qu-accent);
   margin-top: 4px;
 }
 
@@ -139,25 +139,25 @@
 
 .spinAgainButton {
   padding: 8px 18px;
-  border-radius: var(--sq-radius);
+  border-radius: var(--qu-radius);
   background: transparent;
-  color: var(--sq-muted);
-  border: 1px solid var(--sq-border);
+  color: var(--qu-muted);
+  border: 1px solid var(--qu-border);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
 }
 
 .spinAgainButton:hover {
-  color: var(--sq-text);
-  border-color: var(--sq-text);
+  color: var(--qu-text);
+  border-color: var(--qu-text);
 }
 
 .primaryButton {
   padding: 8px 18px;
-  border-radius: var(--sq-radius);
-  background: var(--sq-accent);
-  color: var(--sq-accent-text);
+  border-radius: var(--qu-radius);
+  background: var(--qu-accent);
+  color: var(--qu-accent-text);
   font-weight: 700;
   font-size: 13px;
   border: none;

@@ -12,7 +12,7 @@ import {
   clearConfigValue,
   type ConfigKey,
 } from '../services/configResolver.js';
-import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary, AdminAuditLogEntry } from '@squadqueue/shared';
+import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary, AdminAuditLogEntry } from '@queueup/shared';
 
 // Human-readable labels for audit log entries / error messages - keyed by the same ConfigKey used
 // server-side and sent from the client, so a typo'd key surfaces a clear "unknown setting" error.

@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from './client';
-import type { Notification, NotificationSummary } from '@squadqueue/shared';
+import type { Notification, NotificationSummary } from '@queueup/shared';
 
 export const notificationsApi = {
   feed: () => apiGet<{ notifications: Notification[] }>('/api/notifications'),

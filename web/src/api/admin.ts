@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPatch, apiDelete } from './client';
-import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary, IntegrationConfigKey } from '@squadqueue/shared';
+import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary, IntegrationConfigKey } from '@queueup/shared';
 
 export const adminApi = {
   overview: () => apiGet<{ status: AdminIntegrationStatus }>('/api/admin/overview'),

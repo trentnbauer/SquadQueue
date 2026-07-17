@@ -1,7 +1,7 @@
 import { randomInt } from 'node:crypto';
 import { prisma } from '../db/client.js';
 import { HttpError } from '../util/httpError.js';
-import type { RoomPlatform } from '@squadqueue/shared';
+import type { RoomPlatform } from '@queueup/shared';
 
 export async function getRoomPlatform(roomId: string): Promise<RoomPlatform> {
   const room = await prisma.room.findUniqueOrThrow({ where: { id: roomId } });

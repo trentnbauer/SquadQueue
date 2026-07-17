@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 const SUMMARY_QUERY_KEY = ['notifications', 'summary'];
 const FEED_QUERY_KEY = ['notifications', 'feed'];
-// Notifications aren't pushed live - a light poll keeps the SQ button's badge and the room dots
+// Notifications aren't pushed live - a light poll keeps the QU button's badge and the room dots
 // reasonably fresh without adding a websocket/SSE layer for what's still a small, low-traffic app.
 const POLL_INTERVAL_MS = 30_000;
 

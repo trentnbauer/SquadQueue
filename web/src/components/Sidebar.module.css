@@ -6,8 +6,8 @@
   align-items: center;
   gap: 10px;
   padding: 14px 0;
-  background: var(--sq-surface2);
-  border-right: 1px solid var(--sq-border);
+  background: var(--qu-surface2);
+  border-right: 1px solid var(--qu-border);
   height: 100vh;
   position: sticky;
   top: 0;
@@ -30,9 +30,9 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: var(--sq-accent);
-  color: var(--sq-accent-text);
-  font: 700 14px var(--sq-header-font);
+  background: var(--qu-accent);
+  color: var(--qu-accent-text);
+  font: 700 14px var(--qu-header-font);
   letter-spacing: 0.02em;
   border: none;
   cursor: pointer;
@@ -40,7 +40,7 @@
 }
 
 /* A small badge cut out of the sidebar background (via the border matching it), so it reads as a
- * notch on the icon rather than a solid dot floating on top - same treatment for the SQ button and
+ * notch on the icon rather than a solid dot floating on top - same treatment for the QU button and
  * each room icon below. */
 .unreadDot {
   position: absolute;
@@ -50,7 +50,7 @@
   height: 12px;
   border-radius: 50%;
   background: #ff5c5c;
-  border: 2px solid var(--sq-surface2);
+  border: 2px solid var(--qu-surface2);
 }
 
 .notifFlyout {
@@ -66,25 +66,25 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--sq-border);
+  border-bottom: 1px solid var(--qu-border);
 }
 
 .notifTitle {
   font: 700 13px system-ui, sans-serif;
-  color: var(--sq-text);
+  color: var(--qu-text);
 }
 
 .notifDismissAll {
   background: none;
   border: none;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font: 600 11px system-ui, sans-serif;
   padding: 0;
   cursor: pointer;
 }
 
 .notifDismissAll:hover {
-  color: var(--sq-accent);
+  color: var(--qu-accent);
 }
 
 .notifList {
@@ -96,8 +96,8 @@
   display: block;
   padding: 10px 14px;
   text-decoration: none;
-  color: var(--sq-text);
-  border-bottom: 1px solid var(--sq-border);
+  color: var(--qu-text);
+  border-bottom: 1px solid var(--qu-border);
 }
 
 .notifItem:last-child {
@@ -105,15 +105,15 @@
 }
 
 a.notifItem:hover {
-  background: var(--sq-neutral-pill-bg);
+  background: var(--qu-neutral-pill-bg);
 }
 
 .notifUnread {
-  background: var(--sq-accent-pill-bg);
+  background: var(--qu-accent-pill-bg);
 }
 
 a.notifUnread:hover {
-  background: var(--sq-accent-pill-bg);
+  background: var(--qu-accent-pill-bg);
   filter: brightness(1.15);
 }
 
@@ -121,7 +121,7 @@ a.notifUnread:hover {
   font: 700 10.5px system-ui, sans-serif;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--sq-accent);
+  color: var(--qu-accent);
   margin-bottom: 2px;
 }
 
@@ -132,14 +132,14 @@ a.notifUnread:hover {
 
 .notifTime {
   font-size: 10.5px;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   margin-top: 3px;
 }
 
 .notifEmpty {
   padding: 24px 14px;
   text-align: center;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 12.5px;
 }
 
@@ -147,7 +147,7 @@ a.notifUnread:hover {
   flex-shrink: 0;
   width: 32px;
   height: 1px;
-  background: var(--sq-border);
+  background: var(--qu-border);
 }
 
 .icons {
@@ -172,8 +172,8 @@ a.notifUnread:hover {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--sq-surface);
-  color: var(--sq-text);
+  background: var(--qu-surface);
+  color: var(--qu-text);
   font: 700 15px system-ui, sans-serif;
   text-decoration: none;
   overflow: hidden;
@@ -197,7 +197,7 @@ a.notifUnread:hover {
   width: 4px;
   height: 8px;
   border-radius: 0 4px 4px 0;
-  background: var(--sq-text);
+  background: var(--qu-text);
   opacity: 0;
   transition: height 0.15s ease, opacity 0.15s ease;
 }
@@ -221,7 +221,7 @@ a.notifUnread:hover {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 1px dashed var(--sq-border);
+  border: 1px dashed var(--qu-border);
   cursor: pointer;
   list-style: none;
   transition: border-radius 0.15s ease, border-color 0.15s ease;
@@ -232,7 +232,7 @@ a.notifUnread:hover {
  * top/left 50% + a negative margin of half its own size; its ::before (the vertical bar) is then
  * centered on *that* box the same way - offset by (parent - child) / 2 on each axis, which for a
  * 14x2 parent and a 2x14 child works out to left: 6px, top: -6px. A dimmer, muted-toward-the-
- * background tone rather than --sq-muted directly - this is a secondary "add" affordance, not
+ * background tone rather than --qu-muted directly - this is a secondary "add" affordance, not
  * meant to read with the same visual weight as an actual room. */
 .addRoomPlus {
   position: absolute;
@@ -242,7 +242,7 @@ a.notifUnread:hover {
   height: 2px;
   margin: -1px 0 0 -7px;
   border-radius: 1px;
-  background: color-mix(in srgb, var(--sq-muted) 55%, var(--sq-surface2));
+  background: color-mix(in srgb, var(--qu-muted) 55%, var(--qu-surface2));
   transition: background 0.15s ease;
 }
 
@@ -259,11 +259,11 @@ a.notifUnread:hover {
 
 .addRoomIcon:hover {
   border-radius: 16px;
-  border-color: var(--sq-text);
+  border-color: var(--qu-text);
 }
 
 .addRoomIcon:hover .addRoomPlus {
-  background: var(--sq-text);
+  background: var(--qu-text);
 }
 
 .menu {
@@ -300,9 +300,9 @@ a.notifUnread:hover {
   top: 0;
   min-width: 210px;
   max-width: calc(100vw - 100px);
-  background: var(--sq-surface);
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-radius);
+  background: var(--qu-surface);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-radius);
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -319,12 +319,12 @@ a.notifUnread:hover {
 .userName {
   padding: 6px 10px 4px;
   font: 700 13px system-ui, sans-serif;
-  color: var(--sq-text);
+  color: var(--qu-text);
 }
 
 .hDivider {
   height: 1px;
-  background: var(--sq-border);
+  background: var(--qu-border);
   margin: 4px 0;
 }
 
@@ -333,7 +333,7 @@ a.notifUnread:hover {
   width: 100%;
   padding: 8px 10px;
   border-radius: 6px;
-  color: var(--sq-text);
+  color: var(--qu-text);
   text-decoration: none;
   background: none;
   border: none;
@@ -343,7 +343,7 @@ a.notifUnread:hover {
 }
 
 .menuItem:hover {
-  background: var(--sq-neutral-pill-bg);
+  background: var(--qu-neutral-pill-bg);
 }
 
 .mobileToggle {
@@ -377,9 +377,9 @@ a.notifUnread:hover {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: var(--sq-surface2);
-    border: 1px solid var(--sq-border);
-    color: var(--sq-text);
+    background: var(--qu-surface2);
+    border: 1px solid var(--qu-border);
+    color: var(--qu-text);
     font-size: 16px;
     cursor: pointer;
     z-index: 30;

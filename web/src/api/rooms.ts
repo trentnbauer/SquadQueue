@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPatch, apiDelete } from './client';
-import type { CreateRoomRequest, JoinRoomRequest, Room, RoomMember, RoomRole, UpdateRoomRequest, User } from '@squadqueue/shared';
+import type { CreateRoomRequest, JoinRoomRequest, Room, RoomMember, RoomRole, UpdateRoomRequest, User } from '@queueup/shared';
 
 export const roomsApi = {
   list: () => apiGet<{ rooms: Room[] }>('/api/rooms'),

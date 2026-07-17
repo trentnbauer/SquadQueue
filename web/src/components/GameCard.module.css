@@ -1,8 +1,8 @@
 .card {
   position: relative;
-  background: var(--sq-surface);
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-card-radius);
+  background: var(--qu-surface);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-card-radius);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -14,12 +14,12 @@
   height: 172px;
   background-image: repeating-linear-gradient(
     135deg,
-    var(--sq-stripe) 0px,
-    var(--sq-stripe) 2px,
+    var(--qu-stripe) 0px,
+    var(--qu-stripe) 2px,
     transparent 2px,
     transparent 14px
   );
-  background-color: var(--sq-surface2);
+  background-color: var(--qu-surface2);
   background-size: cover;
   background-position: center;
   display: flex;
@@ -30,7 +30,7 @@
 .coverLabel {
   font: 600 10.5px ui-monospace, Menlo, monospace;
   letter-spacing: 0.06em;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
 }
 
 .beatenRibbon {
@@ -51,7 +51,7 @@
   color: #fff;
   text-align: center;
   text-transform: uppercase;
-  font: 800 24px var(--sq-header-font);
+  font: 800 24px var(--qu-header-font);
   letter-spacing: 0.12em;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
@@ -85,11 +85,11 @@
 
 .playingBanner {
   padding: 20px 17px;
-  background: var(--sq-accent);
+  background: var(--qu-accent);
   color: #fff;
   text-align: center;
   text-transform: uppercase;
-  font: 800 30px var(--sq-header-font);
+  font: 800 30px var(--qu-header-font);
   letter-spacing: 0.06em;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
 }
@@ -99,8 +99,8 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font: 800 17px var(--sq-header-font);
-  color: var(--sq-accent);
+  font: 800 17px var(--qu-header-font);
+  color: var(--qu-accent);
 }
 
 .genre {
@@ -117,7 +117,7 @@
   align-items: center;
   gap: 8px;
   font: 700 13.5px system-ui, sans-serif;
-  color: var(--sq-text);
+  color: var(--qu-text);
 }
 
 .controllerIcon {
@@ -133,9 +133,9 @@
   align-items: center;
   justify-content: center;
   padding: 9px 14px;
-  border-radius: var(--sq-radius);
-  background: var(--sq-accent);
-  color: var(--sq-accent-text);
+  border-radius: var(--qu-radius);
+  background: var(--qu-accent);
+  color: var(--qu-accent-text);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -151,8 +151,8 @@
   justify-content: center;
   padding: 9px 14px;
   border-radius: 999px;
-  background: var(--sq-neutral-pill-bg);
-  color: var(--sq-muted);
+  background: var(--qu-neutral-pill-bg);
+  color: var(--qu-muted);
 }
 
 .priceMetaRow {
@@ -176,8 +176,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: var(--sq-neutral-pill-bg);
-  color: var(--sq-muted);
+  background: var(--qu-neutral-pill-bg);
+  color: var(--qu-muted);
   border: none;
   font-size: 15px;
   line-height: 1;
@@ -185,8 +185,8 @@
 }
 
 .refreshPriceButton:hover {
-  background: var(--sq-accent-pill-bg);
-  color: var(--sq-accent);
+  background: var(--qu-accent-pill-bg);
+  color: var(--qu-accent);
 }
 
 .refreshPriceButton:disabled {
@@ -194,7 +194,7 @@
 }
 
 .refreshPriceButton.spinning {
-  color: var(--sq-accent);
+  color: var(--qu-accent);
   animation: sq-spin 0.8s linear infinite;
 }
 
@@ -209,12 +209,12 @@
 
 .lastRefreshed {
   font: 500 10.5px system-ui, sans-serif;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
 }
 
 .addedBy {
   font: 400 11px system-ui, sans-serif;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -234,13 +234,13 @@
 .targetPriceButton {
   background: none;
   border: none;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font: 600 11px system-ui, sans-serif;
   padding: 0;
 }
 
 .targetPriceButton:hover {
-  color: var(--sq-accent);
+  color: var(--qu-accent);
 }
 
 .targetPricePill {
@@ -249,8 +249,8 @@
   gap: 6px;
   padding: 4px 6px 4px 10px;
   border-radius: 999px;
-  background: var(--sq-accent-pill-bg);
-  color: var(--sq-accent);
+  background: var(--qu-accent-pill-bg);
+  color: var(--qu-accent);
   font: 600 11.5px system-ui, sans-serif;
 }
 
@@ -274,10 +274,10 @@
   flex: 1;
   min-width: 0;
   padding: 6px 8px;
-  border-radius: var(--sq-radius);
-  background: var(--sq-surface2);
-  border: 1px solid var(--sq-border);
-  color: var(--sq-text);
+  border-radius: var(--qu-radius);
+  background: var(--qu-surface2);
+  border: 1px solid var(--qu-border);
+  color: var(--qu-text);
   font-size: 12px;
 }
 
@@ -285,32 +285,32 @@
 .targetPriceCancel {
   flex-shrink: 0;
   border: none;
-  border-radius: var(--sq-radius);
+  border-radius: var(--qu-radius);
   font: 600 11px system-ui, sans-serif;
   padding: 6px 10px;
 }
 
 .targetPriceSave {
-  background: var(--sq-accent);
-  color: var(--sq-accent-text);
+  background: var(--qu-accent);
+  color: var(--qu-accent-text);
 }
 
 .targetPriceCancel {
-  background: var(--sq-neutral-pill-bg);
-  color: var(--sq-muted);
+  background: var(--qu-neutral-pill-bg);
+  color: var(--qu-muted);
 }
 
 .coopWarning {
   font: 600 11px system-ui, sans-serif;
   color: #ffb84a;
   background: rgba(255, 184, 74, 0.12);
-  border-radius: var(--sq-radius);
+  border-radius: var(--qu-radius);
   padding: 7px 10px;
 }
 
 .divider {
   height: 1px;
-  background: var(--sq-border);
+  background: var(--qu-border);
   /* Pushes everything from here down (votes, squad votes, added-by) to the bottom of the card -
      cards in the same grid row are stretched to equal height, but the content above this point
      varies (live price info adds extra rows, Playing hides price info entirely), which without

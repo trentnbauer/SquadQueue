@@ -65,7 +65,7 @@ jobs:
 
       - name: Build shared package
         # server/web import types (and, transitively, runtime code) from
-        # @squadqueue/shared, which resolves through its built dist/ (see
+        # @queueup/shared, which resolves through its built dist/ (see
         # packages/shared/package.json "main"/"types") — same build the
         # predev script runs before local dev.
         if: github.event_name != 'pull_request' || steps.filter.outputs.relevant == 'true'

@@ -7,9 +7,9 @@
   text-align: center;
   min-height: 260px;
   padding: 24px;
-  border: 1px dashed var(--sq-accent);
-  border-radius: var(--sq-card-radius);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--sq-accent) 16%, var(--sq-surface)), var(--sq-surface));
+  border: 1px dashed var(--qu-accent);
+  border-radius: var(--qu-card-radius);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--qu-accent) 16%, var(--qu-surface)), var(--qu-surface));
   cursor: pointer;
 }
 
@@ -29,12 +29,12 @@
 }
 
 .label {
-  font: 800 16px var(--sq-header-font);
-  color: var(--sq-accent);
+  font: 800 16px var(--qu-header-font);
+  color: var(--qu-accent);
 }
 
 .hint {
   font-size: 12px;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   max-width: 200px;
 }

@@ -1,7 +1,7 @@
 #### More AI slop!
 
 
-# SquadQueue
+# QueueUp
 
 A self-hosted game backlog and voting system for a friend group — a private "Personal Shelf" plus shared "Communal Rooms," real pricing from gg.deals, and a 5-emoji voting scale.
 
@@ -64,7 +64,7 @@ Each method's `*_REDIRECT_URI` must exactly match what you register with that pr
 docker compose --env-file .env -f docker-compose.prod.yml up -d
 ```
 
-This pulls the pre-built `server` image (serving both the API and the built frontend) from `ghcr.io/trentnbauer/squadqueue` - published automatically by the "Build and Publish Docker Image" GitHub Actions workflow on every change to `main` - and runs it alongside Postgres and Redis, all wired from the same `.env`. On first boot the container runs `prisma db push` automatically to create the schema. To pin a specific build instead of always tracking the latest, set `IMAGE_TAG=sha-<short-commit>` in `.env`.
+This pulls the pre-built `server` image (serving both the API and the built frontend) from `ghcr.io/trentnbauer/queueup` - published automatically by the "Build and Publish Docker Image" GitHub Actions workflow on every change to `main` - and runs it alongside Postgres and Redis, all wired from the same `.env`. On first boot the container runs `prisma db push` automatically to create the schema. To pin a specific build instead of always tracking the latest, set `IMAGE_TAG=sha-<short-commit>` in `.env`.
 
 ### Running behind a reverse proxy
 

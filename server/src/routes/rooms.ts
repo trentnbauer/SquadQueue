@@ -6,8 +6,8 @@ import { HttpError } from '../util/httpError.js';
 import { requireElevated, requireMembership, generateUniqueInviteCode, getRoom } from '../services/roomAccess.js';
 import { logAdminAction } from '../services/adminAuditLog.js';
 import { notifyRoom, notifyRoomMembersDirect } from '../services/notifications.js';
-import type { CreateRoomRequest, JoinRoomRequest, Room, RoomMember, RoomPlatform, RoomRole, UpdateRoomRequest } from '@squadqueue/shared';
-import { ROOM_PLATFORM_LABELS } from '@squadqueue/shared';
+import type { CreateRoomRequest, JoinRoomRequest, Room, RoomMember, RoomPlatform, RoomRole, UpdateRoomRequest } from '@queueup/shared';
+import { ROOM_PLATFORM_LABELS } from '@queueup/shared';
 
 const ROOM_PLATFORMS: RoomPlatform[] = ['pc', 'xbox_360', 'xbox_one', 'xbox_series', 'ps3', 'ps4', 'ps5', 'switch', 'switch2'];
 const ROOM_ROLES: RoomRole[] = ['room_master', 'moderator', 'member'];

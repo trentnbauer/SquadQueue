@@ -3,7 +3,7 @@ import { env } from '../config/env.js';
 import { getConfigValue } from './configResolver.js';
 import { HttpError } from '../util/httpError.js';
 import { FORCED_REFRESH_COOLDOWN_MS, cooldownRemainingMs, formatCooldownMessage } from './refreshCooldown.js';
-import type { GamePrice } from '@squadqueue/shared';
+import type { GamePrice } from '@queueup/shared';
 
 const PRICE_CACHE_TTL_SECONDS = 60 * 60 * 6; // 6h — prices/sales move faster than metadata
 const PRICE_CACHE_PREFIX = 'gg:price:v3:steam:'; // v3: GamePrice now also carries historicalLow

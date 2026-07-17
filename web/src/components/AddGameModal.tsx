@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { GameSearchResult } from '@squadqueue/shared';
+import type { GameSearchResult } from '@queueup/shared';
 import { gamesApi } from '../api/games';
 import { useModalA11y } from '../hooks/useModalA11y';
 import styles from './AddGameModal.module.css';

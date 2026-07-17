@@ -1,6 +1,6 @@
 # Security Policy
 
-SquadQueue is a self-hosted app meant to run on your own infrastructure, typically
+QueueUp is a self-hosted app meant to run on your own infrastructure, typically
 exposed only to a private friend group rather than the public internet. Even so,
 please report security issues responsibly so they can be fixed before wider disclosure.
 
@@ -35,7 +35,7 @@ released and, if appropriate, a GitHub Security Advisory published.
 
 ## Supported versions
 
-SquadQueue does not yet have tagged releases — `main` is the only supported version.
+QueueUp does not yet have tagged releases — `main` is the only supported version.
 Deploying from `main` and pulling updates regularly is the best way to stay current
 on security fixes.
 
@@ -44,7 +44,7 @@ on security fixes.
 - Automated dependency review and scheduled code-scanning triage are wired up in
   `.github/workflows/` (currently disabled while other repo changes land — see the
   workflow files for status) and will re-run automatically once re-enabled.
-- Report issues in SquadQueue's own code and configuration. Vulnerabilities in
+- Report issues in QueueUp's own code and configuration. Vulnerabilities in
   upstream dependencies (Fastify, Prisma, React, etc.) should be reported to those
   projects directly, though flagging them here is still welcome if they materially
-  affect a default SquadQueue deployment.
+  affect a default QueueUp deployment.

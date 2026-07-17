@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in SquadQueue is broken or not working as expected.
+description: Something in QueueUp is broken or not working as expected.
 labels: ["bug"]
 body:
   - type: textarea

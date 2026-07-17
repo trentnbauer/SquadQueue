@@ -10,9 +10,9 @@
 }
 
 .dialog {
-  background: var(--sq-surface);
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-radius);
+  background: var(--qu-surface);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-radius);
   padding: 24px;
   max-width: 420px;
   width: 100%;
@@ -29,14 +29,14 @@
 }
 
 .title {
-  font: 700 16px var(--sq-header-font);
-  color: var(--sq-text);
+  font: 700 16px var(--qu-header-font);
+  color: var(--qu-text);
 }
 
 .closeButton {
   border: none;
   background: transparent;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
@@ -44,7 +44,7 @@
 }
 
 .closeButton:hover {
-  color: var(--sq-text);
+  color: var(--qu-text);
 }
 
 .section {
@@ -53,12 +53,12 @@
 
 .sectionTitle {
   font: 700 12.5px system-ui, sans-serif;
-  color: var(--sq-text);
+  color: var(--qu-text);
   margin-bottom: 6px;
 }
 
 .hint {
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 12.5px;
   margin: 0 0 12px;
 }
@@ -66,16 +66,16 @@
 .currencySelect {
   padding: 8px 10px;
   border-radius: 6px;
-  background: var(--sq-surface2);
-  border: 1px solid var(--sq-border);
-  color: var(--sq-text);
+  background: var(--qu-surface2);
+  border: 1px solid var(--qu-border);
+  color: var(--qu-text);
   font-size: 13px;
   width: 100%;
 }
 
 .divider {
   height: 1px;
-  background: var(--sq-border);
+  background: var(--qu-border);
   margin: 18px 0;
 }
 
@@ -91,16 +91,16 @@
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: var(--sq-text);
+  color: var(--qu-text);
   cursor: pointer;
 }
 
 .saveButton {
   align-self: flex-start;
   padding: 8px 18px;
-  border-radius: var(--sq-radius);
-  background: var(--sq-accent);
-  color: var(--sq-accent-text);
+  border-radius: var(--qu-radius);
+  background: var(--qu-accent);
+  color: var(--qu-accent-text);
   font-weight: 700;
   font-size: 13px;
   border: none;

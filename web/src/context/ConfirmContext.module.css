@@ -10,9 +10,9 @@
 }
 
 .dialog {
-  background: var(--sq-surface);
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-radius);
+  background: var(--qu-surface);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-radius);
   padding: 20px;
   max-width: 360px;
   width: 100%;
@@ -20,14 +20,14 @@
 }
 
 .title {
-  font-family: var(--sq-header-font);
+  font-family: var(--qu-header-font);
   font-weight: 700;
   font-size: 16px;
   margin-bottom: 8px;
 }
 
 .message {
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 13px;
   margin: 0 0 18px;
   line-height: 1.5;
@@ -46,22 +46,22 @@
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
-  border: 1px solid var(--sq-border);
+  border: 1px solid var(--qu-border);
   cursor: pointer;
 }
 
 .cancelButton {
   background: transparent;
-  color: var(--sq-text);
+  color: var(--qu-text);
 }
 
 .cancelButton:hover {
-  background: var(--sq-surface2);
+  background: var(--qu-surface2);
 }
 
 .confirmButton {
-  background: var(--sq-accent);
-  color: var(--sq-accent-text);
+  background: var(--qu-accent);
+  color: var(--qu-accent-text);
   border-color: transparent;
 }
 

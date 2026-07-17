@@ -7,7 +7,7 @@ import { toUserDto } from '../util/dto.js';
 import { HttpError } from '../util/httpError.js';
 import { extractSteamId64, resolveSteamId64 } from '../services/steamLibrary.js';
 import { setOwnedPlatforms } from '../services/userSettings.js';
-import type { UpdateOwnedPlatformsRequest } from '@squadqueue/shared';
+import type { UpdateOwnedPlatformsRequest } from '@queueup/shared';
 
 /** Attaches a verified Steam identity to an already-signed-in user's account (User.steamId64),
  * rather than creating/upserting a user by oidcSub like a normal login. Returns the URL to
@@ -24,18 +24,18 @@ async function linkSteamAccount(targetUserId: string, provider: string, oidcSub:
 
   // oidcSub is the primary-sign-in identity column - if this exact Steam account is already
   // someone's primary sign-in (a different user), it can't also be linked as a secondary identity
-  // here, since resolveSteamId64() would then find two different SquadQueue users claiming the
+  // here, since resolveSteamId64() would then find two different QueueUp users claiming the
   // same Steam account.
   const primaryOwner = await prisma.user.findUnique({ where: { oidcSub } });
   if (primaryOwner && primaryOwner.id !== targetUserId) {
-    return `${env.APP_BASE_URL}/?steamLinkError=${encodeURIComponent('That Steam account already signs in to a different SquadQueue account.')}`;
+    return `${env.APP_BASE_URL}/?steamLinkError=${encodeURIComponent('That Steam account already signs in to a different QueueUp account.')}`;
   }
 
   try {
     await prisma.user.update({ where: { id: targetUserId }, data: { steamId64 } });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-      return `${env.APP_BASE_URL}/?steamLinkError=${encodeURIComponent('That Steam account is already linked to another SquadQueue account.')}`;
+      return `${env.APP_BASE_URL}/?steamLinkError=${encodeURIComponent('That Steam account is already linked to another QueueUp account.')}`;
     }
     throw err;
   }

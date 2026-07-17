@@ -1,7 +1,7 @@
 import { searchGames, getGameDetail, type IgdbGameDetail } from './igdbClient.js';
 import { getSteamPriceAndUrl, refreshSteamPriceForced } from './priceService.js';
 import { HttpError } from '../util/httpError.js';
-import { ROOM_PLATFORM_LABELS, type GameSearchResult, type RoomPlatform } from '@squadqueue/shared';
+import { ROOM_PLATFORM_LABELS, type GameSearchResult, type RoomPlatform } from '@queueup/shared';
 
 export async function searchIntake(
   query: string,

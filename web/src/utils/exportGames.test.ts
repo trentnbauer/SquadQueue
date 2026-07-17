@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Game } from '@squadqueue/shared';
+import type { Game } from '@queueup/shared';
 import { toCsv, toJson } from './exportGames';
 
 function makeGame(overrides: Partial<Game> = {}): Game {

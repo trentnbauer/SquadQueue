@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Game } from '@squadqueue/shared';
+import type { Game } from '@queueup/shared';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { pickSpinWinner } from './gameGridLogic';
 import styles from './SpinWheelModal.module.css';

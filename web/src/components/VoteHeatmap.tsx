@@ -1,4 +1,4 @@
-import { VOTE_SCALE, type User, type VoteSummary } from '@squadqueue/shared';
+import { VOTE_SCALE, type User, type VoteSummary } from '@queueup/shared';
 import { AvatarBadge } from './AvatarBadge';
 import styles from './VoteHeatmap.module.css';
 

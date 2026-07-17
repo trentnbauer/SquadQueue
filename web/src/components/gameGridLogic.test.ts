@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Game } from '@squadqueue/shared';
+import type { Game } from '@queueup/shared';
 import {
   sortByScore,
   backlogGames,

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PRICE_REGION_LABELS, type PriceRegion } from '@squadqueue/shared';
+import { PRICE_REGION_LABELS, type PriceRegion } from '@queueup/shared';
 import { useCurrencyRegion } from '../context/CurrencyRegionContext';
 import { useModalA11y } from '../hooks/useModalA11y';
 import styles from './OnboardingModal.module.css';
@@ -27,8 +27,8 @@ export function OnboardingModal({ onDone }: OnboardingModalProps) {
 
   return (
     <div className={styles.backdrop} role="presentation">
-      <div ref={dialogRef} className={styles.dialog} role="dialog" aria-modal="true" aria-label="Welcome to SquadQueue" tabIndex={-1}>
-        <div className={styles.title}>Welcome to SquadQueue</div>
+      <div ref={dialogRef} className={styles.dialog} role="dialog" aria-modal="true" aria-label="Welcome to QueueUp" tabIndex={-1}>
+        <div className={styles.title}>Welcome to QueueUp</div>
         <p className={styles.subtitle}>Pick a currency for prices — you can change this anytime from the profile menu.</p>
 
         <div className={styles.field}>

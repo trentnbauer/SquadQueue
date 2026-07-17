@@ -1,5 +1,5 @@
 import { apiGet, apiPatch } from './client';
-import type { RoomPlatform, User } from '@squadqueue/shared';
+import type { RoomPlatform, User } from '@queueup/shared';
 
 export const authApi = {
   me: () => apiGet<{ user: User | null; steamLinked: boolean; ownedPlatforms: RoomPlatform[] }>('/api/me'),

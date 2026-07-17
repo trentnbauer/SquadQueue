@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
-import type { Game, GameStatus, User, VoteValue } from '@squadqueue/shared';
+import type { Game, GameStatus, User, VoteValue } from '@queueup/shared';
 import { GameCard } from './GameCard';
 import { SpinWheelCard } from './SpinWheelCard';
 import { ALL_FILTER_VALUE, splitLabel, sortByScore, statusBucket } from './gameGridLogic';

@@ -1,4 +1,4 @@
-import type { GamePrice } from '@squadqueue/shared';
+import type { GamePrice } from '@queueup/shared';
 import { prisma } from '../db/client.js';
 import { notifyPriceDrop } from './notifications.js';
 import type { GameWithRelations } from './gameSerializer.js';

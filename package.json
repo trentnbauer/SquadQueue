@@ -1,5 +1,5 @@
 {
-  "name": "squadqueue",
+  "name": "queueup",
   "private": true,
   "workspaces": [
     "packages/shared",

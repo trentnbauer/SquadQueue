@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an idea or improvement for SquadQueue.
+description: Suggest an idea or improvement for QueueUp.
 labels: ["enhancement"]
 body:
   - type: textarea

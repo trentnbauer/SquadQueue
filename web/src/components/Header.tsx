@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { IGDB_PLATFORM_NAMES, type RoomRole } from '@squadqueue/shared';
+import { IGDB_PLATFORM_NAMES, type RoomRole } from '@queueup/shared';
 import { useAuth } from '../context/AuthContext';
 import { useView } from '../context/ViewContext';
 import { useConfirm } from '../context/ConfirmContext';

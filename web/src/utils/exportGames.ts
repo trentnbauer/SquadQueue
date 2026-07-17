@@ -1,4 +1,4 @@
-import type { Game } from '@squadqueue/shared';
+import type { Game } from '@queueup/shared';
 
 function csvCell(value: string | number): string {
   const str = String(value);

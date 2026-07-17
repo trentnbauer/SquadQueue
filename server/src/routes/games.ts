@@ -25,8 +25,8 @@ import type {
   SetTargetPriceRequest,
   UpdateGameStatusRequest,
   VoteRequest,
-} from '@squadqueue/shared';
-import { PRICE_REGION_LABELS } from '@squadqueue/shared';
+} from '@queueup/shared';
+import { PRICE_REGION_LABELS } from '@queueup/shared';
 
 const GAME_STATUSES = ['backlog', 'playing', 'done'] as const;
 const PRICE_REGIONS = Object.keys(PRICE_REGION_LABELS) as PriceRegion[];

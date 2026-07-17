@@ -10,9 +10,9 @@
 }
 
 .dialog {
-  background: var(--sq-surface);
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-radius);
+  background: var(--qu-surface);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-radius);
   padding: 28px;
   max-width: 400px;
   width: 100%;
@@ -21,13 +21,13 @@
 }
 
 .title {
-  font: 700 20px var(--sq-header-font);
-  color: var(--sq-text);
+  font: 700 20px var(--qu-header-font);
+  color: var(--qu-text);
   margin-bottom: 6px;
 }
 
 .subtitle {
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 13px;
   margin: 0 0 22px;
   line-height: 1.5;
@@ -43,15 +43,15 @@
 
 .label {
   font-size: 12px;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
 }
 
 .select {
   padding: 10px 12px;
-  border-radius: var(--sq-radius);
-  background: var(--sq-surface2);
-  border: 1px solid var(--sq-border);
-  color: var(--sq-text);
+  border-radius: var(--qu-radius);
+  background: var(--qu-surface2);
+  border: 1px solid var(--qu-border);
+  color: var(--qu-text);
   font-size: 14px;
 }
 
@@ -63,9 +63,9 @@
 
 .confirmButton {
   padding: 10px 20px;
-  border-radius: var(--sq-radius);
-  background: var(--sq-accent);
-  color: var(--sq-accent-text);
+  border-radius: var(--qu-radius);
+  background: var(--qu-accent);
+  color: var(--qu-accent-text);
   font-weight: 700;
   font-size: 14px;
   border: none;
@@ -79,11 +79,11 @@
 .skipButton {
   border: none;
   background: transparent;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 12.5px;
   cursor: pointer;
 }
 
 .skipButton:hover {
-  color: var(--sq-text);
+  color: var(--qu-text);
 }

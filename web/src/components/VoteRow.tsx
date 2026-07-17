@@ -1,4 +1,4 @@
-import { VOTE_SCALE, type VoteValue } from '@squadqueue/shared';
+import { VOTE_SCALE, type VoteValue } from '@queueup/shared';
 
 const SCALE_VALUES = [1, 2, 3, 4, 5] as const;
 
@@ -14,7 +14,7 @@ export function VoteRow({ myVote, onVote }: VoteRowProps) {
         style={{
           font: '600 10px system-ui, sans-serif',
           letterSpacing: '.05em',
-          color: 'var(--sq-muted)',
+          color: 'var(--qu-muted)',
           marginBottom: 7,
           textTransform: 'uppercase',
         }}
@@ -36,8 +36,8 @@ export function VoteRow({ myVote, onVote }: VoteRowProps) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 15,
-                background: active ? 'var(--sq-accent-pill-bg)' : 'var(--sq-neutral-pill-bg)',
-                border: active ? '2px solid var(--sq-accent)' : '2px solid transparent',
+                background: active ? 'var(--qu-accent-pill-bg)' : 'var(--qu-neutral-pill-bg)',
+                border: active ? '2px solid var(--qu-accent)' : '2px solid transparent',
               }}
             >
               {VOTE_SCALE[value]}

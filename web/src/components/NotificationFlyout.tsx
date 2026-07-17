@@ -7,7 +7,7 @@ interface NotificationFlyoutProps {
   onNavigate: () => void;
 }
 
-/** The dropdown behind the SQ button's badge. The feed itself only ever contains unread
+/** The dropdown behind the QU button's badge. The feed itself only ever contains unread
  * notifications (see getNotificationFeed) - closing the flyout marks everything read (the caller,
  * Sidebar, does this - not on unmount here, since unmount isn't a reliable proxy for "the user is
  * done looking"; React 18 StrictMode alone double-fires it in development), which is what makes the

@@ -6,7 +6,7 @@
 }
 
 .empty {
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 13px;
   padding: 12px 40px;
 }
@@ -44,9 +44,9 @@
 }
 
 .skeletonCard {
-  background: var(--sq-surface);
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-card-radius);
+  background: var(--qu-surface);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-card-radius);
   height: 320px;
   animation: pulse 1.4s ease-in-out infinite;
 }

@@ -34,8 +34,8 @@ function LoginButton({ provider }: { provider: string }) {
       href={authApi.loginUrl(provider)}
       style={{
         padding: '12px 28px',
-        borderRadius: 'var(--sq-radius)',
-        background: 'var(--sq-accent)',
+        borderRadius: 'var(--qu-radius)',
+        background: 'var(--qu-accent)',
         color: '#fff',
         fontWeight: 700,
         textDecoration: 'none',
@@ -128,8 +128,8 @@ export default function App() {
           gap: 16,
         }}
       >
-        <div style={{ fontFamily: 'var(--sq-header-font)', fontWeight: 700, fontSize: 28 }}>SquadQueue</div>
-        <p style={{ color: 'var(--sq-muted)', margin: 0 }}>Games the squad wants to play together</p>
+        <div style={{ fontFamily: 'var(--qu-header-font)', fontWeight: 700, fontSize: 28 }}>QueueUp</div>
+        <p style={{ color: 'var(--qu-muted)', margin: 0 }}>Games the squad wants to play together</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
           {providers === null ? null : providers.length > 0 ? (
             providers.map((p) => <LoginButton key={p} provider={p} />)
@@ -142,7 +142,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--sq-bg)', display: 'flex' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--qu-bg)', display: 'flex' }}>
       <Sidebar />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header />

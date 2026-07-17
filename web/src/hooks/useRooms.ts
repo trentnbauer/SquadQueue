@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { roomsApi } from '../api/rooms';
 import { useView } from '../context/ViewContext';
-import type { CreateRoomRequest, JoinRoomRequest, Room } from '@squadqueue/shared';
+import type { CreateRoomRequest, JoinRoomRequest, Room } from '@queueup/shared';
 
 const ROOMS_QUERY_KEY = ['rooms'];
 

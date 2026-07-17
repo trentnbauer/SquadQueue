@@ -1,5 +1,5 @@
 {
-  "name": "@squadqueue/web",
+  "name": "@queueup/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@squadqueue/shared": "*",
+    "@queueup/shared": "*",
     "@tanstack/react-query": "^5.62.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

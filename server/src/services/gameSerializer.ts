@@ -1,5 +1,5 @@
 import type { Prisma } from '@prisma/client';
-import type { Game, GamePrice, PriceRegion, VoteValue } from '@squadqueue/shared';
+import type { Game, GamePrice, PriceRegion, VoteValue } from '@queueup/shared';
 import { getSteamPrice, getSteamPrices } from './priceService.js';
 import { checkPriceDropAlert } from './priceAlerts.js';
 import { toUserDto } from '../util/dto.js';

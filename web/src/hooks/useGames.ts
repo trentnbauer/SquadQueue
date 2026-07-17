@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gamesApi } from '../api/games';
 import { useCurrencyRegion } from '../context/CurrencyRegionContext';
-import type { Game, GameStatus, VoteValue } from '@squadqueue/shared';
+import type { Game, GameStatus, VoteValue } from '@queueup/shared';
 
 const GAMES_QUERY_ROOT = ['games'] as const;
 

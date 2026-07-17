@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { RoomPlatform, User } from '@squadqueue/shared';
+import type { RoomPlatform, User } from '@queueup/shared';
 import { authApi } from '../api/auth';
 
 interface AuthContextValue {

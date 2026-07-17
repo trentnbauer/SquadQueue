@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ROOM_PLATFORM_LABELS, type RoomPlatform } from '@squadqueue/shared';
+import { ROOM_PLATFORM_LABELS, type RoomPlatform } from '@queueup/shared';
 import { useRooms } from '../hooks/useRooms';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { ACCENT_PRESETS } from '../theme/defaultTheme';

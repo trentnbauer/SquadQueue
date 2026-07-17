@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
-import type { Game, GameStatus, User, VoteValue } from '@squadqueue/shared';
+import type { Game, GameStatus, User, VoteValue } from '@queueup/shared';
 import { AvatarBadge } from './AvatarBadge';
 import { VoteRow } from './VoteRow';
 import { VoteHeatmap } from './VoteHeatmap';
@@ -287,8 +287,8 @@ export function GameCard({
               top: menuPos.top,
               left: menuPos.left,
               transform: 'translate(-50%, -50%)',
-              background: 'var(--sq-surface2)',
-              border: '1px solid var(--sq-border)',
+              background: 'var(--qu-surface2)',
+              border: '1px solid var(--qu-border)',
               borderRadius: 12,
               padding: 6,
               display: 'flex',
@@ -312,8 +312,8 @@ export function GameCard({
                   padding: '10px 12px',
                   borderRadius: 8,
                   border: 'none',
-                  background: s === game.status ? 'var(--sq-surface)' : 'transparent',
-                  color: s === game.status ? 'var(--sq-text)' : 'var(--sq-muted)',
+                  background: s === game.status ? 'var(--qu-surface)' : 'transparent',
+                  color: s === game.status ? 'var(--qu-text)' : 'var(--qu-muted)',
                   fontWeight: 700,
                   fontSize: 13.5,
                   textAlign: 'left',
@@ -324,7 +324,7 @@ export function GameCard({
               </button>
             ))}
 
-            <div style={{ height: 1, background: 'var(--sq-border)', margin: '3px 2px' }} />
+            <div style={{ height: 1, background: 'var(--qu-border)', margin: '3px 2px' }} />
 
             <button
               type="button"

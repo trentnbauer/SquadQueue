@@ -8,7 +8,7 @@ import {
   type RoomMember,
   type RoomPlatform,
   type RoomRole,
-} from '@squadqueue/shared';
+} from '@queueup/shared';
 import { roomsApi } from '../api/rooms';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmContext';
@@ -292,7 +292,7 @@ export function RoomSettingsModal({ room, members, games, onClose }: RoomSetting
             <div className={styles.sectionTitle}>Invite existing member</div>
             {candidateUsers.length === 0 ? (
               <p className={styles.readonlyNote}>
-                {candidates.isLoading ? 'Loading…' : 'Every SquadQueue member is already in this room.'}
+                {candidates.isLoading ? 'Loading…' : 'Every QueueUp member is already in this room.'}
               </p>
             ) : (
               <div className={styles.inviteMemberRow}>

@@ -2,7 +2,7 @@ import { redis } from './redisClient.js';
 import { env } from '../config/env.js';
 import { HttpError } from '../util/httpError.js';
 import { getConfigValue } from './configResolver.js';
-import { IGDB_PLATFORM_NAMES, type GameSearchResult, type RoomPlatform } from '@squadqueue/shared';
+import { IGDB_PLATFORM_NAMES, type GameSearchResult, type RoomPlatform } from '@queueup/shared';
 
 /** IGDB client id/secret, resolved env-first with a DB fallback (see configResolver.ts) - either
  * or both may be unset (env.ts no longer requires them at boot), in which case IGDB requests fail

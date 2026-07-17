@@ -1,7 +1,7 @@
 import type { NotificationType, Prisma } from '@prisma/client';
 import { prisma } from '../db/client.js';
 import { toUserDto } from '../util/dto.js';
-import type { Notification } from '@squadqueue/shared';
+import type { Notification } from '@queueup/shared';
 
 async function actorDisplayName(actorId: string): Promise<string> {
   const actor = await prisma.user.findUnique({ where: { id: actorId }, select: { displayName: true } });
@@ -169,7 +169,7 @@ export async function getNotificationFeed(userId: string, take = 50): Promise<No
 }
 
 /** Unread counts for the sidebar: a dot per oversized-in-notifications room icon, plus a total for
- * the SQ button badge. Computed per-membership rather than a single grouped query, since each
+ * the QU button badge. Computed per-membership rather than a single grouped query, since each
  * room's unread cutoff differs by member (their own notificationsReadAt/joinedAt). */
 export async function getNotificationSummary(userId: string): Promise<{ totalUnread: number; rooms: { roomId: string; unreadCount: number }[] }> {
   const memberships = await prisma.roomMember.findMany({

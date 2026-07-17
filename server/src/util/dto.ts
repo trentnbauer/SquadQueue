@@ -1,4 +1,4 @@
-import type { User } from '@squadqueue/shared';
+import type { User } from '@queueup/shared';
 
 export function toUserDto(user: {
   id: string;

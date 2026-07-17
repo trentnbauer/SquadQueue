@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ROOM_PLATFORM_LABELS } from '@squadqueue/shared';
+import { ROOM_PLATFORM_LABELS } from '@queueup/shared';
 import { useAuth } from '../context/AuthContext';
 import { useView } from '../context/ViewContext';
 import { useRooms } from '../hooks/useRooms';
@@ -69,11 +69,11 @@ export function Sidebar() {
           <button
             type="button"
             className={styles.brand}
-            title="SquadQueue"
+            title="QueueUp"
             aria-label={totalUnread > 0 ? `Notifications (${totalUnread} unread)` : 'Notifications'}
             onClick={() => (showNotifications ? closeNotifications() : setShowNotifications(true))}
           >
-            SQ
+            QU
             {totalUnread > 0 && <span className={styles.unreadDot} aria-hidden="true" />}
           </button>
           {showNotifications && (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Game } from '@squadqueue/shared';
+import type { Game } from '@queueup/shared';
 import { backlogGames } from './gameGridLogic';
 import { SpinWheelModal } from './SpinWheelModal';
 import styles from './SpinWheelCard.module.css';

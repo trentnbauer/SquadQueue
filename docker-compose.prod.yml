@@ -34,7 +34,7 @@ services:
     # already builds and pushes linux/amd64+linux/arm64 on every change to main, so there's no
     # need to rebuild here. Override IMAGE_TAG to pin a specific commit (tagged `sha-<short>`)
     # instead of always tracking `latest`.
-    image: ghcr.io/trentnbauer/squadqueue:${IMAGE_TAG:-latest}
+    image: ghcr.io/trentnbauer/queueup:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       postgres:

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import type { Room } from '@squadqueue/shared';
+import type { Room } from '@queueup/shared';
 
 export type View = { type: 'personal' } | { type: 'room'; roomId: string };
 

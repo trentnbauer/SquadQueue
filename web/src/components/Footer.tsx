@@ -27,7 +27,7 @@ export function Footer() {
         <span className={styles.sep}>·</span>
         <a
           className={styles.link}
-          href="https://github.com/trentnbauer/SquadQueue"
+          href="https://github.com/trentnbauer/QueueUp"
           target="_blank"
           rel="noopener noreferrer"
         >

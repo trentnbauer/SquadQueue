@@ -1,4 +1,4 @@
-import type { Game } from '@squadqueue/shared';
+import type { Game } from '@queueup/shared';
 
 /** Sentinel meaning "no filter applied" for both the platform and genre pill filters. */
 export const ALL_FILTER_VALUE = '__all__';

@@ -1,6 +1,6 @@
 import { prisma } from '../db/client.js';
 import { HttpError } from '../util/httpError.js';
-import { ROOM_PLATFORM_LABELS, type RoomPlatform } from '@squadqueue/shared';
+import { ROOM_PLATFORM_LABELS, type RoomPlatform } from '@queueup/shared';
 
 const VALID_PLATFORMS = new Set(Object.keys(ROOM_PLATFORM_LABELS) as RoomPlatform[]);
 

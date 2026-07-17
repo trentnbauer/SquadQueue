@@ -14,8 +14,8 @@
 }
 
 .title {
-  font: 700 22px var(--sq-header-font);
-  color: var(--sq-text);
+  font: 700 22px var(--qu-header-font);
+  color: var(--qu-text);
   margin: 0 0 4px;
 }
 
@@ -29,7 +29,7 @@
   font: 700 13px system-ui, sans-serif;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
 }
 
 .pillRow {
@@ -44,13 +44,13 @@
   gap: 6px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: var(--sq-neutral-pill-bg);
+  background: var(--qu-neutral-pill-bg);
   font-size: 12.5px;
-  color: var(--sq-text);
+  color: var(--qu-text);
 }
 
 .pillOk {
-  color: var(--sq-accent2);
+  color: var(--qu-accent2);
 }
 
 .pillMissing {
@@ -58,8 +58,8 @@
 }
 
 .table {
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-card-radius);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-card-radius);
   overflow: hidden;
 }
 
@@ -68,7 +68,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--sq-border);
+  border-bottom: 1px solid var(--qu-border);
   font-size: 13.5px;
 }
 
@@ -86,19 +86,19 @@
 
 .rowTitle {
   font-weight: 700;
-  color: var(--sq-text);
+  color: var(--qu-text);
 }
 
 .rowSubtitle {
   font-size: 11.5px;
-  color: var(--sq-muted);
+  color: var(--qu-muted);
 }
 
 .adminBadge {
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--sq-accent-pill-bg);
-  color: var(--sq-accent);
+  background: var(--qu-accent-pill-bg);
+  color: var(--qu-accent);
   font-size: 10.5px;
   font-weight: 700;
 }
@@ -112,12 +112,12 @@
 }
 
 .deleteButton:disabled {
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   cursor: default;
 }
 
 .empty {
-  color: var(--sq-muted);
+  color: var(--qu-muted);
   font-size: 13px;
 }
 
@@ -129,17 +129,17 @@
 }
 
 .archiveButton {
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-radius);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-radius);
   padding: 9px 16px;
-  background: var(--sq-surface);
-  color: var(--sq-text);
+  background: var(--qu-surface);
+  color: var(--qu-text);
   font-size: 13px;
   font-weight: 600;
 }
 
 .archiveButton:hover:not(:disabled) {
-  background: var(--sq-surface2);
+  background: var(--qu-surface2);
 }
 
 .archiveButton:disabled {
@@ -148,7 +148,7 @@
 }
 
 .archiveResult {
-  color: var(--sq-accent2);
+  color: var(--qu-accent2);
   font-size: 13px;
 }
 
@@ -160,16 +160,16 @@
 }
 
 .integrationInput {
-  border: 1px solid var(--sq-border);
-  border-radius: var(--sq-radius);
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-radius);
   padding: 7px 10px;
-  background: var(--sq-surface);
-  color: var(--sq-text);
+  background: var(--qu-surface);
+  color: var(--qu-text);
   font-size: 13px;
   width: 200px;
   max-width: 100%;
 }
 
 .integrationInput:focus {
-  outline: 1px solid var(--sq-accent);
+  outline: 1px solid var(--qu-accent);
 }

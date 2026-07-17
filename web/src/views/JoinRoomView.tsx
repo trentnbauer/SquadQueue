@@ -32,7 +32,7 @@ export function JoinRoomView() {
   return (
     <div style={{ maxWidth: 480, margin: '48px auto', padding: '0 16px' }}>
       <ActionErrorBanner message={error} onDismiss={() => setError(null)} />
-      {!error && <p style={{ color: 'var(--sq-muted)' }}>Joining room…</p>}
+      {!error && <p style={{ color: 'var(--qu-muted)' }}>Joining room…</p>}
       {error && (
         <button
           type="button"
@@ -40,10 +40,10 @@ export function JoinRoomView() {
           style={{
             marginTop: 12,
             padding: '10px 20px',
-            borderRadius: 'var(--sq-radius)',
-            border: '1px solid var(--sq-border)',
+            borderRadius: 'var(--qu-radius)',
+            border: '1px solid var(--qu-border)',
             background: 'transparent',
-            color: 'var(--sq-text)',
+            color: 'var(--qu-text)',
             cursor: 'pointer',
           }}
         >

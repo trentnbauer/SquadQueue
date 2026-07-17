@@ -9,7 +9,7 @@ import type {
   SetTargetPriceRequest,
   UpdateGameStatusRequest,
   VoteRequest,
-} from '@squadqueue/shared';
+} from '@queueup/shared';
 
 export const gamesApi = {
   shelf: (region?: PriceRegion) =>
