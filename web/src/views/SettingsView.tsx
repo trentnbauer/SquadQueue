@@ -280,6 +280,14 @@ export function SettingsView() {
           </button>
           {archiveResult && <span className={styles.archiveResult}>{archiveResult}</span>}
         </div>
+        <div className={styles.maintenanceRow}>
+          {/* A plain link, not a fetch+blob dance - the browser already sends the session cookie
+              for a same-origin navigation, and the server's Content-Disposition header is what
+              actually triggers the download rather than navigating away from the page. */}
+          <a className={styles.archiveButton} href="/api/admin/logs/export" download>
+            Download troubleshooting logs
+          </a>
+        </div>
       </div>
     </div>
   );
