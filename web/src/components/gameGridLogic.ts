@@ -1,7 +1,17 @@
-import type { Game } from '@queueup/shared';
+import type { Game, GameStatus } from '@queueup/shared';
 
 /** Sentinel meaning "no filter applied" for both the platform and genre pill filters. */
 export const ALL_FILTER_VALUE = '__all__';
+
+export const GAME_STATUS_LABEL: Record<GameStatus, string> = {
+  backlog: 'Backlog',
+  playing: 'Playing',
+  done: 'Done',
+  dropped: 'Dropped',
+  wishlist: 'Wishlist',
+};
+
+export const GAME_STATUS_LIST: GameStatus[] = ['wishlist', 'backlog', 'playing', 'done', 'dropped'];
 
 /** Genre/platform are stored as comma-joined labels (e.g. "PC, Xbox"), so filter options and
  * matching both split on ", " rather than treating the whole string as one value. */

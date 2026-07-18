@@ -19,6 +19,7 @@ import { resolveSteamId64, getOwnedSteamGames, setSteamImportProgress, getSteamI
 import { setOwnership, markOwned } from '../services/gameOwnership.js';
 import { env } from '../config/env.js';
 import type {
+  BulkUpdateGameStatusRequest,
   CreateGameRequest,
   ImportSteamLibraryResult,
   MoveGameRequest,
@@ -249,6 +250,34 @@ export default async function gameRoutes(app: FastifyInstance) {
     const updated = await loadGameOr404(game.id);
     return { game: await serializeGame(updated, userId) };
   });
+
+  // Personal Shelf only (issue #205) - scoped by roomId: null + addedBy in the query itself rather
+  // than a per-id requireGameReadAccess loop, so one request updates any number of shelf games in a
+  // single query instead of N round trips (the shelf is exactly the case with 100s-800s of games).
+  app.patch<{ Body: BulkUpdateGameStatusRequest }>(
+    '/api/games/bulk-status',
+    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    async (request) => {
+      const userId = await request.requireAuth();
+      const { gameIds, status } = request.body ?? {};
+
+      if (!Array.isArray(gameIds) || gameIds.length === 0) {
+        throw new HttpError(400, 'gameIds must be a non-empty array');
+      }
+      if (gameIds.length > MAX_GAMES_PER_LIST) {
+        throw new HttpError(400, `Cannot update more than ${MAX_GAMES_PER_LIST} games at once`);
+      }
+      if (!GAME_STATUSES.includes(status)) throw new HttpError(400, 'Invalid status');
+
+      await prisma.game.updateMany({
+        where: { id: { in: gameIds }, roomId: null, addedBy: userId },
+        data: { status },
+      });
+
+      const updated = await prisma.game.findMany({ where: { id: { in: gameIds }, roomId: null, addedBy: userId }, include: gameInclude });
+      return { games: await serializeGames(updated, userId) };
+    },
+  );
 
   app.delete<{ Params: { id: string } }>('/api/games/:id', async (request, reply) => {
     const userId = await request.requireAuth();

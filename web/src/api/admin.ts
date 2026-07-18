@@ -4,6 +4,8 @@ import type { AdminIntegrationStatus, AdminRoomSummary, AdminUserSummary, Integr
 export const adminApi = {
   overview: () => apiGet<{ status: AdminIntegrationStatus }>('/api/admin/overview'),
   users: () => apiGet<{ users: AdminUserSummary[] }>('/api/admin/users'),
+  setUserAdmin: (id: string, isAdmin: boolean) =>
+    apiPatch<{ user: AdminUserSummary }>(`/api/admin/users/${id}/admin`, { isAdmin }),
   deleteUser: (id: string) => apiDelete(`/api/admin/users/${id}`),
   rooms: () => apiGet<{ rooms: AdminRoomSummary[] }>('/api/admin/rooms'),
   deleteRoom: (id: string) => apiDelete(`/api/admin/rooms/${id}`),

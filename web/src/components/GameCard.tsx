@@ -21,6 +21,11 @@ interface GameCardProps {
   /** Toggles the current user's ownership claim on this game (issue #173) - only offered for room
    * games (game.ownership is null on the Personal Shelf, where there's no group to count). */
   onSetOwnership?: (owned: boolean) => void;
+  /** Bulk-select mode (issue #205, Personal Shelf only) - while active, clicking the card toggles
+   * selection instead of opening the detail modal. */
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 /** The card face itself is deliberately minimal (cover art plus price/owned) so a grid of games
@@ -38,12 +43,39 @@ export function GameCard({
   isRefreshingPrice = false,
   onSetTargetPrice,
   onSetOwnership,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
 }: GameCardProps) {
   const [detailOpen, setDetailOpen] = useState(false);
 
+  function handleCardClick() {
+    if (selectable) {
+      onToggleSelect?.();
+      return;
+    }
+    setDetailOpen(true);
+  }
+
   return (
     <>
-      <div className={styles.card} onClick={() => setDetailOpen(true)} role="button" aria-label={game.title} title={game.title}>
+      <div
+        className={`${styles.card} ${selectable && selected ? styles.cardSelected : ''}`}
+        onClick={handleCardClick}
+        role="button"
+        aria-label={game.title}
+        title={game.title}
+      >
+        {selectable && (
+          <input
+            type="checkbox"
+            className={styles.selectCheckbox}
+            checked={selected}
+            onClick={(e) => e.stopPropagation()}
+            onChange={() => onToggleSelect?.()}
+            aria-label={`Select ${game.title}`}
+          />
+        )}
         {game.status === 'done' && (
           <div className={styles.ribbon} aria-hidden="true">
             <span className={`${styles.ribbonText} ${styles.beatenRibbonText}`}>Beaten</span>
@@ -65,6 +97,9 @@ export function GameCard({
               with this game," and "should I buy it" isn't relevant once you're playing it. */}
           {game.status !== 'playing' && (
             <div className={styles.coverOverlay}>
+              {game.ownership && game.ownership.total > 1 && game.ownership.owned === game.ownership.total && (
+                <div className={styles.everyoneOwnsLine}>Everyone owns this</div>
+              )}
               {game.youOwn ? (
                 <div className={styles.ownedLine}>
                   <span className={styles.ownedLabel}>Owned</span>

@@ -55,7 +55,12 @@ async function getOrCreateUser(profile: {
   displayName: string;
   avatarUrl: string | null;
 }) {
-  const isAdmin = computeIsAdmin(profile.email, { devFakeAuth: env.DEV_FAKE_AUTH, adminEmails: env.ADMIN_EMAILS });
+  const emailIsAdmin = computeIsAdmin(profile.email, { devFakeAuth: env.DEV_FAKE_AUTH, adminEmails: env.ADMIN_EMAILS });
+  // ADMIN_EMAILS grants admin on every login, but must never revoke it - an admin promoted through
+  // the Settings panel (see admin.ts's PATCH /api/admin/users/:id/admin) has no email in that list
+  // by definition, and would otherwise lose admin status the next time they signed in.
+  const existing = await prisma.user.findUnique({ where: { oidcSub: profile.oidcSub } });
+  const isAdmin = emailIsAdmin || (existing?.isAdmin ?? false);
   return prisma.user.upsert({
     where: { oidcSub: profile.oidcSub },
     update: { email: profile.email, displayName: profile.displayName, avatarUrl: profile.avatarUrl, isAdmin },
