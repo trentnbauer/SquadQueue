@@ -5,7 +5,6 @@ import { prisma } from '../db/client.js';
 import { HttpError } from '../util/httpError.js';
 import { buildAuthProviders } from '../services/authProviders/registry.js';
 import type { AuthProvider } from '../services/authProviders/types.js';
-import { resolveUserIdFromBearerToken } from '../services/playniteAuth.js';
 
 const DEV_USER = {
   oidcSub: 'dev-user',
@@ -85,10 +84,7 @@ export default fp(async function authPlugin(app: FastifyInstance) {
       const devUser = await getOrCreateUser(DEV_USER);
       return devUser.id;
     }
-    if (this.session.userId) return this.session.userId;
-    // No session cookie - the Playnite extension has no browser to hold one, so it authenticates
-    // with a per-user bearer token instead (see services/playniteAuth.ts).
-    return resolveUserIdFromBearerToken(this.headers.authorization);
+    return this.session.userId ?? null;
   });
 
   app.decorateRequest('requireAuth', async function (this: FastifyRequest) {
