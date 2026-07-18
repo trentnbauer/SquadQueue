@@ -4,6 +4,7 @@ import { env } from '../config/env.js';
 import { HttpError } from '../util/httpError.js';
 import { requireAdmin } from '../services/adminAccess.js';
 import { logAdminAction } from '../services/adminAuditLog.js';
+import { getRecentLogLines } from '../services/logBuffer.js';
 import {
   CONFIG_KEYS,
   isConfigKey,
@@ -266,5 +267,27 @@ export default async function adminRoutes(app: FastifyInstance) {
       createdAt: e.createdAt.toISOString(),
     }));
     return { entries: dtos };
+  });
+
+  // Exports the server's own recent application logs (issue #192) - not the Docker daemon's logs,
+  // which would need the Docker socket mounted into the container (a meaningfully bigger attack
+  // surface for a self-hosted app than this endpoint being admin-gated). Good enough for the
+  // common case: seeing recent request/error activity without shelling into the host.
+  app.get('/api/admin/logs/export', async (request, reply) => {
+    const userId = await request.requireAuth();
+    await requireAdmin(userId);
+
+    const header = [
+      'QueueUp troubleshooting log export',
+      `Generated: ${new Date().toISOString()}`,
+      `App version: ${process.env.APP_VERSION ?? 'dev'} (sha ${process.env.APP_SHA ?? 'unknown'})`,
+      `NODE_ENV: ${process.env.NODE_ENV ?? 'unset'}`,
+      '',
+    ].join('\n');
+    const body = header + getRecentLogLines().join('');
+
+    reply.header('Content-Type', 'text/plain; charset=utf-8');
+    reply.header('Content-Disposition', `attachment; filename="queueup-logs-${Date.now()}.txt"`);
+    return body;
   });
 }

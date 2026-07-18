@@ -14,9 +14,14 @@ import healthRoutes from './routes/health.js';
 import versionRoutes from './routes/version.js';
 import { env } from './config/env.js';
 import { redis } from './services/redisClient.js';
+import { logCaptureStream } from './services/logBuffer.js';
 
 export async function buildApp() {
-  const app = Fastify({ logger: true, trustProxy: env.TRUST_PROXY });
+  // logger: { stream: ... } instead of the plain `logger: true` shorthand - same default pino
+  // behavior (JSON lines to stdout, `docker logs` unaffected), but also captures recent lines in
+  // memory so the admin log-export endpoint (issue #192, routes/admin.ts) works without needing
+  // shell/Docker access to the running container.
+  const app = Fastify({ logger: { stream: logCaptureStream }, trustProxy: env.TRUST_PROXY });
 
   await app.register(cors, { origin: env.APP_BASE_URL, credentials: true });
   await app.register(helmet, {
