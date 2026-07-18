@@ -129,6 +129,7 @@
 }
 
 .archiveButton {
+  display: inline-block;
   border: 1px solid var(--qu-border);
   border-radius: var(--qu-radius);
   padding: 9px 16px;
@@ -136,6 +137,8 @@
   color: var(--qu-text);
   font-size: 13px;
   font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .archiveButton:hover:not(:disabled) {
