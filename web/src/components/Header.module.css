@@ -53,6 +53,34 @@
   filter: brightness(1.1);
 }
 
+.resyncButton {
+  flex-shrink: 0;
+  padding: 9px 14px;
+  border-radius: var(--qu-radius);
+  background: var(--qu-surface);
+  color: var(--qu-text);
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid var(--qu-border);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.resyncButton:hover:not(:disabled) {
+  background: var(--qu-surface2);
+}
+
+.resyncButton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.resyncResult {
+  font-size: 12px;
+  color: var(--qu-muted);
+  max-width: 240px;
+}
+
 .searchInput {
   flex-shrink: 0;
   width: 200px;

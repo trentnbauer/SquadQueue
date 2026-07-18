@@ -7,6 +7,7 @@ import { useConfirm } from '../context/ConfirmContext';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { formatRelativeTime } from '../utils/relativeTime';
 import { formatAmount, formatPrice } from '../utils/formatPrice';
+import { GAME_STATUS_LABEL, GAME_STATUS_LIST } from './gameGridLogic';
 import cardStyles from './GameCard.module.css';
 import styles from './GameDetailModal.module.css';
 
@@ -24,16 +25,6 @@ interface GameDetailModalProps {
   onSetOwnership?: (owned: boolean) => void;
   onClose: () => void;
 }
-
-const STATUS_LABEL: Record<GameStatus, string> = {
-  backlog: 'Backlog',
-  playing: 'Playing',
-  done: 'Done',
-  dropped: 'Dropped',
-  wishlist: 'Wishlist',
-};
-
-const ALL_STATUSES: GameStatus[] = ['wishlist', 'backlog', 'playing', 'done', 'dropped'];
 
 /** Everything a card used to show inline (price detail, votes, ownership, status, remove) now
  * lives here instead - the card face is just cover/title/price so the shelf/room grid stays
@@ -237,7 +228,7 @@ export function GameDetailModal({
 
         <div className={styles.sectionTitle}>Status</div>
         <div className={styles.statusList}>
-          {ALL_STATUSES.map((s) => (
+          {GAME_STATUS_LIST.map((s) => (
             <button
               key={s}
               type="button"
@@ -246,7 +237,7 @@ export function GameDetailModal({
               className={`${styles.statusButton} ${s === game.status ? styles.statusButtonActive : ''}`}
               onClick={() => onStatusChange(s)}
             >
-              {STATUS_LABEL[s]}
+              {GAME_STATUS_LABEL[s]}
             </button>
           ))}
         </div>

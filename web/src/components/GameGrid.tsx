@@ -64,6 +64,10 @@ interface GameGridProps {
   onSetTargetPrice: (gameId: string, targetPrice: string | null) => void;
   /** Undefined on the Personal Shelf - ownership is a room-only concept (see GameCard). */
   onSetOwnership?: (gameId: string, owned: boolean) => void;
+  /** Bulk-select mode (issue #205) - passed through to every GameCard when active. */
+  selectionMode?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (gameId: string) => void;
 }
 
 export function GameGrid({
@@ -85,6 +89,9 @@ export function GameGrid({
   isRefreshingPrice,
   onSetTargetPrice,
   onSetOwnership,
+  selectionMode,
+  selectedIds,
+  onToggleSelect,
 }: GameGridProps) {
   // Filter selection lives in GameFilterContext, not here - the pill UI (and the search box) are
   // rendered by the Header (a sibling, not a parent, of this component) next to the Add Game button.
@@ -182,6 +189,9 @@ export function GameGrid({
             isRefreshingPrice={isRefreshingPrice ? isRefreshingPrice(game.id) : false}
             onSetTargetPrice={(targetPrice) => onSetTargetPrice(game.id, targetPrice)}
             onSetOwnership={onSetOwnership ? (owned) => onSetOwnership(game.id, owned) : undefined}
+            selectable={selectionMode}
+            selected={selectedIds?.has(game.id) ?? false}
+            onToggleSelect={onToggleSelect ? () => onToggleSelect(game.id) : undefined}
           />
         </Fragment>
       ))}

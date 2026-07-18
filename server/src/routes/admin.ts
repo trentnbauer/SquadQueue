@@ -137,6 +137,52 @@ export default async function adminRoutes(app: FastifyInstance) {
     return { users: summaries };
   });
 
+  app.patch<{ Params: { id: string }; Body: { isAdmin: boolean } }>(
+    '/api/admin/users/:id/admin',
+    async (request) => {
+      const actorId = await request.requireAuth();
+      const actor = await requireAdmin(actorId);
+      const { id: targetId } = request.params;
+      const { isAdmin } = request.body ?? {};
+
+      if (typeof isAdmin !== 'boolean') {
+        throw new HttpError(400, 'isAdmin must be a boolean');
+      }
+      if (targetId === actorId) {
+        throw new HttpError(400, 'You cannot change your own administrator status');
+      }
+
+      const target = await prisma.user.findUnique({ where: { id: targetId } });
+      if (!target) {
+        throw new HttpError(404, 'User not found');
+      }
+
+      const updated = await prisma.user.update({ where: { id: targetId }, data: { isAdmin } });
+      app.log.warn(
+        { adminAction: isAdmin ? 'user.promote' : 'user.demote', actorId, targetId, targetEmail: target.email },
+        `Admin ${actorId} ${isAdmin ? 'promoted' : 'demoted'} user ${targetId} (${target.email})`,
+      );
+      await logAdminAction({
+        actorId,
+        actorLabel: actor.email,
+        action: isAdmin ? 'user.promote' : 'user.demote',
+        targetLabel: target.email,
+        metadata: { targetId },
+      });
+
+      const summary: AdminUserSummary = {
+        id: updated.id,
+        displayName: updated.displayName,
+        email: updated.email,
+        avatarColor: updated.avatarColor,
+        avatarUrl: updated.avatarUrl,
+        isAdmin: updated.isAdmin,
+        createdAt: updated.createdAt.toISOString(),
+      };
+      return { user: summary };
+    },
+  );
+
   app.delete<{ Params: { id: string } }>('/api/admin/users/:id', async (request, reply) => {
     const actorId = await request.requireAuth();
     const actor = await requireAdmin(actorId);

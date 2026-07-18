@@ -200,6 +200,14 @@ export interface UpdateGameStatusRequest {
   status: GameStatus;
 }
 
+/** Applies one status to many Personal Shelf games at once (issue #205) - scoped to the shelf since
+ * that's where large single-player backlogs pile up; rooms are small/shared enough that per-card
+ * status changes stay easy. */
+export interface BulkUpdateGameStatusRequest {
+  gameIds: string[];
+  status: GameStatus;
+}
+
 /** Sets (or clears, with null) the price to alert at for a game - see Game.targetPrice. */
 export interface SetTargetPriceRequest {
   targetPrice: string | null;

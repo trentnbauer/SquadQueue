@@ -103,6 +103,19 @@
   font-weight: 700;
 }
 
+.roleSelect {
+  border: 1px solid var(--qu-border);
+  border-radius: var(--qu-radius);
+  padding: 6px 10px;
+  background: var(--qu-surface);
+  color: var(--qu-text);
+  font-size: 12.5px;
+}
+
+.roleSelect:disabled {
+  opacity: 0.7;
+}
+
 .deleteButton {
   background: none;
   border: none;

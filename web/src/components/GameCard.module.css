@@ -7,6 +7,22 @@
   cursor: pointer;
 }
 
+.cardSelected {
+  outline: 2px solid var(--qu-accent);
+  outline-offset: -2px;
+}
+
+.selectCheckbox {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 6;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: var(--qu-accent);
+}
+
 .cover {
   position: relative;
   /* Box-art proportions (portrait, taller than wide) now that the cover *is* the whole card - it
@@ -76,7 +92,16 @@
   bottom: 0;
   padding: 24px 14px 12px;
   display: flex;
+  flex-direction: column;
+  gap: 4px;
   background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.72) 55%, rgba(0, 0, 0, 0.85));
+}
+
+.everyoneOwnsLine {
+  font: 800 10.5px system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--qu-accent2);
 }
 
 .priceLine {

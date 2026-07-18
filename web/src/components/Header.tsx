@@ -7,6 +7,7 @@ import { useView } from '../context/ViewContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useGames } from '../hooks/useGames';
 import { useGameFilter } from '../context/GameFilterContext';
+import { useSteamImport } from '../hooks/useSteamImport';
 import { ALL_FILTER_VALUE, distinctValues } from './gameGridLogic';
 import { roomsApi } from '../api/rooms';
 import { AvatarBadge } from './AvatarBadge';
@@ -63,7 +64,7 @@ function PillFilter({ label, allLabel, options, value, onChange }: PillFilterPro
 }
 
 export function Header() {
-  const { user, ownedPlatforms } = useAuth();
+  const { user, ownedPlatforms, steamLinked } = useAuth();
   const { activeRoom } = useView();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -96,6 +97,11 @@ export function Header() {
   // Reuses the same ['games', 'room'|'shelf', ...] query as the active view (RoomView/ShelfView) -
   // React Query dedupes by queryKey, so this doesn't trigger an extra network fetch.
   const { games, invalidate: invalidateGames } = useGames(activeRoom?.id ?? null);
+
+  // Re-sync button (issue #203) - only meaningful on the Personal Shelf (Steam games always land
+  // there, never straight into a room), and saves scrolling to the SteamImportCard tile at the end
+  // of a large shelf's grid to trigger the same import.
+  const steamImport = useSteamImport(steamLinked, invalidateGames);
 
   // A Room already has one fixed platform, so every game in it matches - the platform filter is
   // only meaningful on the Personal Shelf, where games can span multiple systems. There, once the
@@ -147,6 +153,20 @@ export function Header() {
       membersMenuRef.current?.removeAttribute('open');
       navigate('/');
     }
+  }
+
+  async function handleResync() {
+    if (!steamLinked) {
+      steamImport.startLink();
+      return;
+    }
+    const ok = await confirm({
+      title: 'Re-sync your Steam library?',
+      message: 'Pulls your most-played Steam games onto your shelf, skipping anything already here. This can take a little while.',
+      confirmLabel: 'Sync',
+    });
+    if (!ok) return;
+    await steamImport.runImport();
   }
 
   async function handleCopyInviteCode() {
@@ -241,6 +261,22 @@ export function Header() {
         <button type="button" className={styles.addGameButton} onClick={() => setShowAddGame(true)}>
           + Add Game
         </button>
+        {!activeRoom && (
+          <button
+            type="button"
+            className={styles.resyncButton}
+            onClick={handleResync}
+            disabled={steamImport.busy}
+            title={steamLinked ? 'Re-sync your Steam library' : 'Link your Steam account to sync your library'}
+          >
+            {steamImport.busy ? 'Syncing…' : '↻ Re-sync Library'}
+          </button>
+        )}
+        {!activeRoom && (steamImport.result || steamImport.error) && (
+          <span className={styles.resyncResult} style={steamImport.error ? { color: '#ff8a80' } : undefined}>
+            {steamImport.error ?? steamImport.result}
+          </span>
+        )}
         <input
           type="search"
           className={styles.searchInput}

@@ -31,6 +31,7 @@ export function SettingsView() {
   const [archiving, setArchiving] = useState(false);
   const [integrationInputs, setIntegrationInputs] = useState<Record<string, string>>({});
   const [savingIntegrationKey, setSavingIntegrationKey] = useState<string | null>(null);
+  const [savingRoleUserId, setSavingRoleUserId] = useState<string | null>(null);
 
   const overview = useQuery({ queryKey: ['admin', 'overview'], queryFn: adminApi.overview, enabled: !!user?.isAdmin });
   const users = useQuery({ queryKey: ['admin', 'users'], queryFn: adminApi.users, enabled: !!user?.isAdmin });
@@ -96,6 +97,19 @@ export function SettingsView() {
       setActionError(err instanceof Error ? err.message : 'Could not archive old games');
     } finally {
       setArchiving(false);
+    }
+  }
+
+  async function handleSetUserAdmin(id: string, isAdmin: boolean) {
+    setSavingRoleUserId(id);
+    setActionError(null);
+    try {
+      await adminApi.setUserAdmin(id, isAdmin);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Could not update that user's role");
+    } finally {
+      setSavingRoleUserId(null);
     }
   }
 
@@ -259,6 +273,16 @@ export function SettingsView() {
                 </span>
                 <span className={styles.rowSubtitle}>{u.email}</span>
               </div>
+              <select
+                className={styles.roleSelect}
+                value={u.isAdmin ? 'admin' : 'user'}
+                disabled={u.id === user.id || savingRoleUserId === u.id}
+                title={u.id === user.id ? "You can't change your own administrator status" : undefined}
+                onChange={(e) => handleSetUserAdmin(u.id, e.target.value === 'admin')}
+              >
+                <option value="user">User</option>
+                <option value="admin">Administrator</option>
+              </select>
               <button
                 className={styles.deleteButton}
                 onClick={() => handleDeleteUser(u.id)}
