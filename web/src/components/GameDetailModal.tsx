@@ -113,7 +113,10 @@ export function GameDetailModal({
           />
           <div className={styles.headerText}>
             <span className={styles.title}>{game.title}</span>
-            <span className={styles.genre}>{game.genre ?? '—'}</span>
+            <span className={styles.genre}>
+              {game.genre ?? '—'}
+              {game.timeToBeatHours != null && ` · ~${game.timeToBeatHours}h to beat`}
+            </span>
           </div>
           <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">
             ×
