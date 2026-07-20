@@ -229,17 +229,22 @@ export interface MoveGameRequest {
   roomId: string | null;
 }
 
-export interface ImportSteamLibraryResult {
+/** Response from POST /api/games/import-steam-library. The actual import (one IGDB lookup per
+ * unowned game) runs in the background rather than blocking this response on it - a real
+ * deployment saw a big library run past a reverse proxy/CDN's connection timeout, surfacing as a
+ * client-side error even though the import was still completing server-side (see routes/games.ts).
+ * This response only confirms the import started; poll SteamImportProgress for live counts and to
+ * know when it's actually done. */
+export interface SteamImportStarted {
   totalOwned: number;
   consideredCount: number;
-  imported: number;
-  skipped: number;
 }
 
-/** Same shape as ImportSteamLibraryResult, but for wishlist import (issue #228) - added with
- * status `wishlist` rather than the default, and never marked owned. No progress-polling
- * counterpart (unlike library import) since wishlists are typically much smaller; add one if that
- * stops being true. */
+/** Result of a wishlist import (issue #228) - added with status `wishlist` rather than the
+ * default, and never marked owned. Unlike the library import, this still runs and responds
+ * synchronously (no progress-polling counterpart) since wishlists are typically much smaller;
+ * switch to the same background-with-progress approach as library import if that stops being
+ * true. */
 export interface ImportSteamWishlistResult {
   totalWishlisted: number;
   consideredCount: number;
@@ -249,8 +254,9 @@ export interface ImportSteamWishlistResult {
 
 /** Polled by the shelf UI while an import is running (see routes/games.ts and
  * SteamImportCard.tsx) so a slow import (one IGDB lookup per unowned game) shows live counts
- * instead of sitting on a bare "Importing…" the whole time. Same shape as
- * ImportSteamLibraryResult plus `done`, since it's a snapshot of that same in-progress state. */
+ * instead of sitting on a bare "Importing…" the whole time - also the only source of the final
+ * result once `done` is true, since the import runs entirely in the background (see
+ * SteamImportStarted). */
 export interface SteamImportProgress {
   totalOwned: number;
   consideredCount: number;

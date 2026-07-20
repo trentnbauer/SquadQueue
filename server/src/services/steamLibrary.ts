@@ -264,3 +264,26 @@ export async function getSteamImportProgress(userId: string): Promise<SteamImpor
   const cached = await redis.get(importProgressKey(userId));
   return cached ? (JSON.parse(cached) as SteamImportProgress) : null;
 }
+
+// Same ceiling as the progress TTL above - long enough to cover the slowest realistic import,
+// short enough that a crashed run doesn't lock a user out of retrying indefinitely.
+const IMPORT_LOCK_TTL_SECONDS = IMPORT_PROGRESS_TTL_SECONDS;
+
+function importLockKey(userId: string): string {
+  return `steam-import-lock:${userId}`;
+}
+
+/** Guards against two overlapping library imports for the same user - e.g. a retried click after
+ * a slow reverse proxy/CDN times out the first request (see routes/games.ts), or two open tabs.
+ * Without this, each run independently snapshots "what's already on the shelf" when it starts, so
+ * two overlapping runs can both decide the same Steam games are new and both create them,
+ * producing duplicates. Returns true if the lock was acquired (caller may proceed), false if
+ * another import is already running - always pair a true result with releaseSteamImportLock. */
+export async function acquireSteamImportLock(userId: string): Promise<boolean> {
+  const result = await redis.set(importLockKey(userId), '1', 'EX', IMPORT_LOCK_TTL_SECONDS, 'NX');
+  return result === 'OK';
+}
+
+export async function releaseSteamImportLock(userId: string): Promise<void> {
+  await redis.del(importLockKey(userId));
+}
