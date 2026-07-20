@@ -221,10 +221,16 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ needs.check-for-changes.outputs.image_name }}
+          # The bare `run_number` tag (last line) is a plain incrementing integer -
+          # Renovate's default `docker` versioning scheme recognizes that as an ascending
+          # version and can open PRs to bump a compose file pinned to it. The `build-<N>`
+          # tag above is the same number, but Renovate's default versioning won't parse
+          # that prefixed form as a version, so it won't trigger updates on its own.
           tags: |
             type=raw,value=latest
             type=sha,format=short
             type=raw,value=build-${{ github.run_number }}
+            type=raw,value=${{ github.run_number }}
           labels: |
             org.opencontainers.image.description=${{ needs.check-for-changes.outputs.oneline }}
 
