@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { PRICE_REGION_LABELS, ROOM_PLATFORM_LABELS, type PriceRegion, type RoomPlatform } from '@queueup/shared';
+import { PRICE_REGION_LABELS, ROOM_PLATFORM_LABELS, type PriceRegion, type RoomPlatform, type YearInReview } from '@queueup/shared';
 import { authApi } from '../api/auth';
+import { gamesApi } from '../api/games';
 import { useAuth } from '../context/AuthContext';
 import { useCurrencyRegion } from '../context/CurrencyRegionContext';
 import styles from './ProfileSettingsView.module.css';
@@ -46,8 +47,23 @@ export function ProfileSettingsView() {
   const [saved, setSaved] = useState(false);
   const [unlinking, setUnlinking] = useState<string | null>(null);
   const [linkError, setLinkError] = useState<string | null>(null);
+  const [yearInReview, setYearInReview] = useState<YearInReview | null>(null);
+  const [loadingYearInReview, setLoadingYearInReview] = useState(false);
+  const [yearInReviewError, setYearInReviewError] = useState<string | null>(null);
 
   if (!user) return null;
+
+  async function handleShowYearInReview() {
+    setLoadingYearInReview(true);
+    setYearInReviewError(null);
+    try {
+      setYearInReview(await gamesApi.yearInReview());
+    } catch (err) {
+      setYearInReviewError(err instanceof Error ? err.message : 'Could not load your year in games');
+    } finally {
+      setLoadingYearInReview(false);
+    }
+  }
 
   async function handleUnlink(provider: string) {
     setUnlinking(provider);
@@ -170,6 +186,104 @@ export function ProfileSettingsView() {
           </div>
         </div>
       )}
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Year in Games</div>
+        <p className={styles.hint}>A summary of the last 12 months - what you finished, and what the squad voted up.</p>
+        {yearInReviewError && <div className={styles.error}>{yearInReviewError}</div>}
+        {!yearInReview && (
+          <button
+            type="button"
+            className={styles.saveButton}
+            onClick={handleShowYearInReview}
+            disabled={loadingYearInReview}
+          >
+            {loadingYearInReview ? 'Loading…' : 'Show my year in games'}
+          </button>
+        )}
+        {yearInReview && (
+          <div className={styles.yearInReview}>
+            <div className={styles.yearInReviewStats}>
+              <div className={styles.yearInReviewStat}>
+                <span className={styles.yearInReviewStatValue}>{yearInReview.doneCount}</span>
+                <span className={styles.yearInReviewStatLabel}>game{yearInReview.doneCount === 1 ? '' : 's'} finished</span>
+              </div>
+              <div className={styles.yearInReviewStat}>
+                <span className={styles.yearInReviewStatValue}>{yearInReview.estimatedHours}</span>
+                <span className={styles.yearInReviewStatLabel}>estimated hours</span>
+              </div>
+            </div>
+            {yearInReview.genreSpread.length > 0 && (
+              <div>
+                <div className={styles.yearInReviewSubtitle}>Genre spread</div>
+                <div className={styles.genreSpread}>
+                  {yearInReview.genreSpread.map((g) => {
+                    const max = yearInReview.genreSpread[0].count;
+                    return (
+                      <div key={g.genre} className={styles.genreBarRow}>
+                        <span className={styles.genreBarLabel}>{g.genre}</span>
+                        <div className={styles.genreBarTrack}>
+                          <div className={styles.genreBarFill} style={{ width: `${(g.count / max) * 100}%` }} />
+                        </div>
+                        <span className={styles.genreBarCount}>{g.count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {yearInReview.mostTimeConsuming.length > 0 && (
+              <div>
+                <div className={styles.yearInReviewSubtitle}>Where the hours went</div>
+                <ol className={styles.yearInReviewList}>
+                  {yearInReview.mostTimeConsuming.map((g) => (
+                    <li key={g.id} className={styles.yearInReviewListItem}>
+                      <span>{g.title}</span>
+                      <span className={styles.yearInReviewListScore}>{g.hours}h</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+            {yearInReview.achievementsUnlocked > 0 && (
+              <div className={styles.yearInReviewStats}>
+                <div className={styles.yearInReviewStat}>
+                  <span className={styles.yearInReviewStatValue}>{yearInReview.achievementsUnlocked}</span>
+                  <span className={styles.yearInReviewStatLabel}>achievements unlocked</span>
+                </div>
+              </div>
+            )}
+            {yearInReview.rarestAchievements.length > 0 && (
+              <div>
+                <div className={styles.yearInReviewSubtitle}>Rarest achievements earned</div>
+                <ol className={styles.yearInReviewList}>
+                  {yearInReview.rarestAchievements.map((a, i) => (
+                    <li key={`${a.gameTitle}-${a.achievementName}-${i}`} className={styles.yearInReviewListItem}>
+                      <span>
+                        {a.achievementName} <span className={styles.yearInReviewListSubtext}>({a.gameTitle})</span>
+                      </span>
+                      <span className={styles.yearInReviewListScore}>{a.globalUnlockPercent.toFixed(1)}% of players</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+            {yearInReview.topVoted.length > 0 && (
+              <div>
+                <div className={styles.yearInReviewSubtitle}>Top voted by the squad</div>
+                <ol className={styles.yearInReviewList}>
+                  {yearInReview.topVoted.map((g) => (
+                    <li key={g.id} className={styles.yearInReviewListItem}>
+                      <span>{g.title}</span>
+                      <span className={styles.yearInReviewListScore}>{g.voteScore} pts</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
