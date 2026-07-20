@@ -18,8 +18,6 @@ jobs:
     #   github.event.pull_request.user.login == 'new-developer' ||
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
 
-    # DISABLED while other repo changes are landing — remove this line to re-enable.
-    if: false
     runs-on: ubuntu-latest
     permissions:
       contents: read
