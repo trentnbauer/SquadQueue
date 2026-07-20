@@ -24,7 +24,10 @@ import {
   getGlobalAchievementRarity,
   setSteamImportProgress,
   getSteamImportProgress,
+  acquireSteamImportLock,
+  releaseSteamImportLock,
 } from '../services/steamLibrary.js';
+import type { OwnedSteamGame } from '../services/steamLibrary.js';
 import { setOwnership, markOwned } from '../services/gameOwnership.js';
 import { toUserDto } from '../util/dto.js';
 import { env } from '../config/env.js';
@@ -32,7 +35,6 @@ import type {
   BulkRemoveGamesRequest,
   BulkUpdateGameStatusRequest,
   CreateGameRequest,
-  ImportSteamLibraryResult,
   ImportSteamWishlistResult,
   MoveGameRequest,
   PlayerAchievements,
@@ -40,6 +42,7 @@ import type {
   SetGameOwnershipRequest,
   SetTargetPriceRequest,
   SteamImportProgress,
+  SteamImportStarted,
   UpdateGameStatusRequest,
   VoteRequest,
   YearInReview,
@@ -63,6 +66,69 @@ const MAX_GAMES_PER_LIST = 500;
 
 function parseRegion(region?: string): PriceRegion | undefined {
   return PRICE_REGIONS.includes(region as PriceRegion) ? (region as PriceRegion) : undefined;
+}
+
+/** The slow part of a Steam library import - one IGDB lookup (and possibly a create) per unowned
+ * game, which can take minutes for a big library. Run in the background by the route below rather
+ * than awaited inline, since a reverse proxy/CDN in front of this server won't hold a connection
+ * open that long (seen in production as a Cloudflare 524). `existingIgdbIdSet`/`ownedIgdbIds` are
+ * mutated in place as games are processed. Always leaves SteamImportProgress `done: true` when it
+ * returns, even on an unexpected error, so a client polling for completion doesn't spin forever. */
+async function runSteamLibraryImportLoop(
+  userId: string,
+  considered: OwnedSteamGame[],
+  existingIgdbIdSet: Set<number>,
+  ownedIgdbIds: number[],
+  totalOwned: number,
+  consideredCount: number,
+): Promise<void> {
+  let imported = 0;
+  let skipped = 0;
+  try {
+    for (const game of considered) {
+      try {
+        const igdbId = await findIgdbIdBySteamAppId(game.appId);
+        if (igdbId === null) {
+          skipped++;
+          continue;
+        }
+        if (existingIgdbIdSet.has(igdbId)) {
+          ownedIgdbIds.push(igdbId);
+          skipped++;
+          continue;
+        }
+        const resolved = await resolveGameForCreation(igdbId, undefined, STEAM_IMPORT_PLATFORM_LABEL);
+        await prisma.game.create({
+          data: {
+            roomId: null,
+            addedBy: userId,
+            igdbId,
+            title: resolved.title,
+            platform: resolved.platform,
+            genre: resolved.genre,
+            maxCoopPlayers: resolved.maxCoopPlayers,
+            timeToBeatHours: resolved.timeToBeatHours,
+            ggDealsUrl: resolved.ggDealsUrl,
+            steamAppid: resolved.steamAppId,
+            coverImageUrl: resolved.coverImageUrl,
+            releaseYear: resolved.releaseYear,
+          },
+        });
+        existingIgdbIdSet.add(igdbId);
+        ownedIgdbIds.push(igdbId);
+        imported++;
+      } catch {
+        // One game failing to resolve (IGDB hiccup, no match, etc.) shouldn't abort the batch.
+        skipped++;
+      } finally {
+        await setSteamImportProgress(userId, { totalOwned, consideredCount, imported, skipped, done: false });
+      }
+    }
+    if (imported > 0) await invalidateExistingIgdbIds(null, userId);
+    await markOwned(userId, ownedIgdbIds);
+  } finally {
+    await setSteamImportProgress(userId, { totalOwned, consideredCount, imported, skipped, done: true });
+  }
 }
 
 export default async function gameRoutes(app: FastifyInstance) {
@@ -166,7 +232,7 @@ export default async function gameRoutes(app: FastifyInstance) {
     // This is an expensive operation (up to MAX_STEAM_IMPORT_CONSIDERED sequential IGDB lookups),
     // not something to allow hammering.
     { config: { rateLimit: { max: 3, timeWindow: '1 hour' } } },
-    async (request) => {
+    async (request, reply) => {
       const userId = await request.requireAuth();
       if (!env.STEAM_API_KEY) {
         throw new HttpError(400, 'Steam integration is not configured on this server.');
@@ -178,79 +244,51 @@ export default async function gameRoutes(app: FastifyInstance) {
         throw new HttpError(400, 'Sign in with Steam to import your library.');
       }
 
-      const owned = await getOwnedSteamGames(steamId64, env.STEAM_API_KEY);
-
-      const [existingIgdbIdSet, shelfGames] = await Promise.all([
-        existingIgdbIds(null, userId),
-        prisma.game.findMany({ where: { roomId: null, addedBy: userId }, select: { steamAppid: true, igdbId: true } }),
-      ]);
-      const existingSteamAppIds = new Set(shelfGames.map((g) => g.steamAppid).filter((id): id is number => id != null));
-
-      // No cap - a click imports the whole not-yet-shelved library in one go (issue #175). Ordered
-      // most-played first purely for a nicer result ordering, not to bound the work done.
-      const considered = owned
-        .filter((game) => !existingSteamAppIds.has(game.appId))
-        .sort((a, b) => b.playtimeForeverMinutes - a.playtimeForeverMinutes);
-
-      // Every game already on the shelf is, by definition, owned - mark those too (using the
-      // igdbId already on file, no extra Steam/IGDB lookups needed) so ownership coverage isn't
-      // limited to whatever a single import run actually creates (issue #176).
-      const ownedIgdbIds: number[] = shelfGames.map((g) => g.igdbId);
-
-      const totalOwned = owned.length;
-      const consideredCount = considered.length;
-      let imported = 0;
-      let skipped = 0;
-      // One IGDB lookup per unowned game can take a while for a big library - progress is written
-      // to Redis after every game so the shelf UI can poll it and show live counts instead of a
-      // bare "Importing…" for however long the whole batch takes (see SteamImportCard.tsx).
-      await setSteamImportProgress(userId, { totalOwned, consideredCount, imported, skipped, done: false });
-
-      for (const game of considered) {
-        try {
-          const igdbId = await findIgdbIdBySteamAppId(game.appId);
-          if (igdbId === null) {
-            skipped++;
-            continue;
-          }
-          if (existingIgdbIdSet.has(igdbId)) {
-            ownedIgdbIds.push(igdbId);
-            skipped++;
-            continue;
-          }
-          const resolved = await resolveGameForCreation(igdbId, undefined, STEAM_IMPORT_PLATFORM_LABEL);
-          await prisma.game.create({
-            data: {
-              roomId: null,
-              addedBy: userId,
-              igdbId,
-              title: resolved.title,
-              platform: resolved.platform,
-              genre: resolved.genre,
-              maxCoopPlayers: resolved.maxCoopPlayers,
-              timeToBeatHours: resolved.timeToBeatHours,
-              ggDealsUrl: resolved.ggDealsUrl,
-              steamAppid: resolved.steamAppId,
-              coverImageUrl: resolved.coverImageUrl,
-              releaseYear: resolved.releaseYear,
-            },
-          });
-          existingIgdbIdSet.add(igdbId);
-          ownedIgdbIds.push(igdbId);
-          imported++;
-        } catch {
-          // One game failing to resolve (IGDB hiccup, no match, etc.) shouldn't abort the batch.
-          skipped++;
-        } finally {
-          await setSteamImportProgress(userId, { totalOwned, consideredCount, imported, skipped, done: false });
-        }
+      // Without this, a retried click (e.g. after a slow reverse proxy/CDN times out the request
+      // below before the import is actually done - see runSteamLibraryImportLoop) starts a second
+      // run that independently decides the same not-yet-shelved games are new, creating duplicates.
+      if (!(await acquireSteamImportLock(userId))) {
+        throw new HttpError(409, 'A Steam library import is already running for your account.');
       }
-      if (imported > 0) await invalidateExistingIgdbIds(null, userId);
-      await markOwned(userId, ownedIgdbIds);
 
-      const result: ImportSteamLibraryResult = { totalOwned, consideredCount, imported, skipped };
-      await setSteamImportProgress(userId, { ...result, done: true });
-      return result;
+      try {
+        const owned = await getOwnedSteamGames(steamId64, env.STEAM_API_KEY);
+
+        const [existingIgdbIdSet, shelfGames] = await Promise.all([
+          existingIgdbIds(null, userId),
+          prisma.game.findMany({ where: { roomId: null, addedBy: userId }, select: { steamAppid: true, igdbId: true } }),
+        ]);
+        const existingSteamAppIds = new Set(shelfGames.map((g) => g.steamAppid).filter((id): id is number => id != null));
+
+        // No cap - a click imports the whole not-yet-shelved library in one go (issue #175).
+        // Ordered most-played first purely for a nicer result ordering, not to bound the work done.
+        const considered = owned
+          .filter((game) => !existingSteamAppIds.has(game.appId))
+          .sort((a, b) => b.playtimeForeverMinutes - a.playtimeForeverMinutes);
+
+        // Every game already on the shelf is, by definition, owned - mark those too (using the
+        // igdbId already on file, no extra Steam/IGDB lookups needed) so ownership coverage isn't
+        // limited to whatever a single import run actually creates (issue #176).
+        const ownedIgdbIds: number[] = shelfGames.map((g) => g.igdbId);
+
+        const totalOwned = owned.length;
+        const consideredCount = considered.length;
+        // Progress is written to Redis before the slow loop starts (and after every game once it's
+        // running) so the shelf UI can poll it for live counts instead of a bare "Importing…" for
+        // however long the whole batch takes (see SteamImportCard.tsx).
+        await setSteamImportProgress(userId, { totalOwned, consideredCount, imported: 0, skipped: 0, done: false });
+
+        runSteamLibraryImportLoop(userId, considered, existingIgdbIdSet, ownedIgdbIds, totalOwned, consideredCount)
+          .catch((err) => request.log.error({ err }, 'Steam library import failed'))
+          .finally(() => releaseSteamImportLock(userId));
+
+        reply.status(202);
+        const started: SteamImportStarted = { totalOwned, consideredCount };
+        return started;
+      } catch (err) {
+        await releaseSteamImportLock(userId);
+        throw err;
+      }
     },
   );
 

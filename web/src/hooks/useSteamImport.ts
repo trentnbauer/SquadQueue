@@ -73,33 +73,41 @@ export function useSteamImport(steamLinked: boolean, onImported: () => void) {
     setError(null);
     setProgress(null);
 
-    // The import itself is one request that only resolves once the whole batch is done (one IGDB
-    // lookup per unowned game), so polling a separate progress endpoint alongside it is what gives
-    // this a live "X of Y checked" readout instead of a bare spinner for however long that takes.
+    // The import itself (one IGDB lookup per unowned game) runs in the background on the server
+    // rather than as part of this request - a big library can take minutes, well past what a
+    // reverse proxy/CDN in front of the server holds a connection open for. So this POST only
+    // confirms the import started; the progress endpoint below is polled for both live counts and
+    // to detect completion, instead of waiting on the POST's response for either.
+    try {
+      await gamesApi.importSteamLibrary();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not import your Steam library');
+      setBusy(false);
+      return;
+    }
+
     const pollInterval = setInterval(async () => {
       try {
         const { progress: latest } = await gamesApi.importSteamLibraryProgress();
-        if (latest && !latest.done) setProgress(latest);
+        if (!latest) return;
+        if (!latest.done) {
+          setProgress(latest);
+          return;
+        }
+
+        clearInterval(pollInterval);
+        setProgress(null);
+        setResult(
+          latest.imported === 0
+            ? `No new games to add (checked ${latest.consideredCount} of ${latest.totalOwned} owned).`
+            : `Added ${latest.imported} game${latest.imported === 1 ? '' : 's'} (skipped ${latest.skipped}, checked ${latest.consideredCount} of ${latest.totalOwned} owned).`,
+        );
+        if (latest.imported > 0) onImported();
+        setBusy(false);
       } catch {
         // A failed poll just means the next tick tries again - the import itself isn't affected.
       }
     }, PROGRESS_POLL_INTERVAL_MS);
-
-    try {
-      const { imported, skipped, totalOwned, consideredCount } = await gamesApi.importSteamLibrary();
-      setResult(
-        imported === 0
-          ? `No new games to add (checked ${consideredCount} of ${totalOwned} owned).`
-          : `Added ${imported} game${imported === 1 ? '' : 's'} (skipped ${skipped}, checked ${consideredCount} of ${totalOwned} owned).`,
-      );
-      if (imported > 0) onImported();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not import your Steam library');
-    } finally {
-      clearInterval(pollInterval);
-      setProgress(null);
-      setBusy(false);
-    }
   }
 
   return { busy, activeKind, result, error, progress, startLink, runImport, runWishlistImport };
