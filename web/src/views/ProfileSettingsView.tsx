@@ -53,6 +53,10 @@ export function ProfileSettingsView() {
   const [yearInReview, setYearInReview] = useState<YearInReview | null>(null);
   const [loadingYearInReview, setLoadingYearInReview] = useState(false);
   const [yearInReviewError, setYearInReviewError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   if (!user) return null;
 
@@ -105,6 +109,20 @@ export function ProfileSettingsView() {
       setError(err instanceof Error ? err.message : 'Could not save your systems owned');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await authApi.deleteAccount();
+      // The server already destroyed the session - a full page load (rather than client-side
+      // navigation) picks that up cleanly and lands on the signed-out state, same as signing out.
+      window.location.href = '/';
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete your account');
+      setDeleting(false);
     }
   }
 
@@ -326,6 +344,60 @@ export function ProfileSettingsView() {
                 </ol>
               </div>
             )}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.dangerSectionTitle}>Danger zone</div>
+        <p className={styles.hint}>
+          Permanently delete your account: your Personal Shelf, votes, room memberships, and every
+          game you've added to a room. This can't be undone. If you still own a room (created it
+          and haven't transferred ownership), delete it or hand it off to another member in Room
+          Settings first.
+        </p>
+        {!showDeleteConfirm && (
+          <button type="button" className={styles.dangerButton} onClick={() => setShowDeleteConfirm(true)}>
+            Delete my account
+          </button>
+        )}
+        {showDeleteConfirm && (
+          <div className={styles.deleteConfirmBox}>
+            {deleteError && <div className={styles.error}>{deleteError}</div>}
+            <label className={styles.deleteConfirmLabel} htmlFor="delete-account-confirm">
+              Type DELETE to confirm
+            </label>
+            <input
+              id="delete-account-confirm"
+              type="text"
+              className={styles.deleteConfirmInput}
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              autoComplete="off"
+              autoFocus
+            />
+            <div className={styles.saveRow}>
+              <button
+                type="button"
+                className={styles.dangerButton}
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== 'DELETE' || deleting}
+              >
+                {deleting ? 'Deleting…' : 'Permanently delete my account'}
+              </button>
+              <button
+                type="button"
+                className={styles.unlinkButton}
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteConfirmText('');
+                  setDeleteError(null);
+                }}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
       </div>

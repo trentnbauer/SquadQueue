@@ -17,4 +17,5 @@ export const authApi = {
   linkUrl: (provider: string) => `/auth/${provider}/link`,
   unlink: (provider: string) => apiDelete(`/auth/${provider}/unlink`),
   logoutUrl: '/auth/logout',
+  deleteAccount: () => apiDelete('/api/me'),
 };

@@ -7,6 +7,7 @@ import { toUserDto } from '../util/dto.js';
 import { HttpError } from '../util/httpError.js';
 import { extractSteamId64, resolveSteamId64 } from '../services/steamLibrary.js';
 import { setOwnedPlatforms } from '../services/userSettings.js';
+import { logAdminAction } from '../services/adminAuditLog.js';
 import type { OAuthProfile } from '../services/authProviders/types.js';
 import type { UpdateOwnedPlatformsRequest } from '@queueup/shared';
 
@@ -206,4 +207,55 @@ export default async function authRoutes(app: FastifyInstance) {
     const ownedPlatforms = await setOwnedPlatforms(userId, request.body?.platforms);
     return reply.send({ ownedPlatforms });
   });
+
+  app.delete(
+    '/api/me',
+    // Irreversible and, by nature, something an account only ever does once - a tight limit costs
+    // nothing legitimate while blunting abuse of a compromised session.
+    { config: { rateLimit: { max: 5, timeWindow: '1 hour' } } },
+    async (request, reply) => {
+      const userId = await request.requireAuth();
+
+      // Room.createdBy has no cascade/set-null behavior (a room needs an unambiguous owner), so a
+      // straight prisma.user.delete() would fail on a foreign key violation for anyone who still
+      // owns a room - same guard already used by the admin equivalent of this route
+      // (DELETE /api/admin/users/:id). Deleting or transferring ownership of those rooms first is
+      // a deliberate, visible action the account owner takes via Room Settings, rather than this
+      // silently destroying (or silently reassigning) rooms shared with other people.
+      const createdRoomCount = await prisma.room.count({ where: { createdBy: userId } });
+      if (createdRoomCount > 0) {
+        throw new HttpError(
+          400,
+          `You still own ${createdRoomCount} room${createdRoomCount === 1 ? '' : 's'} — delete ${createdRoomCount === 1 ? 'it' : 'them'} or transfer ownership to another member (in Room Settings) before deleting your account.`,
+        );
+      }
+
+      const target = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+
+      // Written before the delete (not after) since AdminAuditLog.actorId references this same
+      // user row - deleting first would make actorId point at a row that no longer exists. Once
+      // the user is gone, the onDelete: SetNull on that relation clears actorId automatically,
+      // same as it does for an admin-initiated deletion; actorLabel keeps the email regardless.
+      await logAdminAction({
+        actorId: userId,
+        actorLabel: target.email,
+        action: 'user.selfDelete',
+        targetLabel: target.email,
+      });
+
+      // Everything else (linked identities, game ownership claims, room memberships, games added,
+      // votes cast, direct notifications) cascades via the schema's onDelete: Cascade - see
+      // schema.prisma's User model relations.
+      await prisma.user.delete({ where: { id: userId } });
+
+      app.log.warn(
+        { action: 'user.selfDelete', userId, email: target.email },
+        `User ${userId} (${target.email}) deleted their own account`,
+      );
+
+      await request.session.destroy();
+      reply.status(204);
+      return null;
+    },
+  );
 }
