@@ -11,6 +11,7 @@ import { ActionErrorBanner } from '../components/ActionErrorBanner';
 import { TruncatedListBanner } from '../components/TruncatedListBanner';
 import { SteamImportCard } from '../components/SteamImportCard';
 import { SteamWishlistImportCard } from '../components/SteamWishlistImportCard';
+import { SteamCompletionsSyncCard } from '../components/SteamCompletionsSyncCard';
 import { BulkActionBar } from '../components/BulkActionBar';
 import styles from './ShelfView.module.css';
 
@@ -143,6 +144,11 @@ export function ShelfView() {
             <>
               <SteamImportCard steamLinked={steamLinked} />
               <SteamWishlistImportCard steamLinked={steamLinked} />
+              <SteamCompletionsSyncCard
+                steamLinked={steamLinked}
+                onApply={(gameIds) => bulkUpdateStatus(gameIds, 'done')}
+                applying={isBulkUpdatingStatus}
+              />
             </>
           )
         }

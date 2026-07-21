@@ -250,6 +250,29 @@ export interface SteamWishlistImportStarted {
   consideredCount: number;
 }
 
+/** One Personal Shelf game "Sync completions from Steam" (issue #244) found 100%'d on Steam but
+ * not yet marked Done in the app - see SteamCompletionsSyncResult. Purely a suggestion: nothing is
+ * changed server-side until the caller explicitly applies Done to some/all of these, the same
+ * opt-in-by-design pattern as the single-game nudge in GameDetailModal.tsx (issue #227). */
+export interface SteamCompletionCandidate {
+  id: string;
+  title: string;
+  coverImageUrl: string | null;
+  /** ISO 8601 - the most recent Steam achievement unlock on file for this game. */
+  lastUnlockedAt: string;
+}
+
+/** Response from POST /api/games/sync-steam-completions. Runs the same candidate-scanning logic as
+ * the Year in Review recap's auto-detection, but across all time instead of a 12-month window (see
+ * findDetectedSteamCompletions in server/src/services/steamCompletionDetection.ts).
+ * `consideredCount` is how many not-yet-Done, Steam-linked shelf games were actually checked
+ * (bounded by STEAM_COMPLETIONS_SYNC_CANDIDATE_LIMIT) - not the size of `candidates`, since most
+ * checked games won't turn out to be 100%'d. */
+export interface SteamCompletionsSyncResult {
+  consideredCount: number;
+  candidates: SteamCompletionCandidate[];
+}
+
 /** Polled by the shelf UI while an import is running (see routes/games.ts and
  * SteamImportCard.tsx) so a slow import (one IGDB lookup per unowned game) shows live counts
  * instead of sitting on a bare "Importing…" the whole time - also the only source of the final
