@@ -33,6 +33,8 @@ export function ShelfView() {
     refreshPrice,
     isRefreshingPrice,
     setTargetPrice,
+    applyTag,
+    removeTag,
     bulkUpdateStatus,
     isBulkUpdatingStatus,
     bulkRemove,
@@ -137,6 +139,8 @@ export function ShelfView() {
         onRefreshPrice={refreshPrice}
         isRefreshingPrice={isRefreshingPrice}
         onSetTargetPrice={setTargetPrice}
+        onApplyTag={applyTag}
+        onRemoveTag={removeTag}
         showSpinWheel={!bulkMode}
         trailingCard={
           !bulkMode && (
