@@ -284,3 +284,52 @@
   flex-direction: column;
   gap: 2px;
 }
+
+.dangerSectionTitle {
+  font: 700 13px system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ff8a80;
+}
+
+.dangerButton {
+  align-self: flex-start;
+  padding: 9px 18px;
+  border-radius: var(--qu-radius);
+  background: #ff8a80;
+  color: #2a0a06;
+  font-weight: 700;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+}
+
+.dangerButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.deleteConfirmBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--qu-radius);
+  border: 1px solid #ff8a80;
+  background: color-mix(in srgb, #ff8a80 8%, transparent);
+  max-width: 320px;
+}
+
+.deleteConfirmLabel {
+  font-size: 12.5px;
+  color: var(--qu-text);
+}
+
+.deleteConfirmInput {
+  padding: 9px 12px;
+  border-radius: var(--qu-radius);
+  background: var(--qu-surface);
+  border: 1px solid var(--qu-border);
+  color: var(--qu-text);
+  font-size: 13px;
+}
