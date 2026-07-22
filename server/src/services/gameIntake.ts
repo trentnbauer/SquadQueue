@@ -1,7 +1,13 @@
-import { searchGames, getGameDetail, type IgdbGameDetail } from './igdbClient.js';
+import { searchGames, searchCollections, getGameDetail, getCollectionGames, type IgdbGameDetail } from './igdbClient.js';
 import { getSteamPriceAndUrl, refreshSteamPriceForced } from './priceService.js';
 import { HttpError } from '../util/httpError.js';
-import { ROOM_PLATFORM_LABELS, type GameSearchResult, type RoomPlatform } from '@queueup/shared';
+import {
+  ROOM_PLATFORM_LABELS,
+  type CollectionGamesResult,
+  type CollectionSearchResult,
+  type GameSearchResult,
+  type RoomPlatform,
+} from '@queueup/shared';
 
 export async function searchIntake(
   query: string,
@@ -10,6 +16,18 @@ export async function searchIntake(
 ): Promise<GameSearchResult[]> {
   const results = await searchGames(query, platforms);
   return excludeIgdbIds ? results.filter((r) => !excludeIgdbIds.has(r.igdbId)) : results;
+}
+
+export async function searchCollectionsIntake(query: string): Promise<CollectionSearchResult[]> {
+  return searchCollections(query);
+}
+
+export async function collectionGamesIntake(
+  collectionId: number,
+  platforms?: RoomPlatform[],
+  excludeIgdbIds?: Set<number>,
+): Promise<CollectionGamesResult> {
+  return getCollectionGames(collectionId, platforms, excludeIgdbIds);
 }
 
 /** Validates a resolved game against an allowed-platforms set. Used both for a room (always a
