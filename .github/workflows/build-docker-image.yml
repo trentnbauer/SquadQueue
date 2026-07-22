@@ -87,13 +87,15 @@ jobs:
             BULLETS="- No commits since the last image build."
           fi
 
-          # Flags any commit in range whose body contains a "BREAKING CHANGE" marker (Conventional
-          # Commits convention - nothing in this repo's history uses it yet, but this is here so it
-          # takes effect the day something does) - called out in its own section rather than mixed
-          # into the regular list, so it can't get lost.
+          # Flags any commit in range with a proper Conventional Commits "BREAKING CHANGE:" footer
+          # - anchored to the start of a line (with the colon) rather than a bare substring match,
+          # or a commit that merely *talks about* breaking changes in prose (like this one) would
+          # false-positive on itself. Nothing in this repo's history uses the marker yet, but this
+          # is here so it takes effect the day something does - called out in its own section
+          # rather than mixed into the regular list, so it can't get lost.
           BREAKING=""
           for commit_hash in $(git rev-list "$RANGE" 2>/dev/null); do
-            if git log -1 --format='%B' "$commit_hash" | grep -qi 'BREAKING CHANGE'; then
+            if git log -1 --format='%B' "$commit_hash" | grep -qiE '^BREAKING CHANGE:'; then
               BREAKING="${BREAKING}- $(git log -1 --format='%s' "$commit_hash")"$'\n'
             fi
           done
