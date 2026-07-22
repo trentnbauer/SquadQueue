@@ -28,6 +28,18 @@ export function useSteamImport(steamLinked: boolean, onImported: () => void) {
   const [progress, setProgress] = useState<SteamImportProgress | null>(null);
   const [wishlistProgress, setWishlistProgress] = useState<SteamWishlistImportProgress | null>(null);
   const autoImportRan = useRef(false);
+  // Only one of runImport/runWishlistImport polls at a time (busy is shared across both on
+  // purpose - see above), so a single ref covers whichever one is currently running. Tracked so it
+  // can be cleared on unmount - previously a bare setInterval kept polling the server every second
+  // indefinitely if the user navigated away mid-import, since it was only ever cleared from inside
+  // its own "done" callback.
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!steamLinked || autoImportRan.current) return;
@@ -46,6 +58,7 @@ export function useSteamImport(steamLinked: boolean, onImported: () => void) {
   }
 
   async function runWishlistImport() {
+    if (pollIntervalRef.current) return;
     setBusy(true);
     setActiveKind('wishlist');
     setResult(null);
@@ -65,7 +78,7 @@ export function useSteamImport(steamLinked: boolean, onImported: () => void) {
       return;
     }
 
-    const pollInterval = setInterval(async () => {
+    pollIntervalRef.current = setInterval(async () => {
       try {
         const { progress: latest } = await gamesApi.importSteamWishlistProgress();
         if (!latest) return;
@@ -74,7 +87,8 @@ export function useSteamImport(steamLinked: boolean, onImported: () => void) {
           return;
         }
 
-        clearInterval(pollInterval);
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
         setWishlistProgress(null);
         setResult(
           latest.imported === 0
@@ -90,6 +104,7 @@ export function useSteamImport(steamLinked: boolean, onImported: () => void) {
   }
 
   async function runImport() {
+    if (pollIntervalRef.current) return;
     setBusy(true);
     setActiveKind('library');
     setResult(null);
@@ -109,7 +124,7 @@ export function useSteamImport(steamLinked: boolean, onImported: () => void) {
       return;
     }
 
-    const pollInterval = setInterval(async () => {
+    pollIntervalRef.current = setInterval(async () => {
       try {
         const { progress: latest } = await gamesApi.importSteamLibraryProgress();
         if (!latest) return;
@@ -118,7 +133,8 @@ export function useSteamImport(steamLinked: boolean, onImported: () => void) {
           return;
         }
 
-        clearInterval(pollInterval);
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
         setProgress(null);
         setResult(
           latest.imported === 0
