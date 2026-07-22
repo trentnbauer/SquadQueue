@@ -49,6 +49,7 @@ function buildGameDto(game: GameWithRelations, currentUserId: string, price: Gam
     platform: game.platform,
     genre: game.genre,
     releaseYear: game.releaseYear,
+    releaseDate: game.releaseDate ? game.releaseDate.toISOString() : null,
     maxCoopPlayers: game.maxCoopPlayers,
     timeToBeatHours: game.timeToBeatHours,
     timeToBeatRushedHours: game.timeToBeatRushedHours,
