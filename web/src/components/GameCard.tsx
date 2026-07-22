@@ -25,6 +25,9 @@ interface GameCardProps {
   onRefreshPrice: () => void;
   /** Drives the refresh button's spinner. Defaults to false (e.g. contexts that don't track it). */
   isRefreshingPrice?: boolean;
+  /** Manually pins (or clears, with null) which Steam release this game's gg.deals pricing should
+   * be matched to - for when the automatic match found nothing or picked the wrong one. */
+  onSetSteamMatch: (steamAppId: number | null) => void;
   /** Sets (or clears, with null) the price to alert at (issue #162) - only offered for games with
    * a live tracked price, since there's nothing to compare a target against otherwise. */
   onSetTargetPrice: (targetPrice: string | null) => void;
@@ -58,6 +61,7 @@ export function GameCard({
   onRemove,
   onRefreshPrice,
   isRefreshingPrice = false,
+  onSetSteamMatch,
   onSetTargetPrice,
   onSetOwnership,
   onApplyTag,
@@ -196,6 +200,7 @@ export function GameCard({
           onRemove={onRemove}
           onRefreshPrice={onRefreshPrice}
           isRefreshingPrice={isRefreshingPrice}
+          onSetSteamMatch={onSetSteamMatch}
           onSetTargetPrice={onSetTargetPrice}
           onSetOwnership={onSetOwnership}
           onApplyTag={onApplyTag}

@@ -22,10 +22,24 @@ interface SteamStoreSearchItem {
   type: string;
   name: string;
   id: number;
+  tiny_image?: string;
 }
 
 interface SteamStoreSearchResponse {
   items?: SteamStoreSearchItem[];
+}
+
+async function steamStoreSearch(query: string): Promise<SteamStoreSearchItem[]> {
+  const url = new URL('https://store.steampowered.com/api/storesearch/');
+  url.searchParams.set('term', query);
+  url.searchParams.set('l', 'english');
+  url.searchParams.set('cc', 'us');
+
+  const response = await fetch(url);
+  if (!response.ok) return [];
+
+  const body = (await response.json()) as SteamStoreSearchResponse;
+  return (body.items ?? []).filter((item) => item.type === 'app');
 }
 
 /** Public, unauthenticated Steam store search - no API key needed, unlike everything else in this
@@ -36,18 +50,29 @@ interface SteamStoreSearchResponse {
  * (case-insensitive) title match against a Steam "app" result - anything looser risks matching a
  * DLC, soundtrack, or demo listing instead of the base game. */
 export async function findSteamAppIdByTitle(title: string): Promise<number | null> {
-  const url = new URL('https://store.steampowered.com/api/storesearch/');
-  url.searchParams.set('term', title);
-  url.searchParams.set('l', 'english');
-  url.searchParams.set('cc', 'us');
-
-  const response = await fetch(url);
-  if (!response.ok) return null;
-
-  const body = (await response.json()) as SteamStoreSearchResponse;
+  const items = await steamStoreSearch(title);
   const normalized = title.trim().toLowerCase();
-  const match = body.items?.find((item) => item.type === 'app' && item.name.trim().toLowerCase() === normalized);
+  const match = items.find((item) => item.name.trim().toLowerCase() === normalized);
   return match?.id ?? null;
+}
+
+export interface SteamStoreMatch {
+  steamAppId: number;
+  title: string;
+  thumbnailUrl: string | null;
+}
+
+/** Same search as findSteamAppIdByTitle, but returns every candidate instead of only an exact
+ * title match - lets a person pick the right one by hand (issue: manual gg.deals match) when the
+ * automatic exact-match fallback comes up empty or picks the wrong edition/remaster. Capped at 10
+ * - plenty to eyeball, and keeps the response small. */
+export async function searchSteamStore(query: string): Promise<SteamStoreMatch[]> {
+  const items = await steamStoreSearch(query);
+  return items.slice(0, 10).map((item) => ({
+    steamAppId: item.id,
+    title: item.name,
+    thumbnailUrl: item.tiny_image ?? null,
+  }));
 }
 
 interface SteamOwnedGame {

@@ -18,6 +18,7 @@ import {
   resolveGameForCreation,
   refreshGamePricing,
   backfillSteamAppId,
+  setManualSteamMatch,
 } from '../services/gameIntake.js';
 import { notifyRoom } from '../services/notifications.js';
 import { platformFamilies, findIgdbIdBySteamAppId } from '../services/igdbClient.js';
@@ -37,6 +38,7 @@ import {
   getSteamWishlistImportProgress,
   acquireSteamWishlistImportLock,
   releaseSteamWishlistImportLock,
+  searchSteamStore,
 } from '../services/steamLibrary.js';
 import type { OwnedSteamGame } from '../services/steamLibrary.js';
 import { setOwnership, markOwned } from '../services/gameOwnership.js';
@@ -52,6 +54,7 @@ import type {
   PriceRegion,
   SetGameOwnershipRequest,
   SetGamePrerequisiteRequest,
+  SetSteamMatchRequest,
   SetTargetPriceRequest,
   SteamImportProgress,
   SteamImportStarted,
@@ -652,6 +655,40 @@ export default async function gameRoutes(app: FastifyInstance) {
       await refreshGamePricing(game.id, steamAppId);
       const updated = await loadGameOr404(game.id);
       return { game: await serializeGame(updated, userId, parseRegion(request.query.region)) };
+    },
+  );
+
+  app.get<{ Params: { id: string }; Querystring: { q?: string } }>(
+    '/api/games/:id/steam-search',
+    // A live outbound request to Steam's public store search, same class of route as
+    // refresh-price above.
+    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    async (request) => {
+      const userId = await request.requireAuth();
+      const game = await loadGameOr404(request.params.id);
+      await requireGameReadAccess(game, userId);
+
+      const query = request.query.q?.trim() || game.title;
+      return { results: await searchSteamStore(query) };
+    },
+  );
+
+  app.patch<{ Params: { id: string }; Body: SetSteamMatchRequest }>(
+    '/api/games/:id/steam-match',
+    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    async (request) => {
+      const userId = await request.requireAuth();
+      const game = await loadGameOr404(request.params.id);
+      await requireGameReadAccess(game, userId);
+
+      const { steamAppId } = request.body;
+      if (steamAppId !== null && (!Number.isInteger(steamAppId) || steamAppId <= 0)) {
+        throw new HttpError(400, 'A valid steamAppId (or null to clear) is required');
+      }
+
+      await setManualSteamMatch(game.id, steamAppId);
+      const updated = await loadGameOr404(game.id);
+      return { game: await serializeGame(updated, userId) };
     },
   );
 

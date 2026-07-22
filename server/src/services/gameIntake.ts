@@ -131,3 +131,20 @@ export async function backfillSteamAppId(gameId: string, igdbId: number): Promis
   await prisma.game.update({ where: { id: gameId }, data: { steamAppid: steamAppId, ggDealsUrl } });
   return steamAppId;
 }
+
+/** Manually pins a game's Steam App ID (issue: manual gg.deals match) - for when neither the IGDB
+ * link nor the exact-title Steam search fallback found the right release (or found none at all),
+ * and the person looking at the card can see for themselves which Steam store result is actually
+ * theirs. Passing null clears the match instead, reverting to "price unavailable" - a future
+ * automatic or manual match can always try again from there. Not gated by the forced-refresh
+ * cooldown in refreshGamePricing - this pins a specific, deliberately-chosen id for the first
+ * time, not the "check this same id yet again" case that cooldown protects against. */
+export async function setManualSteamMatch(gameId: string, steamAppId: number | null): Promise<void> {
+  if (steamAppId === null) {
+    await prisma.game.update({ where: { id: gameId }, data: { steamAppid: null, ggDealsUrl: null } });
+    return;
+  }
+
+  const { ggDealsUrl } = await getSteamPriceAndUrl(steamAppId, { forceRefresh: true });
+  await prisma.game.update({ where: { id: gameId }, data: { steamAppid: steamAppId, ggDealsUrl } });
+}
