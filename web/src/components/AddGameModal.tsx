@@ -213,6 +213,9 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
   const addedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dialogRef = useModalA11y<HTMLDivElement>(onClose);
+  // Bumped on every new search so a response for an older query can recognize it's stale and
+  // avoid overwriting the results of a newer one that resolved first.
+  const latestRequestIdRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -224,21 +227,28 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setAddedTitle(null);
     if (!query.trim()) {
+      // Bump the request id here too, or a still-in-flight search from before the query was
+      // cleared can resolve afterward and pass the staleness check below, overwriting this
+      // intentional clear with stale results.
+      ++latestRequestIdRef.current;
       setResults([]);
       setCollections([]);
       return;
     }
     debounceRef.current = setTimeout(async () => {
+      const requestId = ++latestRequestIdRef.current;
       setSearching(true);
       try {
         const { results, collections } = await gamesApi.search(query.trim(), roomId);
+        if (requestId !== latestRequestIdRef.current) return;
         setResults(results);
         setCollections(collections);
       } catch {
+        if (requestId !== latestRequestIdRef.current) return;
         setResults([]);
         setCollections([]);
       } finally {
-        setSearching(false);
+        if (requestId === latestRequestIdRef.current) setSearching(false);
       }
     }, 300);
     return () => {
