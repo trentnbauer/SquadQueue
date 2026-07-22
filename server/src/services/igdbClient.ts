@@ -254,7 +254,11 @@ interface IgdbCollectionWithGames extends IgdbCollection {
 // its own gg.deals pricing lookup) from a single click.
 const MAX_COLLECTION_GAMES = 40;
 
-export async function getCollectionGames(collectionId: number, platforms?: RoomPlatform[]): Promise<CollectionGamesResult> {
+export async function getCollectionGames(
+  collectionId: number,
+  platforms?: RoomPlatform[],
+  excludeIgdbIds?: Set<number>,
+): Promise<CollectionGamesResult> {
   if (!Number.isInteger(collectionId) || collectionId <= 0) {
     throw new HttpError(400, 'Invalid IGDB collection id');
   }
@@ -272,6 +276,11 @@ export async function getCollectionGames(collectionId: number, platforms?: RoomP
     .filter((g) => g.name)
     .filter(isPrimaryEdition)
     .filter((g) => !activePlatforms || platformFamilies(g.platforms).some((f) => activePlatforms.includes(f)))
+    // Excluded *before* the MAX_COLLECTION_GAMES cap below, not after - otherwise a collection
+    // with more entries than the cap could cut off real, not-yet-added games past position 40
+    // that were never even considered, just because some of the first 40 (by release order)
+    // happened to already be added.
+    .filter((g) => !excludeIgdbIds || !excludeIgdbIds.has(g.id))
     // Oldest release first - the natural "play in order" sequence for a series.
     .sort((a, b) => (a.first_release_date ?? Infinity) - (b.first_release_date ?? Infinity))
     .map((g) => ({

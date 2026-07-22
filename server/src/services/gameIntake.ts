@@ -27,12 +27,7 @@ export async function collectionGamesIntake(
   platforms?: RoomPlatform[],
   excludeIgdbIds?: Set<number>,
 ): Promise<CollectionGamesResult> {
-  const { name, games, truncated } = await getCollectionGames(collectionId, platforms);
-  return {
-    name,
-    games: excludeIgdbIds ? games.filter((g) => !excludeIgdbIds.has(g.igdbId)) : games,
-    truncated,
-  };
+  return getCollectionGames(collectionId, platforms, excludeIgdbIds);
 }
 
 /** Validates a resolved game against an allowed-platforms set. Used both for a room (always a

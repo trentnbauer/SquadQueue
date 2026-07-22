@@ -19,6 +19,10 @@ interface CollectionReviewProps {
   roomId: string | null;
   onAdded: () => void;
   onBack: () => void;
+  /** Lets the parent modal disable its own close controls while a batch add is running - closing
+   * mid-batch previously left the add loop running invisibly in the background with no way for the
+   * user to know, since nothing stopped it and the parent had no idea it was in progress. */
+  onBusyChange: (busy: boolean) => void;
 }
 
 /** The screen shown after picking a collection from search (issue #272) - a review checklist
@@ -28,7 +32,7 @@ interface CollectionReviewProps {
  * default. Sequential POSTs to the same single-game create endpoint everything else uses, rather
  * than a new bulk-create route - collections are small enough (capped server-side) that this
  * doesn't need its own backend path. */
-function CollectionReview({ collection, roomId, onAdded, onBack }: CollectionReviewProps) {
+function CollectionReview({ collection, roomId, onAdded, onBack, onBusyChange }: CollectionReviewProps) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [data, setData] = useState<CollectionGamesResult | null>(null);
@@ -37,6 +41,16 @@ function CollectionReview({ collection, roomId, onAdded, onBack }: CollectionRev
   const [addProgress, setAddProgress] = useState<{ done: number; total: number } | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const [addSummary, setAddSummary] = useState<string | null>(null);
+  // Belt-and-suspenders alongside onBusyChange disabling the parent's close controls - if the
+  // component ever unmounts some other way while a batch add is in flight, this stops the loop
+  // from starting any *further* creates, rather than letting it run to completion invisibly.
+  const cancelledRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      cancelledRef.current = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,25 +88,36 @@ function CollectionReview({ collection, roomId, onAdded, onBack }: CollectionRev
     if (!data || selectedIds.size === 0) return;
     const toAdd = data.games.filter((g) => selectedIds.has(g.igdbId));
     setAdding(true);
+    onBusyChange(true);
     setAddError(null);
     setAddSummary(null);
     setAddProgress({ done: 0, total: toAdd.length });
 
     let added = 0;
-    let failed = 0;
+    const failedIds = new Set<number>();
     for (const game of toAdd) {
+      if (cancelledRef.current) break;
       try {
         await gamesApi.create({ igdbId: game.igdbId, roomId });
         added += 1;
       } catch {
-        failed += 1;
+        failedIds.add(game.igdbId);
       }
       setAddProgress((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev));
     }
+    if (cancelledRef.current) return;
+
+    // Drop the games that were actually added from the checklist, so a retry after a partial
+    // failure only resubmits the ones that failed instead of re-creating (and getting
+    // duplicate-rejected on) ones that already succeeded.
+    setData((prev) => (prev ? { ...prev, games: prev.games.filter((g) => failedIds.has(g.igdbId)) } : prev));
+    setSelectedIds(new Set(failedIds));
 
     setAdding(false);
+    onBusyChange(false);
     setAddProgress(null);
     if (added > 0) onAdded();
+    const failed = failedIds.size;
     setAddSummary(
       failed === 0
         ? `Added ${added} game${added === 1 ? '' : 's'}.`
@@ -109,56 +134,59 @@ function CollectionReview({ collection, roomId, onAdded, onBack }: CollectionRev
     return <div className={styles.error}>{loadError ?? 'Could not load that collection'}</div>;
   }
 
-  if (data.games.length === 0) {
-    return (
-      <div className={styles.searching}>
-        Nothing left to add from {data.name} - every game in it is already here, or none are available
-        on this platform.
-      </div>
-    );
-  }
+  const nothingLeft = data.games.length === 0;
 
   return (
     <div>
       {addError && <div className={styles.error}>{addError}</div>}
       {addSummary && !addError && <div className={styles.added}>{addSummary}</div>}
-      {data.truncated && (
+      {!addSummary && data.truncated && (
         <div className={styles.searching}>
           Showing the first {data.games.length} games in this collection - it has more than that.
         </div>
       )}
 
-      <div className={styles.resultsList}>
-        {data.games.map((g: GameSearchResult) => (
-          <label key={g.igdbId} className={styles.collectionRow}>
-            <input
-              type="checkbox"
-              checked={selectedIds.has(g.igdbId)}
-              onChange={() => toggle(g.igdbId)}
-              disabled={adding}
-            />
-            <div className={styles.resultMeta}>
-              <span className={styles.resultTitle}>
-                {g.title}
-                {g.releaseYear ? ` (${g.releaseYear})` : ''}
-              </span>
-              <span className={styles.resultPlatform}>{g.platform}</span>
-            </div>
-          </label>
-        ))}
-      </div>
+      {nothingLeft ? (
+        <div className={styles.searching}>
+          {addSummary
+            ? 'Nothing else left to add from this collection.'
+            : `Nothing left to add from ${data.name} - every game in it is already here, or none are available on this platform.`}
+        </div>
+      ) : (
+        <div className={styles.resultsList}>
+          {data.games.map((g: GameSearchResult) => (
+            <label key={g.igdbId} className={styles.collectionRow}>
+              <input
+                type="checkbox"
+                checked={selectedIds.has(g.igdbId)}
+                onChange={() => toggle(g.igdbId)}
+                disabled={adding}
+              />
+              <div className={styles.resultMeta}>
+                <span className={styles.resultTitle}>
+                  {g.title}
+                  {g.releaseYear ? ` (${g.releaseYear})` : ''}
+                </span>
+                <span className={styles.resultPlatform}>{g.platform}</span>
+              </div>
+            </label>
+          ))}
+        </div>
+      )}
 
       <div className={styles.collectionActions}>
-        <button
-          type="button"
-          className={styles.addButton}
-          onClick={handleAddSelected}
-          disabled={adding || selectedIds.size === 0}
-        >
-          {adding && addProgress
-            ? `Adding ${addProgress.done}/${addProgress.total}…`
-            : `Add ${selectedIds.size} game${selectedIds.size === 1 ? '' : 's'}`}
-        </button>
+        {!nothingLeft && (
+          <button
+            type="button"
+            className={styles.addButton}
+            onClick={handleAddSelected}
+            disabled={adding || selectedIds.size === 0}
+          >
+            {adding && addProgress
+              ? `Adding ${addProgress.done}/${addProgress.total}…`
+              : `Add ${selectedIds.size} game${selectedIds.size === 1 ? '' : 's'}`}
+          </button>
+        )}
         <button type="button" className={styles.cancelButton} onClick={onBack} disabled={adding}>
           Back to search
         </button>
@@ -180,6 +208,7 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
   const [addedTitle, setAddedTitle] = useState<string | null>(null);
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
   const [activeCollection, setActiveCollection] = useState<CollectionSearchResult | null>(null);
+  const [collectionBusy, setCollectionBusy] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const addedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -260,7 +289,7 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
   const busy = addingId !== null;
 
   return (
-    <div className={styles.backdrop} role="presentation" onClick={onClose}>
+    <div className={styles.backdrop} role="presentation" onClick={collectionBusy ? undefined : onClose}>
       <div
         ref={dialogRef}
         className={styles.dialog}
@@ -272,7 +301,13 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
       >
         <div className={styles.header}>
           <span className={styles.title}>{activeCollection ? activeCollection.name : 'Add a Game'}</span>
-          <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
+            disabled={collectionBusy}
+            aria-label="Close"
+          >
             ×
           </button>
         </div>
@@ -283,6 +318,7 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
             roomId={roomId}
             onAdded={onAdded}
             onBack={() => setActiveCollection(null)}
+            onBusyChange={setCollectionBusy}
           />
         ) : (
           <>
