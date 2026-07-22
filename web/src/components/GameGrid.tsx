@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
-import type { Game, GameStatus, User, VoteValue } from '@queueup/shared';
+import type { Game, GameStatus, SpinWheelTheme, User, VoteValue } from '@queueup/shared';
 import { GameCard } from './GameCard';
 import { SpinWheelCard } from './SpinWheelCard';
 import { ALL_FILTER_VALUE, filterGames, sortByScore, statusBucket } from './gameGridLogic';
@@ -51,6 +51,9 @@ interface GameGridProps {
   showSpinWheel?: boolean;
   /** Room Settings toggle - restricts Spin the Wheel to games every current member owns. */
   spinOnlyFullyOwned?: boolean;
+  /** Room Settings choice of Spin the Wheel presentation (issue #297) - undefined on the Personal
+   * Shelf, same as spinOnlyFullyOwned. */
+  spinWheelTheme?: SpinWheelTheme;
   /** Extra tile rendered as the very last card in the grid, after every game and regardless of
    * filters (e.g. the Steam import tile on the Personal Shelf) - unlike the Spin the Wheel tile,
    * this doesn't get slotted into a specific status position. */
@@ -94,6 +97,7 @@ export function GameGrid({
   roomMembers,
   showSpinWheel,
   spinOnlyFullyOwned,
+  spinWheelTheme,
   trailingCard,
   hiddenStatuses,
   onStatusChange,
@@ -163,7 +167,9 @@ export function GameGrid({
     );
   }
 
-  const spinCard = showSpinWheel && <SpinWheelCard games={games} spinOnlyFullyOwned={spinOnlyFullyOwned} />;
+  const spinCard = showSpinWheel && (
+    <SpinWheelCard games={games} spinOnlyFullyOwned={spinOnlyFullyOwned} spinWheelTheme={spinWheelTheme} />
+  );
 
   if (prioritized.length === 0 || visible.length === 0) {
     const message = prioritized.length === 0

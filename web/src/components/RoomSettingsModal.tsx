@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ROOM_PLATFORM_LABELS,
+  SPIN_WHEEL_THEME_LABELS,
   type Game,
   type Room,
   type RoomMember,
   type RoomPlatform,
   type RoomRole,
+  type SpinWheelTheme,
 } from '@queueup/shared';
 import { roomsApi } from '../api/rooms';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +21,7 @@ import { AvatarBadge } from './AvatarBadge';
 import styles from './RoomSettingsModal.module.css';
 
 const ROOM_PLATFORM_OPTIONS = Object.keys(ROOM_PLATFORM_LABELS) as RoomPlatform[];
+const SPIN_WHEEL_THEME_OPTIONS = Object.keys(SPIN_WHEEL_THEME_LABELS) as SpinWheelTheme[];
 
 const ROLE_LABEL: Record<RoomRole, string> = {
   room_master: 'Room Master',
@@ -46,6 +49,7 @@ export function RoomSettingsModal({ room, members, games, onClose }: RoomSetting
   const [accentColor, setAccentColor] = useState(room.accentColor);
   const [discordWebhookUrl, setDiscordWebhookUrl] = useState(room.discordWebhookUrl ?? '');
   const [spinOnlyFullyOwned, setSpinOnlyFullyOwned] = useState(room.spinOnlyFullyOwned);
+  const [spinWheelTheme, setSpinWheelTheme] = useState<SpinWheelTheme>(room.spinWheelTheme);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
@@ -76,7 +80,8 @@ export function RoomSettingsModal({ room, members, games, onClose }: RoomSetting
     platform !== room.platform ||
     accentColor !== room.accentColor ||
     discordWebhookUrl.trim() !== (room.discordWebhookUrl ?? '') ||
-    spinOnlyFullyOwned !== room.spinOnlyFullyOwned;
+    spinOnlyFullyOwned !== room.spinOnlyFullyOwned ||
+    spinWheelTheme !== room.spinWheelTheme;
 
   function invalidateRoomQueries() {
     queryClient.invalidateQueries({ queryKey: ['rooms'] });
@@ -98,6 +103,7 @@ export function RoomSettingsModal({ room, members, games, onClose }: RoomSetting
         accentColor,
         discordWebhookUrl: discordWebhookUrl.trim() || null,
         spinOnlyFullyOwned,
+        spinWheelTheme,
       });
       invalidateRoomQueries();
       onClose();
@@ -277,6 +283,23 @@ export function RoomSettingsModal({ room, members, games, onClose }: RoomSetting
                 />
                 Only spin games everyone in the room already owns
               </label>
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor="room-settings-spin-theme">
+                  Spin the Wheel theme
+                </label>
+                <select
+                  id="room-settings-spin-theme"
+                  className={styles.select}
+                  value={spinWheelTheme}
+                  onChange={(e) => setSpinWheelTheme(e.target.value as SpinWheelTheme)}
+                >
+                  {SPIN_WHEEL_THEME_OPTIONS.map((t) => (
+                    <option key={t} value={t}>
+                      {SPIN_WHEEL_THEME_LABELS[t]}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button type="button" className={styles.saveButton} onClick={handleSave} disabled={saving || !dirty}>
                 {saving ? 'Saving…' : 'Save changes'}
               </button>

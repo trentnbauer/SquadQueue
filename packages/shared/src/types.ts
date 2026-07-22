@@ -86,7 +86,26 @@ export interface Room {
   discordWebhookUrl?: string | null;
   /** When true, Spin the Wheel only draws from games every current member owns. */
   spinOnlyFullyOwned: boolean;
+  /** Which visual presentation Spin the Wheel uses - see SpinWheelTheme. */
+  spinWheelTheme: SpinWheelTheme;
 }
+
+/** Which visual presentation Spin the Wheel uses, room-settable. "random" resolves to one of the
+ * other four at spin time (see resolveConcreteTheme in the web app) rather than being a renderable
+ * theme itself - ConcreteSpinWheelTheme is what a caller actually renders. */
+export type SpinWheelTheme = 'slot' | 'crate' | 'card_flip' | 'roulette' | 'random';
+
+export const SPIN_WHEEL_THEME_LABELS: Record<SpinWheelTheme, string> = {
+  slot: 'Slot Machine',
+  crate: 'Loot Crate',
+  card_flip: 'Card Flip',
+  roulette: 'Roulette Wheel',
+  random: 'Random',
+};
+
+export type ConcreteSpinWheelTheme = Exclude<SpinWheelTheme, 'random'>;
+
+export const CONCRETE_SPIN_WHEEL_THEMES: ConcreteSpinWheelTheme[] = ['slot', 'crate', 'card_flip', 'roulette'];
 
 export interface RoomMember {
   roomId: string;
@@ -230,6 +249,7 @@ export interface UpdateRoomRequest {
   /** Set to null to clear/disable the webhook. */
   discordWebhookUrl?: string | null;
   spinOnlyFullyOwned?: boolean;
+  spinWheelTheme?: SpinWheelTheme;
 }
 
 export interface JoinRoomRequest {
