@@ -43,6 +43,20 @@ enum RoomPlatform {
   @@map("room_platform")
 }
 
+/// Which visual presentation Spin the Wheel uses (issue #297) - room master only to change, same
+/// gating as Room.spinOnlyFullyOwned. "random" isn't itself a renderable theme - it resolves to
+/// one of the other four at spin time (see resolveConcreteTheme in the web app), re-rolled fresh
+/// on every spin rather than fixed once per room.
+enum SpinWheelTheme {
+  slot
+  crate
+  card_flip
+  roulette
+  random
+
+  @@map("spin_wheel_theme")
+}
+
 enum NotificationType {
   game_added
   member_joined
@@ -139,6 +153,9 @@ model Room {
   /// Room Settings toggle: when true, Spin the Wheel's candidate pool is restricted to games every
   /// current member owns (see gameOwnership.ts / SpinWheelCard) instead of the full backlog.
   spinOnlyFullyOwned Boolean @default(false) @map("spin_only_fully_owned")
+  /// Which visual presentation Spin the Wheel uses (issue #297) - defaults to the original
+  /// slot-machine reel so existing rooms don't change.
+  spinWheelTheme SpinWheelTheme @default(slot) @map("spin_wheel_theme")
 
   creator       User           @relation("RoomCreatedBy", fields: [createdBy], references: [id])
   members       RoomMember[]

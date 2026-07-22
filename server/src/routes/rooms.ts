@@ -6,11 +6,21 @@ import { HttpError } from '../util/httpError.js';
 import { requireElevated, requireMembership, generateUniqueInviteCode, getRoom } from '../services/roomAccess.js';
 import { logAdminAction } from '../services/adminAuditLog.js';
 import { notifyRoom, notifyRoomMembersDirect } from '../services/notifications.js';
-import type { CreateRoomRequest, JoinRoomRequest, Room, RoomMember, RoomPlatform, RoomRole, UpdateRoomRequest } from '@queueup/shared';
+import type {
+  CreateRoomRequest,
+  JoinRoomRequest,
+  Room,
+  RoomMember,
+  RoomPlatform,
+  RoomRole,
+  SpinWheelTheme,
+  UpdateRoomRequest,
+} from '@queueup/shared';
 import { ROOM_PLATFORM_LABELS } from '@queueup/shared';
 
 const ROOM_PLATFORMS: RoomPlatform[] = ['pc', 'xbox_360', 'xbox_one', 'xbox_series', 'ps3', 'ps4', 'ps5', 'switch', 'switch2'];
 const ROOM_ROLES: RoomRole[] = ['room_master', 'moderator', 'member'];
+const SPIN_WHEEL_THEMES: SpinWheelTheme[] = ['slot', 'crate', 'card_flip', 'roulette', 'random'];
 
 function toRoomDto(
   room: {
@@ -22,6 +32,7 @@ function toRoomDto(
     createdAt: Date;
     discordWebhookUrl: string | null;
     spinOnlyFullyOwned: boolean;
+    spinWheelTheme: SpinWheelTheme;
   },
   role: Room['myRole'],
   inviteCode: string,
@@ -40,6 +51,7 @@ function toRoomDto(
     // also change it) gets the real value; other members just don't see it at all.
     discordWebhookUrl: role === 'room_master' ? room.discordWebhookUrl : undefined,
     spinOnlyFullyOwned: room.spinOnlyFullyOwned,
+    spinWheelTheme: room.spinWheelTheme,
   };
 }
 
@@ -139,9 +151,12 @@ export default async function roomRoutes(app: FastifyInstance) {
       throw new HttpError(403, 'Only the Room Master can change room settings');
     }
 
-    const { name, platform, accentColor, discordWebhookUrl, spinOnlyFullyOwned } = request.body;
+    const { name, platform, accentColor, discordWebhookUrl, spinOnlyFullyOwned, spinWheelTheme } = request.body;
     if (name !== undefined && !name.trim()) throw new HttpError(400, 'Room name cannot be empty');
     if (platform !== undefined && !ROOM_PLATFORMS.includes(platform)) throw new HttpError(400, 'A valid platform is required');
+    if (spinWheelTheme !== undefined && !SPIN_WHEEL_THEMES.includes(spinWheelTheme)) {
+      throw new HttpError(400, 'A valid Spin the Wheel theme is required');
+    }
     // Restricted to Discord's own webhook host (not an arbitrary URL) - this app POSTs to
     // whatever's stored here, so accepting any URL would make this an open SSRF vector for
     // whoever can set it (the Room Master, but still - internal network probing shouldn't be
@@ -163,6 +178,7 @@ export default async function roomRoutes(app: FastifyInstance) {
         ...(accentColor !== undefined && { accentColor }),
         ...(discordWebhookUrl !== undefined && { discordWebhookUrl }),
         ...(spinOnlyFullyOwned !== undefined && { spinOnlyFullyOwned }),
+        ...(spinWheelTheme !== undefined && { spinWheelTheme }),
       },
     });
 

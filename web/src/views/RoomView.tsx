@@ -92,6 +92,7 @@ export function RoomView() {
         roomMembers={roomMembers}
         showSpinWheel
         spinOnlyFullyOwned={activeRoom?.spinOnlyFullyOwned}
+        spinWheelTheme={activeRoom?.spinWheelTheme}
         hiddenStatuses={['playing', 'done']}
         onStatusChange={updateStatus}
         onVote={vote}

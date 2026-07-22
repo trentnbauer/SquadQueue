@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Game } from '@queueup/shared';
+import type { Game, SpinWheelTheme } from '@queueup/shared';
 import { backlogGames } from './gameGridLogic';
 import { SpinWheelModal } from './SpinWheelModal';
 import styles from './SpinWheelCard.module.css';
@@ -9,12 +9,15 @@ interface SpinWheelCardProps {
   /** Room Settings toggle (issue #173) - when true, only games every current member owns are
    * eligible, so the wheel never lands on something part of the squad would need to buy first. */
   spinOnlyFullyOwned?: boolean;
+  /** Room Settings choice of presentation (issue #297) - undefined on the Personal Shelf, which
+   * has no room/theme setting of its own; SpinWheelModal defaults to the slot machine either way. */
+  spinWheelTheme?: SpinWheelTheme;
 }
 
 /** Sits in the grid as its own tile (rather than a button in a bar above it), so picking tonight's
  * game reads as part of the collection instead of a toolbar action. Opens the actual spin/reveal
  * in SpinWheelModal - this component only decides whether the wheel has anything to draw from. */
-export function SpinWheelCard({ games, spinOnlyFullyOwned }: SpinWheelCardProps) {
+export function SpinWheelCard({ games, spinOnlyFullyOwned, spinWheelTheme }: SpinWheelCardProps) {
   const [open, setOpen] = useState(false);
   const backlog = backlogGames(games);
   const candidates = spinOnlyFullyOwned
@@ -43,7 +46,9 @@ export function SpinWheelCard({ games, spinOnlyFullyOwned }: SpinWheelCardProps)
         </div>
       </button>
 
-      {open && <SpinWheelModal games={games} candidates={candidates} onClose={() => setOpen(false)} />}
+      {open && (
+        <SpinWheelModal games={games} candidates={candidates} theme={spinWheelTheme} onClose={() => setOpen(false)} />
+      )}
     </>
   );
 }
