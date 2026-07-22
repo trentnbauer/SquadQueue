@@ -5,6 +5,7 @@ import { VoteRow } from './VoteRow';
 import { VoteHeatmap } from './VoteHeatmap';
 import { AchievementRow } from './AchievementRow';
 import { TagPicker } from './TagPicker';
+import { SteamMatchPicker } from './SteamMatchPicker';
 import { useConfirm } from '../context/ConfirmContext';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { useGameAchievements } from '../hooks/useGameAchievements';
@@ -24,6 +25,7 @@ interface GameDetailModalProps {
   onRemove: () => void;
   onRefreshPrice: () => void;
   isRefreshingPrice?: boolean;
+  onSetSteamMatch: (steamAppId: number | null) => void;
   onSetTargetPrice: (targetPrice: string | null) => void;
   onSetOwnership?: (owned: boolean) => void;
   /** Finds-or-creates a tag by name and applies it to this game (issue #247). */
@@ -49,6 +51,7 @@ export function GameDetailModal({
   onRemove,
   onRefreshPrice,
   isRefreshingPrice = false,
+  onSetSteamMatch,
   onSetTargetPrice,
   onSetOwnership,
   onApplyTag,
@@ -60,6 +63,7 @@ export function GameDetailModal({
   const confirm = useConfirm();
   const [editingTargetPrice, setEditingTargetPrice] = useState(false);
   const [targetPriceDraft, setTargetPriceDraft] = useState('');
+  const [showMatchPicker, setShowMatchPicker] = useState(false);
   const dialogRef = useModalA11y<HTMLDivElement>(onClose);
   const { players: achievementPlayers } = useGameAchievements(game.id);
 
@@ -205,6 +209,25 @@ export function GameDetailModal({
                   </span>
                 )}
               </div>
+            )}
+
+            {/* Always available, not just when unavailable - the automatic match (IGDB, then an
+                exact-title Steam search) can pick the wrong edition/remaster for a live price too. */}
+            <button type="button" className={cardStyles.fixMatchLink} onClick={() => setShowMatchPicker(true)}>
+              {game.price.source === 'live' || game.ggDealsUrl ? 'Wrong game matched?' : 'Not finding a price? Fix match'}
+            </button>
+
+            {showMatchPicker && (
+              <SteamMatchPicker
+                gameId={game.id}
+                gameTitle={game.title}
+                hasExistingMatch={game.price.source === 'live' || game.ggDealsUrl !== null}
+                onMatched={(steamAppId) => {
+                  onSetSteamMatch(steamAppId);
+                  setShowMatchPicker(false);
+                }}
+                onClose={() => setShowMatchPicker(false)}
+              />
             )}
 
             {game.price.source === 'live' && (

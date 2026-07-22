@@ -294,6 +294,23 @@
   color: var(--qu-muted);
 }
 
+.fixMatchLink {
+  display: block;
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--qu-muted);
+  font: 500 11px system-ui, sans-serif;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+}
+
+.fixMatchLink:hover {
+  color: var(--qu-accent);
+}
+
 .ownershipRow {
   display: flex;
   align-items: center;

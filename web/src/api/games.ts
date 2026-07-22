@@ -12,10 +12,12 @@ import type {
   PriceRegion,
   SetGameOwnershipRequest,
   SetGamePrerequisiteRequest,
+  SetSteamMatchRequest,
   SetTargetPriceRequest,
   SteamCompletionsSyncResult,
   SteamImportProgress,
   SteamImportStarted,
+  SteamStoreMatch,
   SteamWishlistImportProgress,
   SteamWishlistImportStarted,
   UpdateGameStatusRequest,
@@ -45,6 +47,9 @@ export const gamesApi = {
   bulkRemove: (body: BulkRemoveGamesRequest) => apiDelete('/api/games/bulk', body),
   refreshPrice: (id: string, region?: PriceRegion) =>
     apiPost<{ game: Game }>(`/api/games/${id}/refresh-price${region ? `?region=${region}` : ''}`),
+  steamSearch: (id: string, q?: string) =>
+    apiGet<{ results: SteamStoreMatch[] }>(`/api/games/${id}/steam-search${q ? `?q=${encodeURIComponent(q)}` : ''}`),
+  setSteamMatch: (id: string, body: SetSteamMatchRequest) => apiPatch<{ game: Game }>(`/api/games/${id}/steam-match`, body),
   setTargetPrice: (id: string, body: SetTargetPriceRequest) =>
     apiPatch<{ game: Game }>(`/api/games/${id}/target-price`, body),
   vote: (id: string, body: VoteRequest) => apiPut<{ game: Game }>(`/api/games/${id}/vote`, body),

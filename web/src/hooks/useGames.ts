@@ -106,6 +106,13 @@ export function useGames(roomId: string | null) {
     onError: (err) => setActionError(errorMessage(err, 'Could not save that.')),
   });
 
+  const setSteamMatch = useMutation({
+    mutationFn: ({ gameId, steamAppId }: { gameId: string; steamAppId: number | null }) =>
+      gamesApi.setSteamMatch(gameId, { steamAppId }),
+    onSuccess: ({ game }) => patchGame(game),
+    onError: (err) => setActionError(errorMessage(err, 'Could not save that price match.')),
+  });
+
   // Applies/removes a tag on one game (issue #247) - same patch-the-cache shape as
   // setTargetPrice/setOwnership above, since the endpoint returns the fully-updated game DTO
   // (including its now-current tags list) rather than requiring a separate tags fetch.
@@ -156,6 +163,8 @@ export function useGames(roomId: string | null) {
     setOwnership: (gameId: string, owned: boolean) => setOwnership.mutate({ gameId, owned }),
     setPrerequisite: (gameId: string, prerequisiteGameId: string | null) =>
       setPrerequisite.mutate({ gameId, prerequisiteGameId }),
+    setSteamMatch: (gameId: string, steamAppId: number | null) => setSteamMatch.mutate({ gameId, steamAppId }),
+    isSettingSteamMatch: setSteamMatch.isPending,
     // Callers (TagPicker) only need to know when it's done/failed, not the updated game itself -
     // the cache is already patched via onSuccess above - so this resolves to void rather than
     // leaking the mutation's raw return value into every prop type down the component tree.

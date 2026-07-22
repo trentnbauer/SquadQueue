@@ -31,6 +31,7 @@ export function RoomView() {
     remove,
     refreshPrice,
     isRefreshingPrice,
+    setSteamMatch,
     setTargetPrice,
     setOwnership,
     applyTag,
@@ -75,6 +76,7 @@ export function RoomView() {
         onRemove={remove}
         onRefreshPrice={refreshPrice}
         isRefreshingPrice={isRefreshingPrice}
+        onSetSteamMatch={setSteamMatch}
         onSetTargetPrice={setTargetPrice}
         onSetOwnership={setOwnership}
         onApplyTag={applyTag}
@@ -99,6 +101,7 @@ export function RoomView() {
         onRemove={remove}
         onRefreshPrice={refreshPrice}
         isRefreshingPrice={isRefreshingPrice}
+        onSetSteamMatch={setSteamMatch}
         onSetTargetPrice={setTargetPrice}
         onSetOwnership={setOwnership}
         onApplyTag={applyTag}
@@ -115,6 +118,7 @@ export function RoomView() {
         onRemove={remove}
         onRefreshPrice={refreshPrice}
         isRefreshingPrice={isRefreshingPrice}
+        onSetSteamMatch={setSteamMatch}
         onSetTargetPrice={setTargetPrice}
         onSetOwnership={setOwnership}
         onApplyTag={applyTag}

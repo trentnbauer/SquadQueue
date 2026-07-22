@@ -300,6 +300,21 @@ export interface SetGamePrerequisiteRequest {
   prerequisiteGameId: string | null;
 }
 
+/** One candidate from a Steam store title search - used for manually picking which Steam release
+ * a game's pricing should be matched to, when the automatic match (IGDB, then an exact-title
+ * Steam search) either found nothing or picked the wrong edition/remaster. */
+export interface SteamStoreMatch {
+  steamAppId: number;
+  title: string;
+  thumbnailUrl: string | null;
+}
+
+/** Manually sets (or clears, with null) which Steam App ID a game's gg.deals pricing should be
+ * matched to - see Game.steamAppid. */
+export interface SetSteamMatchRequest {
+  steamAppId: number | null;
+}
+
 /** Relocates a game to a different room, or to the mover's Personal Shelf (roomId: null). */
 export interface MoveGameRequest {
   roomId: string | null;

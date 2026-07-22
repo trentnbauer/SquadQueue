@@ -12,6 +12,7 @@ interface BeatenStripProps {
   onRemove: (gameId: string) => void;
   onRefreshPrice: (gameId: string) => void;
   isRefreshingPrice?: (gameId: string) => boolean;
+  onSetSteamMatch: (gameId: string, steamAppId: number | null) => void;
   onSetTargetPrice: (gameId: string, targetPrice: string | null) => void;
   onSetOwnership?: (gameId: string, owned: boolean) => void;
   onApplyTag: (gameId: string, name: string) => Promise<void>;
@@ -33,6 +34,7 @@ export function BeatenStrip({
   onRemove,
   onRefreshPrice,
   isRefreshingPrice,
+  onSetSteamMatch,
   onSetTargetPrice,
   onSetOwnership,
   onApplyTag,
@@ -63,6 +65,7 @@ export function BeatenStrip({
               onRemove={() => onRemove(game.id)}
               onRefreshPrice={() => onRefreshPrice(game.id)}
               isRefreshingPrice={isRefreshingPrice ? isRefreshingPrice(game.id) : false}
+              onSetSteamMatch={(steamAppId) => onSetSteamMatch(game.id, steamAppId)}
               onSetTargetPrice={(targetPrice) => onSetTargetPrice(game.id, targetPrice)}
               onSetOwnership={onSetOwnership ? (owned) => onSetOwnership(game.id, owned) : undefined}
               onApplyTag={(name) => onApplyTag(game.id, name)}

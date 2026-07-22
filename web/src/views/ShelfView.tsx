@@ -33,6 +33,7 @@ export function ShelfView() {
     remove,
     refreshPrice,
     isRefreshingPrice,
+    setSteamMatch,
     setTargetPrice,
     applyTag,
     removeTag,
@@ -141,6 +142,7 @@ export function ShelfView() {
         onRemove={remove}
         onRefreshPrice={refreshPrice}
         isRefreshingPrice={isRefreshingPrice}
+        onSetSteamMatch={setSteamMatch}
         onSetTargetPrice={setTargetPrice}
         onApplyTag={applyTag}
         onRemoveTag={removeTag}
