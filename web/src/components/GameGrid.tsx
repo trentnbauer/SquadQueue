@@ -204,7 +204,7 @@ export function GameGrid({
           />
         </Fragment>
       ))}
-      {spinCardInsertIndex === filtered.length && spinCard}
+      {spinCardInsertIndex === visible.length && spinCard}
       {trailingCard}
     </div>
   );
