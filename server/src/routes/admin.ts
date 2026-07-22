@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../db/client.js';
 import { env } from '../config/env.js';
 import { HttpError } from '../util/httpError.js';
@@ -211,7 +212,17 @@ export default async function adminRoutes(app: FastifyInstance) {
     if (!target) {
       throw new HttpError(404, 'User not found');
     }
-    await prisma.user.delete({ where: { id: targetId } });
+    try {
+      await prisma.user.delete({ where: { id: targetId } });
+    } catch (err) {
+      // Still possible even after the findUnique check above (another admin's delete, or a
+      // retried request, landing in the gap between the two) - Prisma's P2025 has no statusCode
+      // of its own, so without this it'd fall through to the global handler's 500 default.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+        throw new HttpError(404, 'User not found');
+      }
+      throw err;
+    }
     app.log.warn(
       { adminAction: 'user.delete', actorId, targetId, targetEmail: target.email },
       `Admin ${actorId} deleted user ${targetId} (${target.email})`,
@@ -260,7 +271,15 @@ export default async function adminRoutes(app: FastifyInstance) {
     if (!target) {
       throw new HttpError(404, 'Room not found');
     }
-    await prisma.room.delete({ where: { id: targetId } });
+    try {
+      await prisma.room.delete({ where: { id: targetId } });
+    } catch (err) {
+      // Same TOCTOU gap as the user-delete route above.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+        throw new HttpError(404, 'Room not found');
+      }
+      throw err;
+    }
     app.log.warn(
       {
         adminAction: 'room.delete',
