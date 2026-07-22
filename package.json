@@ -25,6 +25,14 @@
   "engines": {
     "node": ">=20"
   },
+  "overrides": {
+    "ajv": {
+      "fast-uri": "^3.1.4"
+    },
+    "fast-json-stringify": {
+      "fast-uri": "^4.1.1"
+    }
+  },
   "allowScripts": {
     "@prisma/client@6.19.3": true,
     "@prisma/engines@6.19.3": true,
