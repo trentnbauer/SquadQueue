@@ -71,6 +71,9 @@ interface GameGridProps {
   onSetTargetPrice: (gameId: string, targetPrice: string | null) => void;
   /** Undefined on the Personal Shelf - ownership is a room-only concept (see GameCard). */
   onSetOwnership?: (gameId: string, owned: boolean) => void;
+  /** Finds-or-creates a tag by name and applies it to a game (issue #247). */
+  onApplyTag: (gameId: string, name: string) => Promise<void>;
+  onRemoveTag: (gameId: string, tagId: string) => void;
   /** Bulk-select mode (issue #205) - passed through to every GameCard when active. */
   selectionMode?: boolean;
   selectedIds?: Set<string>;
@@ -97,13 +100,15 @@ export function GameGrid({
   isRefreshingPrice,
   onSetTargetPrice,
   onSetOwnership,
+  onApplyTag,
+  onRemoveTag,
   selectionMode,
   selectedIds,
   onToggleSelect,
 }: GameGridProps) {
   // Filter selection lives in GameFilterContext, not here - the pill UI (and the search box) are
   // rendered by the Header (a sibling, not a parent, of this component) next to the Add Game button.
-  const { platformFilter, genreFilter, statusFilter, searchQuery, neglectedFilter } = useGameFilter();
+  const { platformFilter, genreFilter, statusFilter, tagFilter, searchQuery, neglectedFilter } = useGameFilter();
 
   const sorted = useStableOrder(games);
   const prioritized = useMemo(
@@ -113,12 +118,23 @@ export function GameGrid({
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const filtered = useMemo(
-    () => filterGames(prioritized, { platformFilter, genreFilter, statusFilter, searchQuery, neglectedFilter }),
-    [prioritized, platformFilter, genreFilter, statusFilter, searchQuery, neglectedFilter],
+    () => filterGames(prioritized, { platformFilter, genreFilter, statusFilter, tagFilter, searchQuery, neglectedFilter }),
+    [prioritized, platformFilter, genreFilter, statusFilter, tagFilter, searchQuery, neglectedFilter],
   );
 
   const hasActiveFilters =
-    platformFilter !== ALL_FILTER_VALUE || genreFilter !== ALL_FILTER_VALUE || neglectedFilter || normalizedQuery !== '';
+    platformFilter !== ALL_FILTER_VALUE ||
+    genreFilter !== ALL_FILTER_VALUE ||
+    tagFilter !== ALL_FILTER_VALUE ||
+    neglectedFilter ||
+    normalizedQuery !== '';
+
+  // hiddenStatuses only applies when the status pill is untouched - picking a hidden status
+  // explicitly (e.g. filtering to "Playing") is a deliberate ask to see it here, and wins.
+  const visible = useMemo(() => {
+    if (!hiddenStatuses || hiddenStatuses.length === 0 || statusFilter !== ALL_FILTER_VALUE) return filtered;
+    return filtered.filter((g) => !hiddenStatuses.includes(g.status));
+  }, [filtered, hiddenStatuses, statusFilter]);
 
   // hiddenStatuses only applies when the status pill is untouched - picking a hidden status
   // explicitly (e.g. filtering to "Playing") is a deliberate ask to see it here, and wins.
@@ -198,13 +214,15 @@ export function GameGrid({
             isRefreshingPrice={isRefreshingPrice ? isRefreshingPrice(game.id) : false}
             onSetTargetPrice={(targetPrice) => onSetTargetPrice(game.id, targetPrice)}
             onSetOwnership={onSetOwnership ? (owned) => onSetOwnership(game.id, owned) : undefined}
+            onApplyTag={(name) => onApplyTag(game.id, name)}
+            onRemoveTag={(tagId) => onRemoveTag(game.id, tagId)}
             selectable={selectionMode}
             selected={selectedIds?.has(game.id) ?? false}
             onToggleSelect={onToggleSelect ? () => onToggleSelect(game.id) : undefined}
           />
         </Fragment>
       ))}
-      {spinCardInsertIndex === filtered.length && spinCard}
+      {spinCardInsertIndex === visible.length && spinCard}
       {trailingCard}
     </div>
   );
