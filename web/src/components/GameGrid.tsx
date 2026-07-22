@@ -136,6 +136,13 @@ export function GameGrid({
     return filtered.filter((g) => !hiddenStatuses.includes(g.status));
   }, [filtered, hiddenStatuses, statusFilter]);
 
+  // hiddenStatuses only applies when the status pill is untouched - picking a hidden status
+  // explicitly (e.g. filtering to "Playing") is a deliberate ask to see it here, and wins.
+  const visible = useMemo(() => {
+    if (!hiddenStatuses || hiddenStatuses.length === 0 || statusFilter !== ALL_FILTER_VALUE) return filtered;
+    return filtered.filter((g) => !hiddenStatuses.includes(g.status));
+  }, [filtered, hiddenStatuses, statusFilter]);
+
   if (isLoading) {
     return (
       <div className={styles.cards}>
