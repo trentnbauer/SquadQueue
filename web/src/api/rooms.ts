@@ -1,5 +1,14 @@
 import { apiGet, apiPost, apiPatch, apiDelete } from './client';
-import type { CreateRoomRequest, JoinRoomRequest, Room, RoomMember, RoomRole, UpdateRoomRequest, User } from '@queueup/shared';
+import type {
+  CreateRoomRequest,
+  JoinRoomRequest,
+  Room,
+  RoomMember,
+  RoomMemberStats,
+  RoomRole,
+  UpdateRoomRequest,
+  User,
+} from '@queueup/shared';
 
 export const roomsApi = {
   list: () => apiGet<{ rooms: Room[] }>('/api/rooms'),
@@ -9,6 +18,7 @@ export const roomsApi = {
   update: (roomId: string, body: UpdateRoomRequest) => apiPatch<{ room: Room }>(`/api/rooms/${roomId}`, body),
   delete: (roomId: string) => apiDelete(`/api/rooms/${roomId}`),
   members: (roomId: string) => apiGet<{ members: RoomMember[] }>(`/api/rooms/${roomId}/members`),
+  memberStats: (roomId: string, userId: string) => apiGet<RoomMemberStats>(`/api/rooms/${roomId}/members/${userId}/stats`),
   inviteCandidates: (roomId: string) => apiGet<{ users: User[] }>(`/api/rooms/${roomId}/invite-candidates`),
   addMember: (roomId: string, userId: string) => apiPost<{ added: boolean }>(`/api/rooms/${roomId}/members`, { userId }),
   setRole: (roomId: string, userId: string, role: RoomRole) =>

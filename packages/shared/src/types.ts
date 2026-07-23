@@ -114,6 +114,15 @@ export interface RoomMember {
   joinedAt: string;
 }
 
+/** A room member's completion stats within that room (issue: member list click-to-expand).
+ * completedCount is games they added to this room that are Beaten or queued for Replay;
+ * fullyCompletedCount is how many of this room's titles their own Steam account has 100%'d,
+ * regardless of who added them - see AchievementCompletion. */
+export interface RoomMemberStats {
+  completedCount: number;
+  fullyCompletedCount: number;
+}
+
 export interface GamePrice {
   amount: string | null;
   currency: string | null;

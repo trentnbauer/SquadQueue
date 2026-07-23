@@ -174,9 +174,29 @@
 
 .memberRow {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 6px 8px;
+}
+
+.memberRowTop {
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
+}
+
+.memberInfoButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
 }
 
 .memberInfo {
@@ -184,6 +204,12 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+}
+
+.memberStats {
+  font-size: 11.5px;
+  color: var(--qu-muted);
+  padding-left: 30px;
 }
 
 .memberName {

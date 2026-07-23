@@ -99,6 +99,7 @@ model User {
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsActed   Notification[]  @relation("NotificationActor")
   ownedGames           GameOwnership[]
+  achievementCompletions AchievementCompletion[]
   linkedIdentities     LinkedIdentity[]
   tags                 Tag[]
 
@@ -141,6 +142,25 @@ model GameOwnership {
 
   @@id([userId, igdbId])
   @@map("game_ownership")
+}
+
+/// A per-user, per-title fact that this user's Steam achievement progress has hit 100% at least
+/// once, keyed by igdbId (not gameId) like GameOwnership - so it transfers across re-adds and
+/// between rooms/shelf the same way ownership does, rather than being tied to one Game row. Sticky
+/// by construction: rows are only ever inserted, never deleted or "un-completed", since a 100% run
+/// stays true forever regardless of later achievement resets. Populated opportunistically wherever
+/// achievement progress is already being checked (the achievements route, and Steam completion
+/// auto-detection) - never a fresh Steam API call of its own. Powers the per-member "completed /
+/// 100%'d" counts shown in a room's member list.
+model AchievementCompletion {
+  userId    String   @map("user_id")
+  igdbId    Int      @map("igdb_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, igdbId])
+  @@map("achievement_completion")
 }
 
 model Room {
