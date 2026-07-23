@@ -95,11 +95,16 @@ function CollectionReview({ collection, roomId, onAdded, onBack, onBusyChange }:
 
     let added = 0;
     const failedIds = new Set<number>();
+    // Rooms are shared backlogs, typically meant to be played together - worth calling out which
+    // of a batch add have no co-op data at all (see the single-add warning below for the same
+    // reasoning), rather than only surfacing that one at a time via the per-card detail modal.
+    const noCoopTitles: string[] = [];
     for (const game of toAdd) {
       if (cancelledRef.current) break;
       try {
-        await gamesApi.create({ igdbId: game.igdbId, roomId });
+        const { game: created } = await gamesApi.create({ igdbId: game.igdbId, roomId });
         added += 1;
+        if (roomId && created.maxCoopPlayers == null) noCoopTitles.push(created.title);
       } catch {
         failedIds.add(game.igdbId);
       }
@@ -118,11 +123,14 @@ function CollectionReview({ collection, roomId, onAdded, onBack, onBusyChange }:
     setAddProgress(null);
     if (added > 0) onAdded();
     const failed = failedIds.size;
-    setAddSummary(
+    let summary =
       failed === 0
         ? `Added ${added} game${added === 1 ? '' : 's'}.`
-        : `Added ${added} game${added === 1 ? '' : 's'} - ${failed} couldn't be added.`,
-    );
+        : `Added ${added} game${added === 1 ? '' : 's'} - ${failed} couldn't be added.`;
+    if (noCoopTitles.length > 0) {
+      summary += ` ⚠️ No co-op data for: ${noCoopTitles.join(', ')}.`;
+    }
+    setAddSummary(summary);
     if (failed > 0) setAddError(`${failed} game${failed === 1 ? '' : 's'} failed to add - try again individually from search.`);
   }
 
@@ -206,11 +214,13 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [addedTitle, setAddedTitle] = useState<string | null>(null);
+  const [coopWarningTitle, setCoopWarningTitle] = useState<string | null>(null);
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
   const [activeCollection, setActiveCollection] = useState<CollectionSearchResult | null>(null);
   const [collectionBusy, setCollectionBusy] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const addedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const coopWarningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dialogRef = useModalA11y<HTMLDivElement>(onClose);
   // Bumped on every new search so a response for an older query can recognize it's stale and
@@ -220,6 +230,7 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
   useEffect(() => {
     return () => {
       if (addedTimeoutRef.current) clearTimeout(addedTimeoutRef.current);
+      if (coopWarningTimeoutRef.current) clearTimeout(coopWarningTimeoutRef.current);
     };
   }, []);
 
@@ -264,7 +275,7 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
     setAddingId(result.igdbId);
     setError(null);
     try {
-      await gamesApi.create({ igdbId: result.igdbId, roomId });
+      const { game } = await gamesApi.create({ igdbId: result.igdbId, roomId });
       onAdded();
       // Stay open and keep the search results as-is so the user can add several games from the
       // same search without retyping - just mark this one as added.
@@ -272,6 +283,17 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
       setAddedTitle(result.title);
       if (addedTimeoutRef.current) clearTimeout(addedTimeoutRef.current);
       addedTimeoutRef.current = setTimeout(() => setAddedTitle(null), 2500);
+
+      // Rooms are shared backlogs, typically meant to be played together - a game with no co-op
+      // data at all (IGDB found no multiplayer modes, or just doesn't have the data) is worth
+      // flagging right when it's added, since that's the one moment someone's actually deciding
+      // whether it belongs in this room. Not shown on the Personal Shelf (roomId null) - solo play
+      // is the default there, so there's nothing to warn about.
+      if (roomId && game.maxCoopPlayers == null) {
+        setCoopWarningTitle(result.title);
+        if (coopWarningTimeoutRef.current) clearTimeout(coopWarningTimeoutRef.current);
+        coopWarningTimeoutRef.current = setTimeout(() => setCoopWarningTitle(null), 4000);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not add that game');
     } finally {
@@ -334,6 +356,9 @@ export function AddGameModal({ roomId, onAdded, onClose }: AddGameModalProps) {
           <>
             {error && <div className={styles.error}>{error}</div>}
             {addedTitle && !error && <div className={styles.added}>Added "{addedTitle}" ✓</div>}
+            {coopWarningTitle && !error && (
+              <div className={styles.coopWarning}>⚠️ "{coopWarningTitle}" doesn't appear to support co-op</div>
+            )}
 
             <input
               ref={inputRef}
