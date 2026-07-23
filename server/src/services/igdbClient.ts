@@ -86,6 +86,15 @@ export interface IgdbGame {
   category?: number;
   version_parent?: number;
   collection?: IgdbCollectionRef;
+  /** 0-100, IGDB's blended critic+user score - present for most games with any review coverage
+   * at all. Preferred over aggregated_rating/rating individually (see reviewScoreFrom) since it's
+   * already the single "how good is this" figure IGDB itself considers most representative. */
+  total_rating?: number;
+  /** 0-100, critic-only score - fallback when total_rating is missing (e.g. a game with press
+   * reviews on file but not enough user ratings yet for IGDB to blend one in). */
+  aggregated_rating?: number;
+  /** 0-100, user-only score - last-resort fallback when neither of the above is present. */
+  rating?: number;
 }
 
 // IGDB's documented `category` enum (api-docs.igdb.com/#game-enums) - only the two values relevant
@@ -335,6 +344,9 @@ export interface IgdbGameDetail {
   timeToBeatCompletionistHours: number | null;
   /** IGDB's franchise/series id, if this game belongs to one (issue #283) - null otherwise. */
   igdbCollectionId: number | null;
+  /** 0-100 review score (issue #311), see reviewScoreFrom - null when IGDB has no review data at
+   * all for this game. Used to nudge Spin the Wheel toward better-reviewed games. */
+  reviewScore: number | null;
 }
 
 // external_game_source 1 == Steam (from the external_game_sources endpoint) — the `games`
@@ -392,6 +404,20 @@ export function timeToBeatCompletionistHoursFrom(rows: IgdbTimeToBeat[]): number
   return secondsToHours(rows[0]?.completely);
 }
 
+/** Resolves a single 0-100 score from whichever of IGDB's three rating fields is present, in
+ * order of preference (issue #311): total_rating (blended critic+user, IGDB's own best single
+ * figure) first, then aggregated_rating (critic-only), then rating (user-only) - never averaging
+ * across them, since falling back only when a "better" figure is entirely absent avoids
+ * double-counting the same reviews that likely already fed into total_rating. Rounded to the
+ * nearest integer (IGDB's raw values have decimal precision); null when none are present, rather
+ * than defaulting to some baseline - "no review data" and "confirmed mediocre" aren't the same
+ * thing, and Spin the Wheel's weighting (see spinCandidateWeight) treats a null the same as a
+ * game nobody's voted on, not as a penalty. */
+export function reviewScoreFrom(game: IgdbGame): number | null {
+  const score = game.total_rating ?? game.aggregated_rating ?? game.rating;
+  return typeof score === 'number' ? Math.round(score) : null;
+}
+
 export async function getGameDetail(igdbId: number): Promise<IgdbGameDetail> {
   if (!Number.isInteger(igdbId) || igdbId <= 0) {
     throw new HttpError(400, 'Invalid IGDB game id');
@@ -419,7 +445,7 @@ export async function getGameDetail(igdbId: number): Promise<IgdbGameDetail> {
     ]
   >(
     'multiquery',
-    `query games "Game" { fields name,cover.image_id,platforms.name,genres.name,first_release_date,collection.id; where id = ${igdbId}; };
+    `query games "Game" { fields name,cover.image_id,platforms.name,genres.name,first_release_date,collection.id,total_rating,aggregated_rating,rating; where id = ${igdbId}; };
      query external_games "External" { fields uid; where game = ${igdbId} & external_game_source = ${STEAM_EXTERNAL_SOURCE_ID}; };
      query multiplayer_modes "Modes" { fields onlinecoopmax,offlinecoopmax; where game = ${igdbId}; };
      query game_time_to_beats "TimeToBeat" { fields normally,hastily,completely; where game_id = ${igdbId}; };`,
@@ -451,6 +477,7 @@ export async function getGameDetail(igdbId: number): Promise<IgdbGameDetail> {
     timeToBeatRushedHours: timeToBeatRushedHoursFrom(timeToBeatRows),
     timeToBeatCompletionistHours: timeToBeatCompletionistHoursFrom(timeToBeatRows),
     igdbCollectionId: game.collection?.id ?? null,
+    reviewScore: reviewScoreFrom(game),
   };
 
   await redis.set(cacheKey, JSON.stringify(detail), 'EX', DETAIL_CACHE_TTL_SECONDS);

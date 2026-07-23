@@ -166,6 +166,16 @@ export function GameCard({
             </div>
           )}
 
+          {/* IGDB review score (issue #311) - also nudges Spin the Wheel's weighted pick toward
+              better-reviewed games (see spinCandidateWeight), surfaced here so that's not an
+              invisible thumb on the scale. */}
+          {game.reviewScore !== null && (
+            <div className={styles.reviewScoreBadge} title={`IGDB review score: ${game.reviewScore}/100`}>
+              <span aria-hidden="true">⭐</span>
+              {game.reviewScore}
+            </div>
+          )}
+
           {/* Playing hides price/owned info entirely - the ribbon already answers "what's going on
               with this game," and "should I buy it" isn't relevant once you're playing it. */}
           {game.status !== 'playing' && (

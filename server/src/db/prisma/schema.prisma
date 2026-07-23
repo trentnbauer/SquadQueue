@@ -226,6 +226,13 @@ model Game {
   /// "completely" figure (issue #248) - same capture-at-intake reasoning as timeToBeatHours
   /// above. Null when IGDB has no time-to-beat data for this game.
   timeToBeatCompletionistHours Int? @map("time_to_beat_completionist_hours")
+  /// 0-100 review score (issue #311) - IGDB's total_rating (blended critic+user), falling back to
+  /// aggregated_rating (critic-only) then rating (user-only) if the preferred figure is missing -
+  /// see reviewScoreFrom in igdbClient.ts. Same capture-at-intake reasoning as maxCoopPlayers
+  /// above. Null when IGDB has no review data at all for this game (not a penalty - Spin the
+  /// Wheel's weighting treats it the same as a game nobody's voted on), or on games added before
+  /// this field existed.
+  reviewScore    Int?       @map("review_score")
   ggDealsUrl     String?    @map("gg_deals_url")
   steamAppid     Int?       @map("steam_appid")
   coverImageUrl  String?    @map("cover_image_url")

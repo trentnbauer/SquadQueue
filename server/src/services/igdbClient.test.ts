@@ -6,6 +6,7 @@ import {
   timeToBeatHoursFrom,
   timeToBeatRushedHoursFrom,
   timeToBeatCompletionistHoursFrom,
+  reviewScoreFrom,
   type IgdbPlatform,
   type IgdbGame,
   type IgdbTimeToBeat,
@@ -119,5 +120,23 @@ describe('time-to-beat breakdown (issue #248)', () => {
     expect(timeToBeatHoursFrom([])).toBeNull();
     expect(timeToBeatRushedHoursFrom([])).toBeNull();
     expect(timeToBeatCompletionistHoursFrom([])).toBeNull();
+  });
+});
+
+describe('reviewScoreFrom (issue #311)', () => {
+  it('prefers total_rating over the other two when present', () => {
+    expect(reviewScoreFrom({ id: 1, total_rating: 82.4, aggregated_rating: 60, rating: 40 })).toBe(82);
+  });
+
+  it('falls back to aggregated_rating when total_rating is missing', () => {
+    expect(reviewScoreFrom({ id: 1, aggregated_rating: 75.6, rating: 40 })).toBe(76);
+  });
+
+  it('falls back to rating when neither of the other two is present', () => {
+    expect(reviewScoreFrom({ id: 1, rating: 55.2 })).toBe(55);
+  });
+
+  it('returns null when IGDB has no review data at all for this game', () => {
+    expect(reviewScoreFrom({ id: 1 })).toBeNull();
   });
 });
