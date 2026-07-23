@@ -8,6 +8,7 @@ import { useGames } from '../hooks/useGames';
 import { GameGrid } from '../components/GameGrid';
 import { PlayingStrip } from '../components/PlayingStrip';
 import { BeatenStrip } from '../components/BeatenStrip';
+import { DroppedStrip } from '../components/DroppedStrip';
 import { filterGames, ALL_FILTER_VALUE } from '../components/gameGridLogic';
 import { ActionErrorBanner } from '../components/ActionErrorBanner';
 import { TruncatedListBanner } from '../components/TruncatedListBanner';
@@ -51,15 +52,15 @@ export function ShelfView() {
   // GameGrid applies the platform/genre/status/search filter internally (GameFilterContext) - bulk
   // actions must respect the same set of games actually on screen, or "Select all" while filtered
   // would silently reach into hidden games the user never saw (previously a real bug: selected/
-  // updated the whole shelf regardless of the active filter). Playing/Done are excluded the same
-  // way GameGrid itself excludes them below (only while the status pill is "All" - explicitly
-  // filtering to one of those is a deliberate ask to see/select it) now that they have their own
-  // strips instead of showing a second time in the main grid.
+  // updated the whole shelf regardless of the active filter). Playing/Done/Dropped are excluded
+  // the same way GameGrid itself excludes them below (only while the status pill is "All" -
+  // explicitly filtering to one of those is a deliberate ask to see/select it) now that they have
+  // their own strips instead of showing a second time in the main grid.
   const gameFilter = useGameFilter();
   const visibleGames = useMemo(() => {
     const filtered = filterGames(games, gameFilter);
     if (gameFilter.statusFilter !== ALL_FILTER_VALUE) return filtered;
-    return filtered.filter((g) => g.status !== 'playing' && g.status !== 'done');
+    return filtered.filter((g) => g.status !== 'playing' && g.status !== 'done' && g.status !== 'dropped');
   }, [games, gameFilter]);
 
   useEffect(() => {
@@ -159,10 +160,10 @@ export function ShelfView() {
         isError={isError}
         loadError={loadError}
         onRetry={refetch}
-        // Playing/Done games get their own strips above/below instead - same reasoning as
+        // Playing/Done/Dropped games get their own strips above/below instead - same reasoning as
         // RoomView's identical hiddenStatuses, so they don't also show a second time in the main
         // grid here.
-        hiddenStatuses={['playing', 'done']}
+        hiddenStatuses={['playing', 'done', 'dropped']}
         onStatusChange={updateStatus}
         onVote={vote}
         onRemove={remove}
@@ -191,6 +192,19 @@ export function ShelfView() {
         onToggleSelect={toggleSelect}
       />
       <BeatenStrip
+        games={games}
+        currentUserId={user.id}
+        onStatusChange={updateStatus}
+        onVote={vote}
+        onRemove={remove}
+        onRefreshPrice={refreshPrice}
+        isRefreshingPrice={isRefreshingPrice}
+        onSetSteamMatch={setSteamMatch}
+        onSetTargetPrice={setTargetPrice}
+        onApplyTag={applyTag}
+        onRemoveTag={removeTag}
+      />
+      <DroppedStrip
         games={games}
         currentUserId={user.id}
         onStatusChange={updateStatus}
