@@ -8,6 +8,7 @@ import { roomsApi } from '../api/rooms';
 import { GameGrid } from '../components/GameGrid';
 import { PlayingStrip } from '../components/PlayingStrip';
 import { BeatenStrip } from '../components/BeatenStrip';
+import { DroppedStrip } from '../components/DroppedStrip';
 import { ActionErrorBanner } from '../components/ActionErrorBanner';
 import { TruncatedListBanner } from '../components/TruncatedListBanner';
 import { RoomSizeWarningBanner } from '../components/RoomSizeWarningBanner';
@@ -95,7 +96,7 @@ export function RoomView() {
         showSpinWheel
         spinOnlyFullyOwned={activeRoom?.spinOnlyFullyOwned}
         spinWheelTheme={activeRoom?.spinWheelTheme}
-        hiddenStatuses={['playing', 'done']}
+        hiddenStatuses={['playing', 'done', 'dropped']}
         onStatusChange={updateStatus}
         onVote={vote}
         onRemove={remove}
@@ -109,6 +110,23 @@ export function RoomView() {
         onSetPrerequisite={setPrerequisite}
       />
       <BeatenStrip
+        games={games}
+        currentUserId={user.id}
+        memberCount={memberCount}
+        roomMembers={roomMembers}
+        onStatusChange={updateStatus}
+        onVote={vote}
+        onRemove={remove}
+        onRefreshPrice={refreshPrice}
+        isRefreshingPrice={isRefreshingPrice}
+        onSetSteamMatch={setSteamMatch}
+        onSetTargetPrice={setTargetPrice}
+        onSetOwnership={setOwnership}
+        onApplyTag={applyTag}
+        onRemoveTag={removeTag}
+        onSetPrerequisite={setPrerequisite}
+      />
+      <DroppedStrip
         games={games}
         currentUserId={user.id}
         memberCount={memberCount}
