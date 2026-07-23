@@ -114,6 +114,16 @@ export function isPrimaryEdition(game: IgdbGame): boolean {
   return true;
 }
 
+/** Stable sort promoting an exact (case-insensitive) title match to the front. Long-running
+ * franchises rack up a dozen+ entries (sequels, remasters, collections, spin-offs), and IGDB's
+ * own relevance ranking doesn't reliably put an exact match - e.g. the 2018 "God of War", named
+ * identically to the 2005 original - ahead of same-franchise partial matches like "God of War:
+ * Ragnarök". Array.prototype.sort is stable, so non-matching rows keep IGDB's relative order. */
+export function sortExactMatchFirst<T extends { name?: string }>(games: T[], query: string): T[] {
+  const lowerQuery = query.trim().toLowerCase();
+  return [...games].sort((a, b) => Number(b.name?.toLowerCase() === lowerQuery) - Number(a.name?.toLowerCase() === lowerQuery));
+}
+
 function coverUrl(cover?: IgdbCover): string | null {
   return cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${cover.image_id}.jpg` : null;
 }
@@ -221,24 +231,32 @@ export async function searchGames(query: string, platforms?: RoomPlatform[]): Pr
   const activePlatforms = platforms && platforms.length > 0 ? platforms : undefined;
 
   const escaped = escapeApicalypseString(trimmed);
-  // Scoping the platform filter into the query itself (rather than fetching the top 20 results
-  // overall and discarding non-matching ones afterward) matters: IGDB ranks "top 20 for this query
-  // on this platform" when the where clause is present, instead of "top 20 for this query" full
+  // Scoping the platform filter into the query itself (rather than fetching the top results
+  // overall and discarding non-matching ones afterward) matters: IGDB ranks "top N for this query
+  // on this platform" when the where clause is present, instead of "top N for this query" full
   // stop - a specific-platform release (e.g. a Switch game with a generic title) can easily rank
-  // outside the top 20 unfiltered results even though it'd be a top result once scoped.
+  // outside the top unfiltered results even though it'd be a top result once scoped.
   const whereClause = activePlatforms ? platformWhereClause(activePlatforms) : '';
+  // Fetch more than the 20 we display: long-running franchises (God of War, Final Fantasy, ...)
+  // rack up a dozen+ entries (sequels, remasters, collections, spin-offs), and IGDB's relevance
+  // ranking doesn't reliably put an exact title match (e.g. the 2018 "God of War", named
+  // identically to the 2005 original) inside a bare top-20 window. A wider fetch plus the
+  // exact-match promotion below fixes that without changing what's ultimately shown.
   const games = await igdbRequest<IgdbGame[]>(
     'games',
-    `search "${escaped}"; fields name,cover.image_id,platforms.name,first_release_date,category,version_parent; ${whereClause} limit 20;`,
+    `search "${escaped}"; fields name,cover.image_id,platforms.name,first_release_date,category,version_parent; ${whereClause} limit 50;`,
   );
 
-  return games
+  const filtered = games
     .filter((g) => g.name)
     .filter(isPrimaryEdition)
     // Belt-and-suspenders: the query-level filter above should already scope results correctly,
     // but keep the client-side family check too in case IGDB's platform data on a given row is
     // incomplete/odd (e.g. a bundle with mixed platform tags).
-    .filter((g) => !activePlatforms || platformFamilies(g.platforms).some((f) => activePlatforms.includes(f)))
+    .filter((g) => !activePlatforms || platformFamilies(g.platforms).some((f) => activePlatforms.includes(f)));
+
+  return sortExactMatchFirst(filtered, trimmed)
+    .slice(0, 20)
     .map((g) => ({
       igdbId: g.id,
       title: g.name!,
