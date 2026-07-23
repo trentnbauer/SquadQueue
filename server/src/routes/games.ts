@@ -536,43 +536,49 @@ export default async function gameRoutes(app: FastifyInstance) {
     return { game: await serializeGame(updated, userId), shelfSync };
   });
 
-  app.post<{ Params: { id: string } }>('/api/games/:id/sync-shelf-beaten', async (request) => {
-    const userId = await request.requireAuth();
-    const game = await loadGameOr404(request.params.id);
-    await requireGameReadAccess(game, userId);
+  app.post<{ Params: { id: string } }>(
+    '/api/games/:id/sync-shelf-beaten',
+    // Same class of route as steam-match/target-price/ownership above - a direct, occasional user
+    // action, not something a normal session comes close to hitting at volume.
+    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    async (request) => {
+      const userId = await request.requireAuth();
+      const game = await loadGameOr404(request.params.id);
+      await requireGameReadAccess(game, userId);
 
-    const shelfGame = await prisma.game.findFirst({ where: { roomId: null, addedBy: userId, igdbId: game.igdbId } });
-    if (shelfGame) {
-      await prisma.game.update({ where: { id: shelfGame.id }, data: { status: 'done' } });
-    } else {
-      const resolved = await resolveGameForCreation(game.igdbId, await getOwnedPlatforms(userId));
-      await prisma.game.create({
-        data: {
-          roomId: null,
-          addedBy: userId,
-          igdbId: game.igdbId,
-          title: resolved.title,
-          platform: resolved.platform,
-          genre: resolved.genre,
-          maxCoopPlayers: resolved.maxCoopPlayers,
-          timeToBeatHours: resolved.timeToBeatHours,
-          timeToBeatRushedHours: resolved.timeToBeatRushedHours,
-          timeToBeatCompletionistHours: resolved.timeToBeatCompletionistHours,
-          ggDealsUrl: resolved.ggDealsUrl,
-          steamAppid: resolved.steamAppId,
-          coverImageUrl: resolved.coverImageUrl,
-          releaseYear: resolved.releaseYear,
-          releaseDate: resolved.releaseDate,
-          igdbCollectionId: resolved.igdbCollectionId,
-          reviewScore: resolved.reviewScore,
-          status: 'done',
-        },
-      });
-      await invalidateExistingIgdbIds(null, userId);
-    }
+      const shelfGame = await prisma.game.findFirst({ where: { roomId: null, addedBy: userId, igdbId: game.igdbId } });
+      if (shelfGame) {
+        await prisma.game.update({ where: { id: shelfGame.id }, data: { status: 'done' } });
+      } else {
+        const resolved = await resolveGameForCreation(game.igdbId, await getOwnedPlatforms(userId));
+        await prisma.game.create({
+          data: {
+            roomId: null,
+            addedBy: userId,
+            igdbId: game.igdbId,
+            title: resolved.title,
+            platform: resolved.platform,
+            genre: resolved.genre,
+            maxCoopPlayers: resolved.maxCoopPlayers,
+            timeToBeatHours: resolved.timeToBeatHours,
+            timeToBeatRushedHours: resolved.timeToBeatRushedHours,
+            timeToBeatCompletionistHours: resolved.timeToBeatCompletionistHours,
+            ggDealsUrl: resolved.ggDealsUrl,
+            steamAppid: resolved.steamAppId,
+            coverImageUrl: resolved.coverImageUrl,
+            releaseYear: resolved.releaseYear,
+            releaseDate: resolved.releaseDate,
+            igdbCollectionId: resolved.igdbCollectionId,
+            reviewScore: resolved.reviewScore,
+            status: 'done',
+          },
+        });
+        await invalidateExistingIgdbIds(null, userId);
+      }
 
-    return { ok: true };
-  });
+      return { ok: true };
+    },
+  );
 
   // Personal Shelf only (issue #205) - scoped by roomId: null + addedBy in the query itself rather
   // than a per-id requireGameReadAccess loop, so one request updates any number of shelf games in a
