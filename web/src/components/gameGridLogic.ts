@@ -263,16 +263,37 @@ const GENRE_DIVERSITY_MULTIPLIER = 2;
 // voted on first.
 const UNVOTED_BASELINE_WEIGHT = 1;
 
+// Review-score multiplier range (issue #311) - deliberately mild compared to the vote/genre
+// factors above (a 2x swing at most, vs. votes' unbounded-but-slow sqrt growth and genre's flat
+// 2x), since this is a nudge toward quality, not a replacement for the room's own votes. Linear
+// from REVIEW_SCORE_MIN_MULTIPLIER at reviewScore 0 to REVIEW_SCORE_MAX_MULTIPLIER at 100.
+const REVIEW_SCORE_MIN_MULTIPLIER = 0.75;
+const REVIEW_SCORE_MAX_MULTIPLIER = 1.5;
+
+/** Maps a 0-100 IGDB review score to a weight multiplier - null (no review data at all, either
+ * because IGDB has none or the game was added before this was captured) is neutral (1x, same as
+ * doing nothing), not a penalty - "no data" and "confirmed mediocre" aren't the same thing. */
+export function reviewScoreMultiplier(reviewScore: number | null): number {
+  if (reviewScore === null) return 1;
+  const t = Math.max(0, Math.min(100, reviewScore)) / 100;
+  return REVIEW_SCORE_MIN_MULTIPLIER + t * (REVIEW_SCORE_MAX_MULTIPLIER - REVIEW_SCORE_MIN_MULTIPLIER);
+}
+
 /** A candidate's effective Spin the Wheel weight: its vote score (diminishing-returns scaled, plus
  * a small baseline so an unvoted game isn't a guaranteed loser), boosted for genre variety against
- * `avoided` (see avoidedGenres). The sqrt scale keeps "more votes = more likely" without letting
- * one heavily-voted game statistically crush every other candidate - a 16-vote game is only 4x as
- * likely as a 1-vote game, not 16x, so the wheel still has real suspense instead of a predictable
- * outcome. Exported mainly for testing - callers should use pickSpinWinner. */
+ * `avoided` (see avoidedGenres), and nudged by its IGDB review score (see reviewScoreMultiplier).
+ * The sqrt scale keeps "more votes = more likely" without letting one heavily-voted game
+ * statistically crush every other candidate - a 16-vote game is only 4x as likely as a 1-vote
+ * game, not 16x, so the wheel still has real suspense instead of a predictable outcome. Exported
+ * mainly for testing - callers should use pickSpinWinner. */
 export function spinCandidateWeight(game: Game, avoided: Set<string>): number {
   const primary = primaryGenre(game.genre);
   const differs = avoided.size > 0 && primary !== null && !avoided.has(primary);
-  return (Math.sqrt(game.voteScore) + UNVOTED_BASELINE_WEIGHT) * (differs ? GENRE_DIVERSITY_MULTIPLIER : 1);
+  return (
+    (Math.sqrt(game.voteScore) + UNVOTED_BASELINE_WEIGHT) *
+    (differs ? GENRE_DIVERSITY_MULTIPLIER : 1) *
+    reviewScoreMultiplier(game.reviewScore)
+  );
 }
 
 /** Spin the Wheel's actual pick: weighted by vote score, boosted for differing from the genre of

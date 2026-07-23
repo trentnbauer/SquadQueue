@@ -66,6 +66,7 @@ function buildGameDto(game: GameWithRelations, currentUserId: string, price: Gam
     ownership: ownership.ownership,
     tags,
     igdbCollectionId: game.igdbCollectionId,
+    reviewScore: game.reviewScore,
     prerequisiteGameId: game.prerequisiteGameId,
     createdAt: game.createdAt.toISOString(),
     updatedAt: game.updatedAt.toISOString(),

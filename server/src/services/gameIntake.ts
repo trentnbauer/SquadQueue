@@ -78,6 +78,7 @@ export async function resolveGameForCreation(
   timeToBeatRushedHours: number | null;
   timeToBeatCompletionistHours: number | null;
   igdbCollectionId: number | null;
+  reviewScore: number | null;
 }> {
   const detail = await getGameDetail(igdbId);
   assertPlatformMatch(detail, allowedPlatforms);
@@ -98,6 +99,7 @@ export async function resolveGameForCreation(
     timeToBeatRushedHours: detail.timeToBeatRushedHours,
     timeToBeatCompletionistHours: detail.timeToBeatCompletionistHours,
     igdbCollectionId: detail.igdbCollectionId,
+    reviewScore: detail.reviewScore,
   };
 }
 

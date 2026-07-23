@@ -11,6 +11,7 @@ import {
   avoidedGenres,
   statusBucket,
   spinCandidateWeight,
+  reviewScoreMultiplier,
   pickSpinWinner,
   isNeglectedBacklogGame,
   filterGames,
@@ -45,6 +46,7 @@ function makeGame(overrides: Partial<Game> = {}): Game {
     ownership: null,
     tags: [],
     igdbCollectionId: null,
+    reviewScore: null,
     prerequisiteGameId: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
@@ -297,6 +299,35 @@ describe('spinCandidateWeight', () => {
     const light = makeGame({ voteScore: 1, genre: 'Puzzle' });
     const ratio = spinCandidateWeight(heavy, new Set()) / spinCandidateWeight(light, new Set());
     expect(ratio).toBeLessThan(16);
+  });
+
+  it('boosts a well-reviewed candidate over an otherwise-identical one with no review data', () => {
+    const reviewed = makeGame({ voteScore: 9, genre: 'Puzzle', reviewScore: 95 });
+    const unreviewed = makeGame({ voteScore: 9, genre: 'Puzzle', reviewScore: null });
+    expect(spinCandidateWeight(reviewed, new Set())).toBeGreaterThan(spinCandidateWeight(unreviewed, new Set()));
+  });
+
+  it('does not zero out a poorly-reviewed candidate - it stays pickable, just less likely', () => {
+    const poorlyReviewed = makeGame({ voteScore: 9, genre: 'Puzzle', reviewScore: 0 });
+    expect(spinCandidateWeight(poorlyReviewed, new Set())).toBeGreaterThan(0);
+  });
+});
+
+describe('reviewScoreMultiplier (issue #311)', () => {
+  it('is neutral (1x) when there is no review data at all - missing data is not a penalty', () => {
+    expect(reviewScoreMultiplier(null)).toBe(1);
+  });
+
+  it('is at its maximum for a perfect score', () => {
+    expect(reviewScoreMultiplier(100)).toBeCloseTo(1.5);
+  });
+
+  it('is at its minimum, but still positive, for the worst possible score', () => {
+    expect(reviewScoreMultiplier(0)).toBeCloseTo(0.75);
+  });
+
+  it('scales linearly between the two', () => {
+    expect(reviewScoreMultiplier(50)).toBeCloseTo(1.125);
   });
 });
 

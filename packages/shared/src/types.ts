@@ -195,6 +195,10 @@ export interface Game {
    * before this was captured. Used to compute the "play after" dropdown's default suggestion
    * (the closest-released earlier entry from the same collection already in the room). */
   igdbCollectionId: number | null;
+  /** 0-100 IGDB review score (issue #311) - null when IGDB has no review data for this game, or
+   * on games added before this was captured. Nudges Spin the Wheel's weighted pick toward
+   * better-reviewed games - see spinCandidateWeight in gameGridLogic.ts. */
+  reviewScore: number | null;
   /** User-set "play this after" pointer to another game in the same room (e.g. Borderlands 2 ->
    * Borderlands 1) - null when unset. Room games only; always null on the Personal Shelf. Spin the
    * Wheel excludes a backlog game from its candidate pool while its prerequisite isn't yet Done -
