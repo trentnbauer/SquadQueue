@@ -683,6 +683,17 @@ export default async function gameRoutes(app: FastifyInstance) {
         await prisma.game.update({ where: { id: game.id }, data: { steamFullyCompleted: true } });
       }
 
+      // Same persist-on-observe treatment, but per player rather than per game - powers the
+      // member-list "100%'d" count, which needs to know *who* cleared a title, not just whether
+      // anyone did. See AchievementCompletion's schema comment.
+      const fullyCompletedPlayerIds = players.filter((p) => p.total > 0 && p.unlocked === p.total).map((p) => p.user.id);
+      if (fullyCompletedPlayerIds.length > 0) {
+        await prisma.achievementCompletion.createMany({
+          data: fullyCompletedPlayerIds.map((completedUserId) => ({ userId: completedUserId, igdbId: game.igdbId })),
+          skipDuplicates: true,
+        });
+      }
+
       return { players };
     },
   );

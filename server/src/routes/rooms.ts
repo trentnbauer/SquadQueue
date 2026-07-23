@@ -281,6 +281,33 @@ export default async function roomRoutes(app: FastifyInstance) {
     return { members: dtos };
   });
 
+  // Powers the member list's "completed / 100%'d" counts (click a member to see it). "Completed"
+  // counts games this member added to *this* room that are Beaten or queued for Replay - status
+  // lives on the Game row, not per-member, so a member's own additions are the only sound way to
+  // scope it to them. "100%'d" is a genuinely personal fact (their own Steam achievement progress -
+  // see AchievementCompletion), so it's scoped to this room's games regardless of who added them.
+  app.get<{ Params: { roomId: string; userId: string } }>(
+    '/api/rooms/:roomId/members/:userId/stats',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (request) => {
+      const requesterId = await request.requireAuth();
+      const { roomId, userId: targetUserId } = request.params;
+      await requireMembership(roomId, requesterId);
+      await requireMembership(roomId, targetUserId);
+
+      const [completedCount, roomGames] = await Promise.all([
+        prisma.game.count({ where: { roomId, addedBy: targetUserId, status: { in: ['done', 'replay'] } } }),
+        prisma.game.findMany({ where: { roomId }, select: { igdbId: true }, distinct: ['igdbId'] }),
+      ]);
+
+      const fullyCompletedCount = await prisma.achievementCompletion.count({
+        where: { userId: targetUserId, igdbId: { in: roomGames.map((g) => g.igdbId) } },
+      });
+
+      return { completedCount, fullyCompletedCount };
+    },
+  );
+
   app.get<{ Params: { roomId: string } }>(
     '/api/rooms/:roomId/invite-candidates',
     // Elevated-only, but the response is effectively a dump of every user on the server (minus

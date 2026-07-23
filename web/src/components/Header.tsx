@@ -88,6 +88,10 @@ export function Header() {
   const [showRoomSettings, setShowRoomSettings] = useState(false);
   const [showAddGame, setShowAddGame] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
+  // Which member's row is expanded to show their completed/100%'d counts - at most one at a time,
+  // toggled by clicking the row again (see memberRow below). Not persisted; closes on re-render of
+  // a fresh menu open, same as any other transient UI-only state.
+  const [expandedMemberId, setExpandedMemberId] = useState<string | null>(null);
 
   const membersQueryKey = ['room-members', activeRoom?.id];
   const { data: membersData } = useQuery({
@@ -97,6 +101,12 @@ export function Header() {
   });
   const members = membersData?.members ?? [];
   const myRole = activeRoom?.myRole;
+
+  const { data: memberStats, isLoading: memberStatsLoading } = useQuery({
+    queryKey: ['room-member-stats', activeRoom?.id, expandedMemberId],
+    queryFn: () => roomsApi.memberStats(activeRoom!.id, expandedMemberId!),
+    enabled: !!activeRoom && !!expandedMemberId,
+  });
 
   // Reuses the same ['games', 'room'|'shelf', ...] query as the active view (RoomView/ShelfView) -
   // React Query dedupes by queryKey, so this doesn't trigger an extra network fetch.
@@ -241,25 +251,46 @@ export function Header() {
               <div className={styles.menuPanel}>
                 {members.map((m) => {
                   const isSelf = m.user.id === user.id;
+                  const isExpanded = expandedMemberId === m.user.id;
                   return (
                     <div key={m.user.id} className={styles.memberRow}>
-                      <AvatarBadge name={m.user.displayName} color={m.user.avatarColor} avatarUrl={m.user.avatarUrl} size={22} />
-                      <div className={styles.memberInfo}>
-                        <span className={styles.memberName}>
-                          {m.user.displayName}
-                          {isSelf ? ' (you)' : ''}
-                        </span>
-                        <span className={styles.memberRole}>{ROLE_LABEL[m.role]}</span>
+                      <div className={styles.memberRowTop}>
+                        <button
+                          type="button"
+                          className={styles.memberInfoButton}
+                          onClick={() => setExpandedMemberId(isExpanded ? null : m.user.id)}
+                          aria-expanded={isExpanded}
+                        >
+                          <AvatarBadge name={m.user.displayName} color={m.user.avatarColor} avatarUrl={m.user.avatarUrl} size={22} />
+                          <div className={styles.memberInfo}>
+                            <span className={styles.memberName}>
+                              {m.user.displayName}
+                              {isSelf ? ' (you)' : ''}
+                            </span>
+                            <span className={styles.memberRole}>{ROLE_LABEL[m.role]}</span>
+                          </div>
+                        </button>
+                        {canPromote(m.role) && (
+                          <button className={styles.memberAction} onClick={() => handlePromote(m.user.id)}>
+                            Promote
+                          </button>
+                        )}
+                        {canRemove(m.user.id, m.role) && (
+                          <button className={styles.memberAction} onClick={() => handleRemove(m.user.id, isSelf)}>
+                            {isSelf ? 'Leave' : 'Remove'}
+                          </button>
+                        )}
                       </div>
-                      {canPromote(m.role) && (
-                        <button className={styles.memberAction} onClick={() => handlePromote(m.user.id)}>
-                          Promote
-                        </button>
-                      )}
-                      {canRemove(m.user.id, m.role) && (
-                        <button className={styles.memberAction} onClick={() => handleRemove(m.user.id, isSelf)}>
-                          {isSelf ? 'Leave' : 'Remove'}
-                        </button>
+                      {isExpanded && (
+                        <div className={styles.memberStats}>
+                          {memberStatsLoading ? (
+                            'Loading…'
+                          ) : (
+                            <>
+                              🏁 {memberStats?.completedCount ?? 0} completed · 💯 {memberStats?.fullyCompletedCount ?? 0} 100%'d
+                            </>
+                          )}
+                        </div>
                       )}
                     </div>
                   );

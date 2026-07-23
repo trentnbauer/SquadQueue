@@ -12,6 +12,7 @@ export interface SteamCompletionCandidateGame {
   steamAppid: number | null;
   roomId: string | null;
   coverImageUrl: string | null;
+  igdbId: number;
 }
 
 export interface DetectedSteamCompletion extends SteamCompletionCandidateGame {
@@ -77,7 +78,16 @@ export async function findDetectedSteamCompletions(
       steamAppid: { not: null },
       ...(personalShelfOnly ? { roomId: null } : {}),
     },
-    select: { id: true, title: true, genre: true, timeToBeatHours: true, steamAppid: true, roomId: true, coverImageUrl: true },
+    select: {
+      id: true,
+      title: true,
+      genre: true,
+      timeToBeatHours: true,
+      steamAppid: true,
+      roomId: true,
+      coverImageUrl: true,
+      igdbId: true,
+    },
     orderBy: { updatedAt: 'desc' },
     take: limit,
   });
@@ -104,6 +114,12 @@ export async function findDetectedSteamCompletions(
     await prisma.game.updateMany({
       where: { id: { in: completions.map((c) => c.id) }, steamFullyCompleted: false },
       data: { steamFullyCompleted: true },
+    });
+    // Same per-player fact as the achievements route persists (see AchievementCompletion's schema
+    // comment) - this is the one completion path that can fire with no detail-modal view at all.
+    await prisma.achievementCompletion.createMany({
+      data: completions.map((c) => ({ userId, igdbId: c.igdbId })),
+      skipDuplicates: true,
     });
   }
 
